@@ -18,3 +18,11 @@ jobs:
     steps:
       - checkout
       - run: python3 setup.py test
+
+workflows:
+  version: 2
+  test: # name of your workflow
+    jobs:
+      - test-cpy27
+      - test-cpy35
+      - test-cpy36
