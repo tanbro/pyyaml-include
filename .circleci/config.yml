@@ -15,7 +15,6 @@ jobs:
       - run: python setup.py test
       - store_test_results:
           path: test-reports
-      - bdist_wheel
 
   test-cpy35:
     docker:
