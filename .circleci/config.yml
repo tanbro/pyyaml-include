@@ -1,23 +1,36 @@
+# Python CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-python/ for more details
+#
+
 version: 2
+
 jobs:
+
   test-cpy27:
     docker:
       - image: circleci/python:2.7
+    working_directory: ~/repo
     steps:
       - checkout
       - run: python setup.py test
+
   test-cpy35:
     docker:
       - image: circleci/python:3.5
+    working_directory: ~/repo
     steps:
       - checkout
       - run: python3 setup.py test
+
   test-cpy36:
     docker:
       - image: circleci/python:3.6
+    working_directory: ~/repo
     steps:
       - checkout
       - run: python3 setup.py test
+
 
 workflows:
   version: 2
