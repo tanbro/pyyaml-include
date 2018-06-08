@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-__all__ = ['IncludeConstructor']
+__all__ = ['YamlIncludeConstructor']
 
 import os
-import sys
 from glob import iglob
+from sys import version_info
 
 import yaml
 
-_PYTHON_VERSION_MAYOR_MINOR = sys.version_info[:2]
+_PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 
-class IncludeConstructor:
+class YamlIncludeConstructor:
     DEFAULT_TAG = '!include'
 
     def __call__(self, loader, node):
