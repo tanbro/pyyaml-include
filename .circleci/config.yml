@@ -39,3 +39,6 @@ workflows:
       - test-cpy27
       - test-cpy35
       - test-cpy36
+
+- store_test_results:
+    path: test-results

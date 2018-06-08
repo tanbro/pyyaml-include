@@ -1,3 +1,5 @@
+from __future__ import unicode_literals, absolute_import
+
 import os
 import unittest
 from io import StringIO
@@ -7,7 +9,7 @@ import yaml
 from yamlinclude import YamlIncludeConstructor
 
 
-class IncludeSingleFileTestCase(unittest.TestCase):
+class YamlIncludeTestCase(unittest.TestCase):
     LOADERS = []
 
     def setUp(self):
