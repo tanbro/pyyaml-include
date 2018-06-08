@@ -7,12 +7,15 @@ Include YAML files within YAML
 __all__ = ['YamlIncludeConstructor']
 
 import os
+import re
 from glob import iglob
 from sys import version_info
 
 import yaml
 
 _PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
+
+_RE_GLOB_WILDCARDS = re.compile(r'^.*(\*|\?|\[!*.+\]).*$')
 
 
 class YamlIncludeConstructor:
@@ -36,12 +39,12 @@ class YamlIncludeConstructor:
 
     @classmethod
     def _include(cls, loader, pathname, recursive=False):
-        if '*' in pathname:
+        if _RE_GLOB_WILDCARDS.match(pathname):
             result = []
-            if _PYTHON_VERSION_MAYOR_MINOR < '3.5':
-                iterator = iglob(pathname)
-            else:
+            if _PYTHON_VERSION_MAYOR_MINOR >= '3.5':
                 iterator = iglob(pathname, recursive=recursive)
+            else:
+                iterator = iglob(pathname)
             for path in iterator:
                 if os.path.isfile(path):
                     with open(path) as f:
