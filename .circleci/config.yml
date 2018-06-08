@@ -16,6 +16,15 @@ jobs:
       - store_test_results:
           path: test-reports
 
+  test-cpy34:
+    docker:
+      - image: circleci/python:3.4
+    steps:
+      - checkout
+      - run: python3 setup.py test
+      - store_test_results:
+          path: test-reports
+
   test-cpy35:
     docker:
       - image: circleci/python:3.5
