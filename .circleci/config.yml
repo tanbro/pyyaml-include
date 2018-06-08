@@ -15,6 +15,7 @@ jobs:
       - run: python setup.py test
       - store_test_results:
           path: test-reports
+      - bdist_wheel
 
   test-cpy35:
     docker:
@@ -34,6 +35,18 @@ jobs:
       - store_test_results:
           path: test-reports
 
+  deploy:
+    docker:
+      - image: circleci/python:3
+    steps:
+      - checkout
+      - run: pip install --user -r requires/distribute.txt
+      - run: python setup.py test
+      - store_test_results:
+          path: test-reports
+      - run: python3 setup.py sdist bdist_wheel
+      - run: twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+
 
 workflows:
   version: 2
@@ -42,3 +55,11 @@ workflows:
       - test-cpy27
       - test-cpy35
       - test-cpy36
+      - deploy:
+        requires:
+          - test-cpy27
+          - test-cpy35
+          - test-cpy36
+        filters:
+          branches:
+            only: master
