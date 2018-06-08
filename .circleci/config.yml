@@ -14,6 +14,9 @@ jobs:
     steps:
       - checkout
       - run: python setup.py test
+      # Upload test results
+      - store_test_results:
+          path: /tmp/test-reports
 
   test-cpy35:
     docker:
@@ -22,6 +25,9 @@ jobs:
     steps:
       - checkout
       - run: python3 setup.py test
+      # Upload test results
+      - store_test_results:
+          path: /tmp/test-reports
 
   test-cpy36:
     docker:
@@ -30,6 +36,9 @@ jobs:
     steps:
       - checkout
       - run: python3 setup.py test
+      # Upload test results
+      - store_test_results:
+          path: /tmp/test-reports
 
 
 workflows:
@@ -39,6 +48,3 @@ workflows:
       - test-cpy27
       - test-cpy35
       - test-cpy36
-
-- store_test_results:
-    path: test-results
