@@ -61,6 +61,7 @@ workflows:
   test-and-deploy: # name of your workflow
     jobs:
       - test-cpy27
+      - test-cpy34
       - test-cpy35
       - test-cpy36
       - deploy:
