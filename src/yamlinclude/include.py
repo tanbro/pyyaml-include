@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+Include YAML files within YAML
+"""
+
 __all__ = ['YamlIncludeConstructor']
 
 import os
@@ -12,6 +16,9 @@ _PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 
 class YamlIncludeConstructor:
+    """The `include constructor` for PyYAML's loader
+    """
+
     DEFAULT_TAG = '!include'
 
     def __call__(self, loader, node):

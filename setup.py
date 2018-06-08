@@ -18,12 +18,14 @@ setup(
         # post-release:	generates post release versions (adds postN)
         'version_scheme': 'guess-next-dev',
     },
-    setup_requires=['setuptools_scm', 'setuptools_scm_git_archive'],
+    setup_requires=['pytest-runner', 'setuptools_scm', 'setuptools_scm_git_archive'],
 
     install_requires=[
         'PyYAML',
     ],
-
+    tests_require=[
+        'pytest',
+    ],
     test_suite='tests.test_all',
 
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*'

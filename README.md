@@ -5,7 +5,7 @@ Extending [PyYAML] with a custom constructor for including [YAML] files within [
 ## Install
 
 ```sh
-pip install yamlinclude
+pip install pyyaml-include
 ```
 
 [YAML]: http://yaml.org/
