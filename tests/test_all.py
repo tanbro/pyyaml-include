@@ -73,7 +73,7 @@ file2: !include tests/data/include.d/2.yaml
         '''
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertListEqual(sorted(data), sorted([{'name': '1'}, {'name': '2'}]))
+            self.assertListEqual(data, [{'name': '1'}, {'name': '2'}])
 
     def test_include_recursive(self):
         yml = '''
@@ -102,7 +102,8 @@ file2: !include tests/data/include.d/2.yaml
                     '''
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertListEqual(sorted(data), sorted([{'name': '1'}, {'name': '2'}]))
+            self.assertIsInstance(data, list)
+            self.assertListEqual(sorted(data, key=lambda n: n['name']), [{'name': '1'}, {'name': '2'}])
 
 
 if __name__ == '__main__':
