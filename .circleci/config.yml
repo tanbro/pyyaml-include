@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  test-cpy27:
+    docker:
+      - image: circleci/python:2.7
+    steps:
+      - checkout
+      - run: python setup.py test
+  test-cpy35:
+    docker:
+      - image: circleci/python:3.5
+    steps:
+      - checkout
+      - run: python3 setup.py test
+  test-cpy36:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - run: python3 setup.py test
