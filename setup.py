@@ -24,9 +24,7 @@ setup(
         'PyYAML',
     ],
 
-    package_data={
-        '': ['data/*/*']
-    },
+    test_suite='tests.test_all',
 
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*'
 )
