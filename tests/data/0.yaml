@@ -1,0 +1,3 @@
+file1: !include tests/data/include.d/1.yaml
+file2: !include tests/data/include.d/2.yaml
+files: [!include tests/data/include.d/1.yaml, !include tests/data/include.d/2.yaml]
