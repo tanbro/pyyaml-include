@@ -66,6 +66,7 @@ workflows:
       - deploy:
           requires:
             - test-cpy27
+            - test-cpy34
             - test-cpy35
             - test-cpy36
           filters:
