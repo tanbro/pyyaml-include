@@ -1,11 +1,13 @@
 # pyyaml-include
 
-![CircleCI](https://img.shields.io/circleci/project/github/tanbro/pyyaml-include.svg)
-![PyPI](https://img.shields.io/pypi/v/pyyaml-include.svg)
-![PyPI - Format](https://img.shields.io/pypi/format/pyyaml-include.svg)
-![PyPI - Status](https://img.shields.io/pypi/status/pyyaml-include.svg)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyyaml-include.svg)
-![PyPI - Implementation](https://img.shields.io/pypi/implementation/pyyaml-include.svg)
+[![CircleCI](https://img.shields.io/circleci/project/github/tanbro/pyyaml-include.svg)](https://circleci.com/gh/tanbro/workflows/pyyaml-include)
+[![GitHub tag](https://img.shields.io/github/tag/tanbro/pyyaml-include.svg)](https://github.com/tanbro/pyyaml-include)
+[![PyPI](https://img.shields.io/pypi/v/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
+[![PyPI - License](https://img.shields.io/pypi/l/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
+[![PyPI - Format](https://img.shields.io/pypi/format/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
+[![PyPI - Status](https://img.shields.io/pypi/status/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
+[![PyPI - Implementation](https://img.shields.io/pypi/implementation/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 
 Extending [PyYAML] with a custom constructor for including [YAML] files within [YAML] files.
 
