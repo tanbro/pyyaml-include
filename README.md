@@ -129,7 +129,7 @@ We'll get:
 
 > **ℹ Note**:
 > - For `Python>=3.5`, if `recursive` argument of `!include` [YAML] tag is `true`, the pattern `“**”` will match any files and zero or more directories and subdirectories.
-> - Using the “**” pattern in large directory trees may consume an inordinate amount of time because of recursive search.
+> - Using the `“**”` pattern in large directory trees may consume an inordinate amount of time because of recursive search.
 
 In order to enable `recursive` arugment, we shall write the `!include` tag in `Mapping` or `Sequence` mode:
 
