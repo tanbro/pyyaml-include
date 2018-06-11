@@ -14,8 +14,8 @@ setup(
     author_email='liu_xue_yan@foxmail.com',
 
     use_scm_version={
-        # guess-next-dev:	automatically guesses the next development version (default)
-        # post-release:	generates post release versions (adds postN)
+        # guess-next-dev: automatically guesses the next development version (default)
+        # post-release:   generates post release versions (adds postN)
         'version_scheme': 'guess-next-dev',
     },
     setup_requires=['pytest-runner', 'setuptools_scm', 'setuptools_scm_git_archive'],
