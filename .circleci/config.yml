@@ -55,7 +55,6 @@ jobs:
       - run: python3 setup.py sdist bdist_wheel
       - run: python3 -m twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
-
 workflows:
   version: 2
   test-and-deploy: # name of your workflow

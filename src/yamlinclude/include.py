@@ -15,7 +15,7 @@ import yaml
 
 _PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
-_RE_GLOB_WILDCARDS = re.compile(r'^.*(\*|\?|\[!*.+\]).*$')
+_RE_GLOB_WILDCARDS = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 
 
 class YamlIncludeConstructor:
