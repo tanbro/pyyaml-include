@@ -55,7 +55,6 @@ jobs:
       - run: python3 setup.py sdist bdist_wheel
       - run: python3 -m twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
-
 workflows:
   version: 2
   test-and-deploy: # name of your workflow
@@ -71,5 +70,5 @@ workflows:
             - test-cpy35
             - test-cpy36
           filters:
-            branches:
-              only: master
+            tags:
+              only: /(v?(?:(?:(?P<epoch>[0-9]+)!)?(?P<release>[0-9]+(?:\.[0-9]+)*)(?P<pre>[-_\.]?(?P<pre_l>(a|b|c|rc|alpha|beta|pre|preview))[-_\.]?(?P<pre_n>[0-9]+)?)?(?P<post>(?:-(?P<post_n1>[0-9]+))|(?:[-_\.]?(?P<post_l>post|rev|r)[-_\.]?(?P<post_n2>[0-9]+)?))?(?P<dev>[-_\.]?(?P<dev_l>dev)[-_\.]?(?P<dev_n>[0-9]+)?)?)(?:\+(?P<local>[a-z0-9]+(?:[-_\.][a-z0-9]+)*))?)/
