@@ -1,3 +1,3 @@
 {
-    "python.pythonPath": "/mnt/1B9074BA60C16502/works/personal/aliyunoss2-autoupload/.venv/bin/python"
+    "python.pythonPath": "${workspaceFolder}/.venv/bin/python"
 }
