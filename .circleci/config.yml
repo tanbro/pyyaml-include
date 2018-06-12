@@ -5,55 +5,52 @@
 
 version: 2
 
+references:
+  tests_steps: &tests_steps
+    step:
+      - checkout
+      - run: export PATH=${PATH}:/home/circleci/.local/bin
+      - run: pip install --user --requirement requirements/ci.txt
+      - run: coverage run setup.py test
+      - store_test_results:
+          path: test-reports
+      - run: coverage xml
+      - run: python-codacy-coverage -r coverage.xml
+
+  deploy_steps: &deploy_steps
+    step:
+      - checkout
+      - run: export PATH=${PATH}:/home/circleci/.local/bin
+      - run: pip install --user --requirement requirements/ci.txt
+      - run: python setup.py sdist bdist_wheel
+      - run: twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+
 jobs:
 
   test-cpy27:
     docker:
       - image: circleci/python:2.7
-    steps:
-      - checkout
-      - run: python setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   test-cpy34:
     docker:
       - image: circleci/python:3.4
-    steps:
-      - checkout
-      - run: python3 setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   test-cpy35:
     docker:
       - image: circleci/python:3.5
-    steps:
-      - checkout
-      - run: python3 setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   test-cpy36:
     docker:
       - image: circleci/python:3.6
-    steps:
-      - checkout
-      - run: python3 setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   deploy:
     docker:
       - image: circleci/python:3
-    steps:
-      - checkout
-      - run: pip install --user -r requires/distribute.txt
-      - run: python setup.py test
-      - store_test_results:
-          path: test-reports
-      - run: python3 setup.py sdist bdist_wheel
-      - run: python3 -m twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+    <<: *deploy_steps
 
 workflows:
   version: 2
