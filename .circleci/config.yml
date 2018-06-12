@@ -77,5 +77,7 @@ workflows:
             - test-cpy35
             - test-cpy36
           filters:
+            tags:
+              only: /^(\d+(\.\d+)*)+(\.?(a|b|c|dev|alpha|beta|rc|preview)(\d+(\.\d+)*)+)?$/
             branches:
-              only: master
+              ignore: /.*/
