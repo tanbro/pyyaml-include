@@ -86,6 +86,18 @@ file2: !include tests/data/include.d/2.yaml
             data = yaml.load(StringIO(yml), loader)
             self.assertListEqual(data, [self.YAML1, self.YAML2])
 
+    def test_include_file_not_exists(self):
+        yml = '''
+!include tests/data/include.d/x.yaml
+            '''
+        if _PYTHON_VERSION_MAYOR_MINOR >= '3.3': 
+            err_cls = FileNotFoundError
+        else:
+            err_cls = IOError
+        for loader in self.LOADERS:
+            with self.assertRaises(err_cls):
+                yaml.load(StringIO(yml), loader)
+
     def test_include_recursive(self):
         yml = '''
 !include tests/data/0.yaml
