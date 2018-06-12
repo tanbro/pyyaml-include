@@ -5,55 +5,62 @@
 
 version: 2
 
+references:
+  tests_steps: &tests_steps
+    steps:
+      - checkout
+      - run:
+          name: Install pip dependencies
+          command: sudo pip install coverage codacy-coverage
+      - run:
+          name: Run unittests
+          command: coverage run setup.py test
+      - store_test_results:
+          path: test-reports
+      - run:
+          name: Upload coverage xml file to codacy
+          command: |
+            coverage xml --include=src/*.py
+            python-codacy-coverage -r coverage.xml
+
+  deploy_steps: &deploy_steps
+    steps:
+      - checkout
+      - run:
+          name: Install pip dependencies
+          command: sudo pip install wheel twine
+      - run:
+          name: Build and upload distributive packages
+          command: |
+            python setup.py sdist bdist_wheel
+            twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+
 jobs:
 
   test-cpy27:
     docker:
       - image: circleci/python:2.7
-    steps:
-      - checkout
-      - run: python setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   test-cpy34:
     docker:
       - image: circleci/python:3.4
-    steps:
-      - checkout
-      - run: python3 setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   test-cpy35:
     docker:
       - image: circleci/python:3.5
-    steps:
-      - checkout
-      - run: python3 setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   test-cpy36:
     docker:
       - image: circleci/python:3.6
-    steps:
-      - checkout
-      - run: python3 setup.py test
-      - store_test_results:
-          path: test-reports
+    <<: *tests_steps
 
   deploy:
     docker:
       - image: circleci/python:3
-    steps:
-      - checkout
-      - run: pip install --user -r requires/distribute.txt
-      - run: python setup.py test
-      - store_test_results:
-          path: test-reports
-      - run: python3 setup.py sdist bdist_wheel
-      - run: python3 -m twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+    <<: *deploy_steps
 
 workflows:
   version: 2
@@ -70,5 +77,7 @@ workflows:
             - test-cpy35
             - test-cpy36
           filters:
+            tags:
+              only: /^(\d+(\.\d+)*)+(\.?(a|b|c|dev|alpha|beta|rc|preview)(\d+(\.\d+)*)+)?$/
             branches:
-              only: master
+              ignore: /.*/
