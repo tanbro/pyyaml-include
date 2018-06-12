@@ -33,8 +33,6 @@ class YamlIncludeConstructor:
             args = loader.construct_sequence(node)
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
-        else:
-            raise ValueError('Unsupported yaml node {0!r}'.format(node))
         return self._include(loader, *args, **kwargs)
 
     @classmethod
