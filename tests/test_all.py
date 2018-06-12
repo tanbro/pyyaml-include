@@ -90,8 +90,12 @@ file2: !include tests/data/include.d/2.yaml
         yml = '''
 !include tests/data/include.d/x.yaml
             '''
+        if _PYTHON_VERSION_MAYOR_MINOR >= '3.3': 
+            err_cls = FileNotFoundError
+        else:
+            err_cls = IOError
         for loader in self.LOADERS:
-            with self.assertRaises(FileNotFoundError):
+            with self.assertRaises(err_cls):
                 yaml.load(StringIO(yml), loader)
 
     def test_include_recursive(self):
