@@ -7,7 +7,7 @@ version: 2
 
 references:
   tests_steps: &tests_steps
-    step:
+    steps:
       - checkout
       - run: export PATH=${PATH}:/home/circleci/.local/bin
       - run: pip install --user --requirement requirements/ci.txt
@@ -18,7 +18,7 @@ references:
       - run: python-codacy-coverage -r coverage.xml
 
   deploy_steps: &deploy_steps
-    step:
+    steps:
       - checkout
       - run: export PATH=${PATH}:/home/circleci/.local/bin
       - run: pip install --user --requirement requirements/ci.txt
