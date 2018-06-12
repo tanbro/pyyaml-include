@@ -9,21 +9,19 @@ references:
   tests_steps: &tests_steps
     steps:
       - checkout
-      - run: export PATH=${PATH}:/home/circleci/.local/bin
       - run: pip install --user --requirement requirements/ci.txt
-      - run: coverage run setup.py test
+      - run: PATH=$PATH:/home/circleci/.local/bin coverage run setup.py test
       - store_test_results:
           path: test-reports
-      - run: coverage xml
-      - run: python-codacy-coverage -r coverage.xml
+      - run: PATH=$PATH:/home/circleci/.local/bin coverage xml
+      - run: PATH=$PATH:/home/circleci/.local/bin python-codacy-coverage -r coverage.xml
 
   deploy_steps: &deploy_steps
     steps:
       - checkout
-      - run: export PATH=${PATH}:/home/circleci/.local/bin
       - run: pip install --user --requirement requirements/ci.txt
       - run: python setup.py sdist bdist_wheel
-      - run: twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+      - run: PATH=$PATH:/home/circleci/.local/bin twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
 jobs:
 
