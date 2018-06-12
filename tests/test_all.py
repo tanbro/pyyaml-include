@@ -15,6 +15,13 @@ from yamlinclude import YamlIncludeConstructor
 class YamlIncludeTestCase(unittest.TestCase):
     LOADERS = []
 
+    YAML1 = {'name': '1'}
+    YAML2 = {'name': '2'}
+
+    @staticmethod
+    def YAML_SORT_KEY(n):
+        return n['name']
+
     def setUp(self):
         from yaml import SafeLoader, Loader
         self.LOADERS = [SafeLoader, Loader]
@@ -40,7 +47,7 @@ class YamlIncludeTestCase(unittest.TestCase):
         '''
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertDictEqual(data, {'name': '1'})
+            self.assertDictEqual(data, self.YAML1)
 
     def test_include_one_in_mapping(self):
         yml = '''
@@ -48,7 +55,7 @@ file1: !include tests/data/include.d/1.yaml
         '''
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertDictEqual(data, {'file1': {'name': '1'}})
+            self.assertDictEqual(data, {'file1': self.YAML1})
 
     def test_include_two_in_mapping(self):
         yml = '''
@@ -58,8 +65,8 @@ file2: !include tests/data/include.d/2.yaml
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
             self.assertDictEqual(data, {
-                'file1': {'name': '1'},
-                'file2': {'name': '2'},
+                'file1': self.YAML1,
+                'file2': self.YAML2,
             })
 
     def test_include_one_in_sequence(self):
@@ -68,7 +75,7 @@ file2: !include tests/data/include.d/2.yaml
         '''
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertListEqual(data, [{'name': '1'}])
+            self.assertListEqual(data, [self.YAML1])
 
     def test_include_two_in_sequence(self):
         yml = '''
@@ -77,7 +84,7 @@ file2: !include tests/data/include.d/2.yaml
         '''
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertListEqual(data, [{'name': '1'}, {'name': '2'}])
+            self.assertListEqual(data, [self.YAML1, self.YAML2])
 
     def test_include_recursive(self):
         yml = '''
@@ -86,9 +93,9 @@ file2: !include tests/data/include.d/2.yaml
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
             self.assertDictEqual(data, {
-                'files': [{'name': '1'}, {'name': '2'}],
-                'file1': {'name': '1'},
-                'file2': {'name': '2'}
+                'files': [self.YAML1, self.YAML2],
+                'file1': self.YAML1,
+                'file2': self.YAML2,
             })
 
     def test_include_abs(self):
@@ -98,7 +105,7 @@ file2: !include tests/data/include.d/2.yaml
         '''.format(dirpath)
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
-            self.assertDictEqual(data, {'name': '1'})
+            self.assertDictEqual(data, self.YAML1)
 
     def test_include_wildcards(self):
         yml = '''
@@ -107,8 +114,10 @@ file2: !include tests/data/include.d/2.yaml
         for loader in self.LOADERS:
             data = yaml.load(StringIO(yml), loader)
             self.assertIsInstance(data, list)
-            self.assertListEqual(sorted(data, key=lambda n: n['name']), [
-                                 {'name': '1'}, {'name': '2'}])
+            self.assertListEqual(
+                sorted(data, key=self.YAML_SORT_KEY),
+                [self.YAML1, self.YAML2]
+            )
 
     if _PYTHON_VERSION_MAYOR_MINOR >= '3.5':
 
@@ -119,8 +128,10 @@ file2: !include tests/data/include.d/2.yaml
             for loader in self.LOADERS:
                 data = yaml.load(StringIO(yml), loader)
                 self.assertIsInstance(data, list)
-                self.assertListEqual(sorted(data, key=lambda n: n['name']), [
-                                     {'name': '1'}, {'name': '2'}])
+                self.assertListEqual(
+                    sorted(data, key=self.YAML_SORT_KEY),
+                    [self.YAML1, self.YAML2]
+                )
 
         def test_include_recursive_namedargs(self):
             yml = '''
@@ -129,8 +140,10 @@ file2: !include tests/data/include.d/2.yaml
             for loader in self.LOADERS:
                 data = yaml.load(StringIO(yml), loader)
                 self.assertIsInstance(data, list)
-                self.assertListEqual(sorted(data, key=lambda n: n['name']), [
-                                     {'name': '1'}, {'name': '2'}])
+                self.assertListEqual(
+                    sorted(data, key=self.YAML_SORT_KEY),
+                    [self.YAML1, self.YAML2]
+                )
 
 
 if __name__ == '__main__':
