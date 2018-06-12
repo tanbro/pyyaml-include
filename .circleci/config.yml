@@ -9,19 +9,19 @@ references:
   tests_steps: &tests_steps
     steps:
       - checkout
-      - run: pip install --user --requirement requirements/ci.txt
-      - run: PATH=$PATH:/home/circleci/.local/bin coverage run setup.py test
+      - run: sudo pip install coverage codacy-coverage
+      - run: coverage run setup.py test
       - store_test_results:
           path: test-reports
-      - run: PATH=$PATH:/home/circleci/.local/bin coverage xml
-      - run: PATH=$PATH:/home/circleci/.local/bin python-codacy-coverage -r coverage.xml
+      - run: coverage xml
+      - run: python-codacy-coverage -r coverage.xml
 
   deploy_steps: &deploy_steps
     steps:
       - checkout
-      - run: pip install --user --requirement requirements/ci.txt
+      - run: sudo pip install wheel twine
       - run: python setup.py sdist bdist_wheel
-      - run: PATH=$PATH:/home/circleci/.local/bin twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+      - run: twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
 jobs:
 
