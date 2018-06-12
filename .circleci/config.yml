@@ -9,19 +9,31 @@ references:
   tests_steps: &tests_steps
     steps:
       - checkout
-      - run: sudo pip install coverage codacy-coverage
-      - run: coverage run setup.py test
+      - run:
+          name: Install pip dependencies
+          command: sudo pip install coverage codacy-coverage
+      - run:
+          name: Run unittests
+          command: coverage run setup.py test
       - store_test_results:
           path: test-reports
-      - run: coverage xml --include=src/*.py
-      - run: python-codacy-coverage -r coverage.xml
+      - run:
+          name: Upload coverage xml file to codacy
+          command: |
+            coverage xml --include=src/*.py
+            python-codacy-coverage -r coverage.xml
 
   deploy_steps: &deploy_steps
     steps:
       - checkout
-      - run: sudo pip install wheel twine
-      - run: python setup.py sdist bdist_wheel
-      - run: twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+      - run:
+          name: Install pip dependencies
+          command: sudo pip install wheel twine
+      - run:
+          name: Build and upload distributive packages
+          command: |
+            python setup.py sdist bdist_wheel
+            twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
 jobs:
 
