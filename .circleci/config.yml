@@ -13,7 +13,7 @@ references:
       - run: coverage run setup.py test
       - store_test_results:
           path: test-reports
-      - run: coverage xml
+      - run: coverage xml --include=src/*.py
       - run: python-codacy-coverage -r coverage.xml
 
   deploy_steps: &deploy_steps
