@@ -90,7 +90,7 @@ file2: !include tests/data/include.d/2.yaml
         yml = '''
 !include tests/data/include.d/x.yaml
             '''
-        if _PYTHON_VERSION_MAYOR_MINOR >= '3.3': 
+        if _PYTHON_VERSION_MAYOR_MINOR >= '3.3':
             err_cls = FileNotFoundError
         else:
             err_cls = IOError
@@ -120,36 +120,17 @@ file2: !include tests/data/include.d/2.yaml
             self.assertDictEqual(data, self.YAML1)
 
     def test_include_wildcards(self):
-        yml = '''
+        ymllist = ['''
 !include tests/data/include.d/*.yaml
-        '''
-        for loader in self.LOADERS:
-            data = yaml.load(StringIO(yml), loader)
-            self.assertIsInstance(data, list)
-            self.assertListEqual(
-                sorted(data, key=self.YAML_SORT_KEY),
-                [self.YAML1, self.YAML2]
-            )
-
-    if _PYTHON_VERSION_MAYOR_MINOR >= '3.5':
-
-        def test_include_recursive_seqargs(self):
-            yml = '''
+''']
+        if _PYTHON_VERSION_MAYOR_MINOR >= '3.5':
+            ymllist.extend(['''
 !include [tests/data/include.d/**/*.yaml, true]
-            '''
-            for loader in self.LOADERS:
-                data = yaml.load(StringIO(yml), loader)
-                self.assertIsInstance(data, list)
-                self.assertListEqual(
-                    sorted(data, key=self.YAML_SORT_KEY),
-                    [self.YAML1, self.YAML2]
-                )
-
-        def test_include_recursive_namedargs(self):
-            yml = '''
+''', '''
 !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
-            '''
-            for loader in self.LOADERS:
+'''])
+        for loader in self.LOADERS:
+            for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader)
                 self.assertIsInstance(data, list)
                 self.assertListEqual(

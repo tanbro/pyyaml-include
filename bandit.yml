@@ -1,0 +1,8 @@
+---
+
+### profile may optionally select or skip tests
+
+# (optional) list skipped tests here:
+skips:
+  # yaml load
+  - B506
