@@ -5,11 +5,11 @@ import unittest
 from io import StringIO
 from sys import version_info, stderr
 
-_PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
-
 import yaml
 
 from yamlinclude import YamlIncludeConstructor
+
+_PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 
 class YamlIncludeTestCase(unittest.TestCase):
