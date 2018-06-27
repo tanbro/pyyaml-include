@@ -10,10 +10,10 @@ setup(
 
     description='Extending PyYAML with a custom constructor for including YAML files within YAML files',
     url='https://github.com/tanbro/pyyaml-include',
-    license = 'GNU General Public License v3 or later (GPLv3+)',
+    license='GNU General Public License v3 or later (GPLv3+)',
     author='liu xue yan',
     author_email='liu_xue_yan@foxmail.com',
-    keywords = 'yaml PyYAML include',
+    keywords='yaml PyYAML include',
 
     use_scm_version={
         # guess-next-dev: automatically guesses the next development version (default)
@@ -30,7 +30,7 @@ setup(
     tests_require=['pytest'],
     test_suite='tests',
 
-    classifiers = [
+    classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
