@@ -19,6 +19,7 @@ setup(
         # guess-next-dev: automatically guesses the next development version (default)
         # post-release:   generates post release versions (adds postN)
         'version_scheme': 'guess-next-dev',
+        'write_to': 'src/yamlinclude/version.py',
     },
 
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',

@@ -1,9 +1,9 @@
-from __future__ import unicode_literals, absolute_import
+from __future__ import unicode_literals, absolute_import, print_function
 
 import os
 import unittest
 from io import StringIO
-from sys import version_info
+from sys import version_info, stderr
 
 _PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
@@ -27,19 +27,21 @@ class YamlIncludeTestCase(unittest.TestCase):
         self.LOADERS = [SafeLoader, Loader]
         try:
             from yaml import CSafeLoader
-        except ImportError:
-            pass
+        except ImportError as err:
+            print(err, file=stderr)
         else:
             self.LOADERS.append(CSafeLoader)
         try:
             from yaml import CLoader
-        except ImportError:
-            pass
+        except ImportError as err:
+            print(err, file=stderr)
         else:
             self.LOADERS.append(CLoader)
+
         for loader in self.LOADERS:
             loader.add_constructor(
-                YamlIncludeConstructor.DEFAULT_TAG, YamlIncludeConstructor())
+                YamlIncludeConstructor.DEFAULT_TAG, YamlIncludeConstructor()
+            )
 
     def test_include_single_in_top(self):
         yml = '''
