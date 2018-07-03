@@ -3,9 +3,6 @@
 """
 Include YAML files within YAML
 """
-
-__all__ = ['YamlIncludeConstructor']
-
 import os
 import re
 from glob import iglob
@@ -13,9 +10,11 @@ from sys import version_info
 
 import yaml
 
-_PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
+__all__ = ['YamlIncludeConstructor']
 
-_RE_GLOB_WILDCARDS = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
+PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
+
+WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 
 
 class YamlIncludeConstructor:
@@ -37,9 +36,9 @@ class YamlIncludeConstructor:
 
     @classmethod
     def _include(cls, loader, pathname, recursive=False):
-        if _RE_GLOB_WILDCARDS.match(pathname):
+        if WILDCARDS_REGEX.match(pathname):
             result = []
-            if _PYTHON_VERSION_MAYOR_MINOR >= '3.5':
+            if PYTHON_MAYOR_MINOR >= '3.5':
                 iterator = iglob(pathname, recursive=recursive)
             else:
                 iterator = iglob(pathname)
@@ -51,3 +50,14 @@ class YamlIncludeConstructor:
         else:
             with open(pathname) as f:
                 return yaml.load(f, type(loader))
+
+    @classmethod
+    def add_to_loader_class(cls, loader_cls=None, tag=''):
+        if loader_cls is None:
+            loader_cls = yaml.Loader
+        if tag is None:
+            tag = ''
+        tag = tag.strip()
+        if not tag:
+            tag = cls.TAG
+            loader_cls.add_constructor(tag, cls())
