@@ -1,8 +1,8 @@
 # Changelog
 
-## develop
+## 1.0.1
 
-Date: developing
+Date: 2018-07-03
 
 - Add:
 
