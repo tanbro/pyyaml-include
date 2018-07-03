@@ -68,23 +68,27 @@ jobs:
 
   deploy:
     docker:
-      - image: circleci/python:3
+      - image: circleci/python
     <<: *deploy_steps
 
 workflows:
   version: 2
   test-and-deploy: # name of your workflow
     jobs:
+      - test-cpy26
       - test-cpy27
       - test-cpy34
       - test-cpy35
       - test-cpy36
+      - test-cpy37
       - deploy:
           requires:
+            - test-cpy26
             - test-cpy27
             - test-cpy34
             - test-cpy35
             - test-cpy36
+            - test-cpy37
           filters:
             tags:
               only: /^(\d+(\.\d+)*)+(\.?(a|b|c|dev|alpha|beta|rc|preview)(\d+(\.\d+)*)+)?$/
