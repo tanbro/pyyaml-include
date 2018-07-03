@@ -40,7 +40,7 @@ class YamlIncludeTestCase(unittest.TestCase):
 
         for loader in self.LOADERS:
             loader.add_constructor(
-                YamlIncludeConstructor.DEFAULT_TAG, YamlIncludeConstructor()
+                YamlIncludeConstructor.TAG, YamlIncludeConstructor()
             )
 
     def test_include_single_in_top(self):

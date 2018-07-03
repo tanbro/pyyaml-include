@@ -22,7 +22,7 @@ class YamlIncludeConstructor:
     """The `include constructor` for PyYAML's loader
     """
 
-    DEFAULT_TAG = '!include'
+    TAG = '!include'
 
     def __call__(self, loader, node):
         args = []
