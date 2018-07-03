@@ -36,34 +36,39 @@ references:
             twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
 jobs:
-  test-cpy26:
+  test-python:
     docker:
-      - image: circleci/python:2.6
+      - image: circleci/python
     <<: *tests_steps
 
-  test-cpy27:
+  test-python2:
+    docker:
+      - image: circleci/python:2
+    <<: *tests_steps
+
+  test-python3:
+    docker:
+      - image: circleci/python:3
+    <<: *tests_steps
+
+  test-python2.7:
     docker:
       - image: circleci/python:2.7
     <<: *tests_steps
 
-  test-cpy34:
+  test-python3.4:
     docker:
       - image: circleci/python:3.4
     <<: *tests_steps
 
-  test-cpy35:
+  test-python3.5:
     docker:
       - image: circleci/python:3.5
     <<: *tests_steps
 
-  test-cpy36:
+  test-python3.6:
     docker:
       - image: circleci/python:3.6
-    <<: *tests_steps
-
-  test-cpy37:
-    docker:
-      - image: circleci/python:3.7
     <<: *tests_steps
 
   deploy:
@@ -75,20 +80,16 @@ workflows:
   version: 2
   test-and-deploy: # name of your workflow
     jobs:
-      - test-cpy26
-      - test-cpy27
-      - test-cpy34
-      - test-cpy35
-      - test-cpy36
-      - test-cpy37
+      - test-python
+      - test-python2
+      - test-python3
+      - test-python2.7
+      - test-python3.4
+      - test-python3.5
+      - test-python3.6
       - deploy:
           requires:
-            - test-cpy26
-            - test-cpy27
-            - test-cpy34
-            - test-cpy35
-            - test-cpy36
-            - test-cpy37
+            - test-python
           filters:
             tags:
               only: /^(\d+(\.\d+)*)+(\.?(a|b|c|dev|alpha|beta|rc|preview)(\d+(\.\d+)*)+)?$/
