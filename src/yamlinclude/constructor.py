@@ -60,4 +60,4 @@ class YamlIncludeConstructor:
         tag = tag.strip()
         if not tag:
             tag = cls.TAG
-            loader_cls.add_constructor(tag, cls())
+        loader_cls.add_constructor(tag, cls())
