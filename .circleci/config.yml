@@ -10,10 +10,10 @@ references:
     steps:
       - checkout
       - run:
-          name: Install pip dependencies
+          name: Install additional pip dependencies
           command: sudo pip install coverage codacy-coverage
       - run:
-          name: Run unittests
+          name: Run setup test
           command: coverage run setup.py test
       - store_test_results:
           path: test-reports
@@ -27,55 +27,69 @@ references:
     steps:
       - checkout
       - run:
-          name: Install pip dependencies
+          name: Install additional pip dependencies
           command: sudo pip install wheel twine
       - run:
-          name: Build and upload distributive packages
+          name: Build and upload dist
           command: |
             python setup.py sdist bdist_wheel
             twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
 jobs:
+  test-python:
+    docker:
+      - image: circleci/python
+    <<: *tests_steps
 
-  test-cpy27:
+  test-python2:
+    docker:
+      - image: circleci/python:2
+    <<: *tests_steps
+
+  test-python3:
+    docker:
+      - image: circleci/python:3
+    <<: *tests_steps
+
+  test-python2.7:
     docker:
       - image: circleci/python:2.7
     <<: *tests_steps
 
-  test-cpy34:
+  test-python3.4:
     docker:
       - image: circleci/python:3.4
     <<: *tests_steps
 
-  test-cpy35:
+  test-python3.5:
     docker:
       - image: circleci/python:3.5
     <<: *tests_steps
 
-  test-cpy36:
+  test-python3.6:
     docker:
       - image: circleci/python:3.6
     <<: *tests_steps
 
   deploy:
     docker:
-      - image: circleci/python:3
+      - image: circleci/python
     <<: *deploy_steps
 
 workflows:
   version: 2
   test-and-deploy: # name of your workflow
     jobs:
-      - test-cpy27
-      - test-cpy34
-      - test-cpy35
-      - test-cpy36
+      - test-python
+      - test-python2
+      - test-python3
+      - test-python2.7
+      - test-python3.4
+      - test-python3.5
+      - test-python3.6
       - deploy:
           requires:
-            - test-cpy27
-            - test-cpy34
-            - test-cpy35
-            - test-cpy36
+            - test-python
           filters:
             tags:
               only: /^(\d+(\.\d+)*)+(\.?(a|b|c|dev|alpha|beta|rc|preview)(\d+(\.\d+)*)+)?$/
