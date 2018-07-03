@@ -12,6 +12,8 @@ Date: developing
     
     A class method to add the constructor itself into YAML loader class
 
+  - Sphinx docs
+
 - Change:
 
   - Rename module file `include.py` to `constructor.py`

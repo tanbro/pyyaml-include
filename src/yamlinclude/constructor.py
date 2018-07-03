@@ -19,6 +19,8 @@ WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML's loader
+
+    You can use :func:`yaml.add_constructor` to add it into loader.
     """
 
     TAG = '!include'
@@ -53,11 +55,32 @@ class YamlIncludeConstructor:
 
     @classmethod
     def add_to_loader_class(cls, loader_cls=None, tag=''):
-        if loader_cls is None:
-            loader_cls = yaml.Loader
+        """
+        Create an instance of the constructor, and add it to the YAML `Loader` class
+
+        :param loader_cls:
+          The `Loader` class add constructor to.
+
+          :default: ``None``: Add to PyYAML's default `Loader`
+
+        :type loader_cls: type(yaml.SafeLoader) | type(yaml.Loader) | type(yaml.CSafeLoader) | type(yaml.CLoader)
+
+        :param str tag:
+          tag name for the include constructor.
+
+          :default: ``""``: use :attr:`TAG` as tag name.
+
+        :return: New created object
+        :rtype: YamlIncludeConstructor
+        """
         if tag is None:
             tag = ''
         tag = tag.strip()
         if not tag:
             tag = cls.TAG
-        loader_cls.add_constructor(tag, cls())
+        instance = cls()
+        if loader_cls is None:
+            yaml.add_constructor(tag, instance)
+        else:
+            yaml.add_constructor(tag, instance, loader_cls)
+        return instance
