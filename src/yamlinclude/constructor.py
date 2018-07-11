@@ -4,6 +4,7 @@
 Include YAML files within YAML
 """
 
+import io
 import os
 import re
 from glob import iglob
@@ -78,11 +79,11 @@ class YamlIncludeConstructor:
                 iterator = iglob(pathname)
             for path in iterator:
                 if os.path.isfile(path):
-                    with open(path, encoding=encoding) as f:
+                    with io.open(path, encoding=encoding) as f:
                         result.append(yaml.load(f, type(loader)))
             return result
         else:
-            with open(pathname, encoding=encoding) as f:
+            with io.open(pathname, encoding=encoding) as f:
                 return yaml.load(f, type(loader))
 
     @classmethod
