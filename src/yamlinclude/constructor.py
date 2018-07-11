@@ -21,6 +21,15 @@ class YamlIncludeConstructor:
     """The `include constructor` for PyYAML's loader
 
     You can use :func:`yaml.add_constructor` to add it into loader.
+
+    In YAML files, use ``!include`` to load other YAML files as below::
+
+        !include [dir/**/*.yml, true]
+
+    or::
+
+        !include {pathname: dir/abc.yml, encoding: utf-16}
+
     """
 
     TAG = '!include'
@@ -34,10 +43,12 @@ class YamlIncludeConstructor:
             args = loader.construct_sequence(node)
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
-        return self._include(loader, *args, **kwargs)
+        return self.load(loader, *args, **kwargs)
 
     @classmethod
-    def _include(cls, loader, pathname, recursive=False):
+    def load(cls, loader, pathname, recursive=False, encoding=None):
+        if not encoding:
+            encoding = 'utf-8'
         if WILDCARDS_REGEX.match(pathname):
             result = []
             if PYTHON_MAYOR_MINOR >= '3.5':
@@ -46,11 +57,11 @@ class YamlIncludeConstructor:
                 iterator = iglob(pathname)
             for path in iterator:
                 if os.path.isfile(path):
-                    with open(path) as f:
+                    with open(path, encoding=encoding) as f:
                         result.append(yaml.load(f, type(loader)))
             return result
         else:
-            with open(pathname) as f:
+            with open(pathname, encoding=encoding) as f:
                 return yaml.load(f, type(loader))
 
     @classmethod
