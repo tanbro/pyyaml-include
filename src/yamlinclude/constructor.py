@@ -3,6 +3,8 @@
 """
 Include YAML files within YAML
 """
+
+import io
 import os
 import re
 from glob import iglob
@@ -20,7 +22,16 @@ WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML's loader
 
-    You can use :func:`yaml.add_constructor` to add it into loader.
+    Call :meth:`add_to_loader_class` to add it into loader.
+
+    In YAML files, use ``!include`` to load other YAML files as below::
+
+        !include [dir/**/*.yml, true]
+
+    or::
+
+        !include {pathname: dir/abc.yml, encoding: utf-16}
+
     """
 
     TAG = '!include'
@@ -34,10 +45,32 @@ class YamlIncludeConstructor:
             args = loader.construct_sequence(node)
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
-        return self._include(loader, *args, **kwargs)
+        return self.load(loader, *args, **kwargs)
 
     @classmethod
-    def _include(cls, loader, pathname, recursive=False):
+    def load(cls, loader, pathname, recursive=False, encoding=None):
+        """Once add the constructor to PyYAML loader class,
+        Loader will use this function to include other YAML fils
+        on parsing ``"!include"`` tag
+
+        :param loader: Instance of PyYAML's loader class
+        :param str pathname: pathname can be either absolute (like /usr/src/Python-1.5/Makefile) or relative (like ../../Tools/*/*.gif), and can contain shell-style wildcards
+
+        :param bool recursive: If recursive is true, the pattern ``"**"`` will match any files and zero or more directories and subdirectories. If the pattern is followed by an os.sep, only directories and subdirectories match.
+
+            Note:
+             Using the ``"**"`` pattern in large directory trees may consume an inordinate amount of time.
+
+        :param str encoding: YAML file encoding
+
+            :default: ``None``: ``"utf-8``
+
+        :return: included YAML file, in Python data type
+
+        .. tip:: You can a different tag by setting ``tag`` parameter in :meth:`add_to_loader_class`
+        """
+        if not encoding:
+            encoding = 'utf-8'
         if WILDCARDS_REGEX.match(pathname):
             result = []
             if PYTHON_MAYOR_MINOR >= '3.5':
@@ -46,11 +79,11 @@ class YamlIncludeConstructor:
                 iterator = iglob(pathname)
             for path in iterator:
                 if os.path.isfile(path):
-                    with open(path) as f:
+                    with io.open(path, encoding=encoding) as f:
                         result.append(yaml.load(f, type(loader)))
             return result
         else:
-            with open(pathname) as f:
+            with io.open(pathname, encoding=encoding) as f:
                 return yaml.load(f, type(loader))
 
     @classmethod

@@ -19,6 +19,7 @@ class YamlIncludeTestCase(unittest.TestCase):
 
     YAML1 = {'name': '1'}
     YAML2 = {'name': '2'}
+    YAML_ZH_CN = {'name': '中文'}
 
     @staticmethod
     def YAML_SORT_KEY(n):
@@ -50,6 +51,14 @@ class YamlIncludeTestCase(unittest.TestCase):
         for loader_cls in self.LOADER_CLASSES:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, self.YAML1)
+
+    def test_include_non_ascii_single_in_top(self):
+        yml = '''
+!include tests/data/zh_cn.yaml
+            '''
+        for loader_cls in self.LOADER_CLASSES:
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertDictEqual(data, self.YAML_ZH_CN)
 
     def test_include_one_in_mapping(self):
         yml = '''
