@@ -20,7 +20,7 @@ WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML's loader
 
-    You can use :func:`yaml.add_constructor` to add it into loader.
+    Call :meth:`add_to_loader_class` to add it into loader.
 
     In YAML files, use ``!include`` to load other YAML files as below::
 
@@ -47,6 +47,18 @@ class YamlIncludeConstructor:
 
     @classmethod
     def load(cls, loader, pathname, recursive=False, encoding=None):
+        """Once add the constructor to PyYAML loader class,
+        Loader will use this function to include other YAML fils
+        on parsing ``"!include"`` tag
+
+        :param loader:
+        :param pathname:
+        :param recursive:
+        :param encoding:
+        :return:
+
+        .. tip:: You can a different tag by setting ``tag`` parameter in :meth:`add_to_loader_class`
+        """
         if not encoding:
             encoding = 'utf-8'
         if WILDCARDS_REGEX.match(pathname):
