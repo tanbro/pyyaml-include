@@ -51,11 +51,6 @@ jobs:
       - image: circleci/python:3
     <<: *tests_steps
 
-  test-python2.7:
-    docker:
-      - image: circleci/python:2.7
-    <<: *tests_steps
-
   test-python3.4:
     docker:
       - image: circleci/python:3.4
@@ -83,7 +78,6 @@ workflows:
       - test-python
       - test-python2
       - test-python3
-      - test-python2.7
       - test-python3.4
       - test-python3.5
       - test-python3.6
