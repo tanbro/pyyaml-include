@@ -1,6 +1,8 @@
 # Changelog
 
-## develop
+## 1.0.2
+
+Date: 2018-07-11
 
 - Add:
 
