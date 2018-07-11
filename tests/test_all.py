@@ -51,6 +51,14 @@ class YamlIncludeTestCase(unittest.TestCase):
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, self.YAML1)
 
+    def test_include_non_ascii_single_in_top(self):
+            yml = '''
+    !include tests/data/zh_cn.yaml
+            '''
+            for loader_cls in self.LOADER_CLASSES:
+                data = yaml.load(StringIO(yml), loader_cls)
+                self.assertDictEqual(data, self.YAML1)
+
     def test_include_one_in_mapping(self):
         yml = '''
 file1: !include tests/data/include.d/1.yaml
