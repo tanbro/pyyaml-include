@@ -3,6 +3,7 @@
 """
 Include YAML files within YAML
 """
+
 import os
 import re
 from glob import iglob
@@ -51,11 +52,19 @@ class YamlIncludeConstructor:
         Loader will use this function to include other YAML fils
         on parsing ``"!include"`` tag
 
-        :param loader:
-        :param pathname:
-        :param recursive:
-        :param encoding:
-        :return:
+        :param loader: Instance of PyYAML's loader class
+        :param str pathname: pathname can be either absolute (like /usr/src/Python-1.5/Makefile) or relative (like ../../Tools/*/*.gif), and can contain shell-style wildcards
+
+        :param bool recursive: If recursive is true, the pattern ``"**"`` will match any files and zero or more directories and subdirectories. If the pattern is followed by an os.sep, only directories and subdirectories match.
+
+            Note:
+             Using the ``"**"`` pattern in large directory trees may consume an inordinate amount of time.
+
+        :param str encoding: YAML file encoding
+
+            :default: ``None``: ``"utf-8``
+
+        :return: included YAML file, in Python data type
 
         .. tip:: You can a different tag by setting ``tag`` parameter in :meth:`add_to_loader_class`
         """

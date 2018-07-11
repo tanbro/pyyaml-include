@@ -1,5 +1,15 @@
 # Changelog
 
+## develop
+
+- Add:
+
+  - `encoding` argument
+
+- Bugix:
+
+  - encoding error if non-ascii characters on non-utf8 os.
+
 ## 1.0.1
 
 Date: 2018-07-03
