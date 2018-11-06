@@ -1,5 +1,6 @@
 version.py
 test-reports/
+*.lock
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
