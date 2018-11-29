@@ -6,4 +6,8 @@ name = "pypi"
 [packages]
 
 [dev-packages]
-
+autopep8 = "*"
+pylint = "*"
+rope = "*"
+twine = "*"
+wheel = "*"
