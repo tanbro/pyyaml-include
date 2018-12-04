@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.3
+
+Date: 2018-12-04
+
+- New Feature:
+
+  - Add `base_dir` argument
+
+- Misc:
+
+  - Add some new unit-test
+  - Add Python3.7 in circleci 
+
 ## 1.0.2
 
 Date: 2018-07-11
