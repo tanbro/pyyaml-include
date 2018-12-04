@@ -47,7 +47,7 @@ To include `1.yaml`, `2.yaml` in `0.yaml`, we shall first add `YamlIncludeConstr
 import yaml
 from yamlinclude import YamlIncludeConstructor
 
-yaml.add_constructor('!include', YamlIncludeConstructor())
+YamlIncludeConstructor.add_to_loader_class(base_dir='/your/conf/dir')
 
 with open('0.yaml') as f:
     data = yaml.load(f)
@@ -82,11 +82,11 @@ print(data)
 
   We'll get:
 
-  ```json
-  {
-    "file1": {"name": "1"},
-    "file2": {"name": "2"}
-  }
+  ```yaml
+    file1:
+      name: "1"
+    file2:
+      name: "2"
   ```
 
 - In sequence:
@@ -101,11 +101,10 @@ print(data)
 
   We'll get:
 
-  ```json
-  {"files": [
-    {"name": "1"},
-    {"name": "2"}
-  ]}
+  ```yaml
+  files:
+    - name: "1"
+    - name: "2"
   ```
 
 > **ℹ Note**:
@@ -123,11 +122,10 @@ files: !include include.d/*.yaml
 
 We'll get:
 
-```json
-{"files": [
-  {"name": "1"},
-  {"name": "2"}
-]}
+```yaml
+files:
+  - name: "1"
+  - name: "2"
 ```
 
 > **ℹ Note**:

@@ -14,7 +14,116 @@ from yamlinclude import YamlIncludeConstructor
 _PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 
-class YamlIncludeTestCase(unittest.TestCase):
+class AddToDefaultLoaderTestCase(unittest.TestCase):
+
+    YAML1 = {'name': '1'}
+    YAML2 = {'name': '2'}
+    YAML_ZH_CN = {'name': '中文'}
+
+    @staticmethod
+    def YAML_SORT_KEY(n):
+        return n['name']
+
+    def setUp(self):
+        YamlIncludeConstructor.add_to_loader_class()
+
+    def test_include_single_in_top(self):
+        yml = '''
+!include tests/data/include.d/1.yaml
+        '''
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, self.YAML1)
+
+    def test_include_non_ascii_single_in_top(self):
+        yml = '''
+!include tests/data/zh_cn.yaml
+            '''
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, self.YAML_ZH_CN)
+
+    def test_include_one_in_mapping(self):
+        yml = '''
+file1: !include tests/data/include.d/1.yaml
+        '''
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, {'file1': self.YAML1})
+
+    def test_include_two_in_mapping(self):
+        yml = '''
+file1: !include tests/data/include.d/1.yaml
+file2: !include tests/data/include.d/2.yaml
+        '''
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, {
+            'file1': self.YAML1,
+            'file2': self.YAML2,
+        })
+
+    def test_include_one_in_sequence(self):
+        yml = '''
+- !include tests/data/include.d/1.yaml
+        '''
+        data = yaml.load(StringIO(yml))
+        self.assertListEqual(data, [self.YAML1])
+
+    def test_include_two_in_sequence(self):
+        yml = '''
+- !include tests/data/include.d/1.yaml
+- !include tests/data/include.d/2.yaml
+        '''
+        data = yaml.load(StringIO(yml))
+        self.assertListEqual(data, [self.YAML1, self.YAML2])
+
+    def test_include_file_not_exists(self):
+        yml = '''
+!include tests/data/include.d/x.yaml
+            '''
+        if _PYTHON_VERSION_MAYOR_MINOR >= '3.3':
+            err_cls = FileNotFoundError
+        else:
+            err_cls = IOError
+        with self.assertRaises(err_cls):
+            yaml.load(StringIO(yml))
+
+    def test_include_recursive(self):
+        yml = '''
+!include tests/data/0.yaml
+            '''
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, {
+            'files': [self.YAML1, self.YAML2],
+            'file1': self.YAML1,
+            'file2': self.YAML2,
+        })
+
+    def test_include_abs(self):
+        dirpath = os.path.abspath('')
+        yml = '''
+!include {0}/tests/data/include.d/1.yaml
+        '''.format(dirpath)
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, self.YAML1)
+
+    def test_include_wildcards(self):
+        ymllist = ['''
+!include tests/data/include.d/*.yaml
+''']
+        if _PYTHON_VERSION_MAYOR_MINOR >= '3.5':
+            ymllist.extend(['''
+!include [tests/data/include.d/**/*.yaml, true]
+''', '''
+!include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
+'''])
+        for yml in ymllist:
+            data = yaml.load(StringIO(yml))
+            self.assertIsInstance(data, list)
+            self.assertListEqual(
+                sorted(data, key=self.YAML_SORT_KEY),
+                [self.YAML1, self.YAML2]
+            )
+
+
+class AddToMultiLoaderTestCase(unittest.TestCase):
     LOADER_CLASSES = []
 
     YAML1 = {'name': '1'}

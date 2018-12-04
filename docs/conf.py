@@ -36,6 +36,8 @@ release = '.'.join(version.split('.')[:2])
 
 # -- General configuration ---------------------------------------------------
 
+autoclass_content = 'both'
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
@@ -60,14 +62,14 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = '.rst'
+source_suffix = '.rst'
 # The suffix of source filenames.
 
 # Markdown support
-source_suffix = ['.rst', '.md']
-source_parsers = {
-    '.md': 'recommonmark.parser.CommonMarkParser',
-}
+# source_suffix = ['.rst', '.md']
+# source_parsers = {
+#     '.md': 'recommonmark.parser.CommonMarkParser',
+# }
 
 # The master toctree document.
 master_doc = 'index'

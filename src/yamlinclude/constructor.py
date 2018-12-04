@@ -5,7 +5,7 @@ Include YAML files within YAML
 """
 
 import io
-import os
+import os.path
 import re
 from glob import iglob
 from sys import version_info
@@ -22,7 +22,7 @@ WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML's loader
 
-    Call :meth:`add_to_loader_class` to add it into loader.
+    Call :meth:`add_to_loader_class` or :meth:`yaml.Loader.add_constructor` to add it into loader.
 
     In YAML files, use ``!include`` to load other YAML files as below::
 
@@ -34,7 +34,16 @@ class YamlIncludeConstructor:
 
     """
 
+    DEFAULT_ENCODING = 'utf-8'
     TAG = '!include'
+
+    def __init__(self, base_dir=None):
+        """
+        :param str base_dir: Base directory from where finding YAML files
+
+            * `None`: load YAML files from current working directory.
+        """
+        self._base_dir = base_dir
 
     def __call__(self, loader, node):
         args = []
@@ -47,8 +56,15 @@ class YamlIncludeConstructor:
             kwargs = loader.construct_mapping(node)
         return self.load(loader, *args, **kwargs)
 
-    @classmethod
-    def load(cls, loader, pathname, recursive=False, encoding=None):
+    @property
+    def base_dir(self):  # type: ()->str
+        return self._base_dir
+
+    @base_dir.setter
+    def base_dir(self, value):  # type: (str)->None
+        self._base_dir = value
+
+    def load(self, loader, pathname, recursive=False, encoding=None):
         """Once add the constructor to PyYAML loader class,
         Loader will use this function to include other YAML fils
         on parsing ``"!include"`` tag
@@ -67,10 +83,12 @@ class YamlIncludeConstructor:
 
         :return: included YAML file, in Python data type
 
-        .. tip:: You can a different tag by setting ``tag`` parameter in :meth:`add_to_loader_class`
+        .. warning:: It's called by :mod:`yaml`. Do NOT call it yourself.
         """
         if not encoding:
-            encoding = 'utf-8'
+            encoding = self.DEFAULT_ENCODING
+        if self._base_dir:
+            pathname = os.path.join(self._base_dir, pathname)
         if WILDCARDS_REGEX.match(pathname):
             result = []
             if PYTHON_MAYOR_MINOR >= '3.5':
@@ -87,7 +105,8 @@ class YamlIncludeConstructor:
                 return yaml.load(f, type(loader))
 
     @classmethod
-    def add_to_loader_class(cls, loader_cls=None, tag=''):
+    def add_to_loader_class(cls, loader_cls=None, tag=None, **kwargs):
+        # type: (type(yaml.Loader), str, **str)-> YamlIncludeConstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
@@ -103,6 +122,8 @@ class YamlIncludeConstructor:
 
           :default: ``""``: use :attr:`TAG` as tag name.
 
+        :param kwargs: Arguments passed to constructor
+
         :return: New created object
         :rtype: YamlIncludeConstructor
         """
@@ -111,7 +132,9 @@ class YamlIncludeConstructor:
         tag = tag.strip()
         if not tag:
             tag = cls.TAG
-        instance = cls()
+        if not tag.startswith('!'):
+            raise ValueError('`tag` argument should start with character "!"')
+        instance = cls(**kwargs)
         if loader_cls is None:
             yaml.add_constructor(tag, instance)
         else:
