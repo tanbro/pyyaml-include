@@ -58,7 +58,7 @@ class YamlIncludeConstructor:
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
         else:
-            raise TypeError('Un-supported YAML node %r'.format(node))
+            raise TypeError('Un-supported YAML node {!r}'.format(node))
         return self.load(loader, *args, **kwargs)
 
     @property
