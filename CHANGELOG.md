@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.0.4
+
+Date: 2019-01--7
+
+- Change:
+
+  - rename: `TAG` ==> `DEFAULT_TAG_NAME`
+  - add: `encoding` argument
+
+- Fix:
+
+  - A wrong logging text format
+
+- Misc:
+
+  - add: `.pylintrc`
+
 ## 1.0.3
 
 Date: 2018-12-04
@@ -34,7 +51,7 @@ Date: 2018-07-03
   - Old Python2.6 and new Python3.7 compatibilities
 
   - class method `add_to_loader_class`
-    
+
     A class method to add the constructor itself into YAML loader class
 
   - Sphinx docs
