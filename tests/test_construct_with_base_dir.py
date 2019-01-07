@@ -43,7 +43,7 @@ class ConstructWithBaseDirTestCase(unittest.TestCase):
         constructor = YamlIncludeConstructor(base_dir='tests/data')
 
         for loader_cls in self.LOADER_CLASSES:
-            loader_cls.add_constructor(constructor.TAG, constructor)
+            loader_cls.add_constructor(constructor.DEFAULT_TAG_NAME, constructor)
 
     def test_include_single_in_top(self):
         yml = '''

@@ -35,15 +35,18 @@ class YamlIncludeConstructor:
     """
 
     DEFAULT_ENCODING = 'utf-8'
-    TAG = '!include'
+    DEFAULT_TAG_NAME = '!include'
 
-    def __init__(self, base_dir=None):
+    def __init__(self, base_dir=None, encoding=None):
+        # type:(str, str)->YamlIncludeConstructor
         """
         :param str base_dir: Base directory from where finding YAML files
+        :param str encoding: encoding of the YAML files
 
             * `None`: load YAML files from current working directory.
         """
         self._base_dir = base_dir
+        self._encoding = encoding
 
     def __call__(self, loader, node):
         args = []
@@ -54,15 +57,27 @@ class YamlIncludeConstructor:
             args = loader.construct_sequence(node)
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
+        else:
+            raise TypeError('Un-supported YAML node {!r}'.format(node))
         return self.load(loader, *args, **kwargs)
 
     @property
     def base_dir(self):  # type: ()->str
+        # pylint:disable=missing-docstring
         return self._base_dir
 
     @base_dir.setter
     def base_dir(self, value):  # type: (str)->None
         self._base_dir = value
+
+    @property
+    def encoding(self):  # type: ()->str
+        # pylint:disable=missing-docstring
+        return self._encoding
+
+    @encoding.setter
+    def encoding(self, value):  # type: (str)->None
+        self._encoding = value
 
     def load(self, loader, pathname, recursive=False, encoding=None):
         """Once add the constructor to PyYAML loader class,
@@ -79,14 +94,14 @@ class YamlIncludeConstructor:
 
         :param str encoding: YAML file encoding
 
-            :default: ``None``: ``"utf-8``
+            :default: ``None``: :attr:`encoding` or :attr:`DEFAULT_ENCODING` will be used
 
         :return: included YAML file, in Python data type
 
         .. warning:: It's called by :mod:`yaml`. Do NOT call it yourself.
         """
         if not encoding:
-            encoding = self.DEFAULT_ENCODING
+            encoding = self._encoding or self.DEFAULT_ENCODING
         if self._base_dir:
             pathname = os.path.join(self._base_dir, pathname)
         if WILDCARDS_REGEX.match(pathname):
@@ -97,11 +112,11 @@ class YamlIncludeConstructor:
                 iterator = iglob(pathname)
             for path in iterator:
                 if os.path.isfile(path):
-                    with io.open(path, encoding=encoding) as f:
+                    with io.open(path, encoding=encoding) as f:  # pylint:disable=invalid-name
                         result.append(yaml.load(f, type(loader)))
             return result
         else:
-            with io.open(pathname, encoding=encoding) as f:
+            with io.open(pathname, encoding=encoding) as f:  # pylint:disable=invalid-name
                 return yaml.load(f, type(loader))
 
     @classmethod
@@ -120,7 +135,7 @@ class YamlIncludeConstructor:
         :param str tag:
           tag name for the include constructor.
 
-          :default: ``""``: use :attr:`TAG` as tag name.
+          :default: ``""``: use :attr:`DEFAULT_TAG_NAME` as tag name.
 
         :param kwargs: Arguments passed to constructor
 
@@ -131,7 +146,7 @@ class YamlIncludeConstructor:
             tag = ''
         tag = tag.strip()
         if not tag:
-            tag = cls.TAG
+            tag = cls.DEFAULT_TAG_NAME
         if not tag.startswith('!'):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
