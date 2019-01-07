@@ -26,7 +26,7 @@ setup(
 
     setup_requires=['pytest-runner', 'setuptools_scm', 'setuptools_scm_git_archive'],
 
-    install_requires=['PyYAML>=3.12,<4.0'],
+    install_requires=['PyYAML>=3.12'],
 
     tests_require=['pytest'],
     test_suite='tests',
