@@ -1,8 +1,16 @@
 # Changelog
 
+## 1.1
+
+Date: 2019-03-18
+
+- Change:
+  - Update PyYAML to 5.*
+  - Argument `loader_class` of `YamlIncludeConstructor.add_to_loader_class()` renamed and required(former: `loader_cls`, default=`None`)
+
 ## 1.0.4
 
-Date: 2019-01--7
+Date: 2019-01-07
 
 - Change:
 
@@ -28,7 +36,7 @@ Date: 2018-12-04
 - Misc:
 
   - Add some new unit-test
-  - Add Python3.7 in circleci 
+  - Add Python3.7 in CircleCI
 
 ## 1.0.2
 
@@ -38,7 +46,7 @@ Date: 2018-07-11
 
   - `encoding` argument
 
-- Bugix:
+- Bug fix:
 
   - encoding error if non-ascii characters on non-utf8 os.
 
