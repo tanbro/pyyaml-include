@@ -120,17 +120,17 @@ class YamlIncludeConstructor:
                 return yaml.load(f, type(loader))
 
     @classmethod
-    def add_to_loader_class(cls, loader_cls=None, tag=None, **kwargs):
+    def add_to_loader_class(cls, loader_class, tag=None, **kwargs):
         # type: (type(yaml.Loader), str, **str)-> YamlIncludeConstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
-        :param loader_cls:
+        :param loader_class:
           The `Loader` class add constructor to.
 
           :default: ``None``: Add to PyYAML's default `Loader`
 
-        :type loader_cls: type(yaml.SafeLoader) | type(yaml.Loader) | type(yaml.CSafeLoader) | type(yaml.CLoader)
+        :type loader_class: type(yaml.SafeLoader) | type(yaml.Loader) | type(yaml.CSafeLoader) | type(yaml.FullLoader)
 
         :param str tag:
           tag name for the include constructor.
@@ -150,8 +150,5 @@ class YamlIncludeConstructor:
         if not tag.startswith('!'):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
-        if loader_cls is None:
-            yaml.add_constructor(tag, instance)
-        else:
-            yaml.add_constructor(tag, instance, loader_cls)
+        yaml.add_constructor(tag, instance, loader_class)
         return instance

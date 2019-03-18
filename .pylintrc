@@ -60,7 +60,9 @@ confidence=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use "--disable=all --enable=classes
 # --disable=W".
-disable=print-statement,
+disable=missing-docstring,
+        line-too-long,
+        print-statement,
         parameter-unpacking,
         unpacking-in-except,
         old-raise-syntax,
@@ -73,6 +75,7 @@ disable=print-statement,
         raw-checker-failed,
         bad-inline-option,
         locally-disabled,
+        locally-enabled,
         file-ignored,
         suppressed-message,
         useless-suppression,
@@ -138,8 +141,7 @@ disable=print-statement,
         xreadlines-attribute,
         deprecated-sys-function,
         exception-escape,
-        comprehension-escape,
-        line-too-long
+        comprehension-escape
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
@@ -242,10 +244,33 @@ function-naming-style=snake_case
 #function-rgx=
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names=i,
+good-names=a,
+           b,
+           c,
+           d,
+           e,
+           f,
+           g,
+           h,
+           i,
            j,
            k,
+           l,
+           m,
+           n,
+           o,
+           p,
+           q,
+           r,
+           s,
+           v,
+           w,
+           x,
+           y,
+           z,
            ex,
+           ss,
+           fp,
            Run,
            _
 
@@ -283,7 +308,6 @@ no-docstring-rgx=^_
 
 # List of decorators that produce properties, such as abc.abstractproperty. Add
 # to this list to register other decorators that produce valid properties.
-# These decorators are taken in consideration only for invalid-name.
 property-classes=abc.abstractproperty
 
 # Naming style matching correct variable names.
@@ -302,7 +326,7 @@ expected-line-ending-format=
 # Regexp for a line that is allowed to be longer than the limit.
 ignore-long-lines=^\s*(# )?<?https?://\S+>?$
 
-# Number of spaces of indent required inside a hanging or continued line.
+# Number of spaces of indent required inside a hanging  or continued line.
 indent-after-paren=4
 
 # String used as indentation unit. This is usually "    " (4 spaces) or "\t" (1
@@ -332,10 +356,6 @@ single-line-if-stmt=no
 
 
 [LOGGING]
-
-# Format style used to check logging format string. `old` means using %
-# formatting, while `new` is for `{}` formatting.
-logging-format-style=old
 
 # Logging modules to check that the string format arguments are in logging
 # function parameter format.
@@ -440,7 +460,7 @@ missing-member-max-choices=1
 [VARIABLES]
 
 # List of additional names supposed to be defined in builtins. Remember that
-# you should avoid defining new builtins when possible.
+# you should avoid to define new builtins when possible.
 additional-builtins=
 
 # Tells whether unused global variables should be treated as a violation.
