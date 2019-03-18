@@ -115,13 +115,12 @@ class YamlIncludeConstructor:
                     with io.open(path, encoding=encoding) as f:  # pylint:disable=invalid-name
                         result.append(yaml.load(f, type(loader)))
             return result
-        else:
-            with io.open(pathname, encoding=encoding) as f:  # pylint:disable=invalid-name
-                return yaml.load(f, type(loader))
+        with io.open(pathname, encoding=encoding) as f:  # pylint:disable=invalid-name
+            return yaml.load(f, type(loader))
 
     @classmethod
     def add_to_loader_class(cls, loader_class, tag=None, **kwargs):
-        # type: (type(yaml.Loader), str, **str)-> YamlIncludeConstructor
+        # type: (type(yaml.Loader), str, **str)-> yamlincludeconstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
