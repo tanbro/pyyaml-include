@@ -12,6 +12,12 @@ from sys import version_info
 
 import yaml
 
+try:
+    from yaml import FullLoader
+except ImportError:
+    FullLoader = None
+
+
 __all__ = ['YamlIncludeConstructor']
 
 PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
@@ -119,7 +125,7 @@ class YamlIncludeConstructor:
             return yaml.load(f, type(loader))
 
     @classmethod
-    def add_to_loader_class(cls, loader_class, tag=None, **kwargs):
+    def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
         # type: (type(yaml.Loader), str, **str)-> yamlincludeconstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
@@ -127,7 +133,10 @@ class YamlIncludeConstructor:
         :param loader_class:
           The `Loader` class add constructor to.
 
-          :default: ``None``: Add to PyYAML's default `Loader`
+          :default: ``None``:
+
+            - When `pyyaml` 3.*: Add to PyYAML's default `Loader`
+            - When `pyyaml` 5.*: Add to `FullLoader`
 
         :type loader_class: type(yaml.SafeLoader) | type(yaml.Loader) | type(yaml.CSafeLoader) | type(yaml.FullLoader)
 
@@ -149,5 +158,11 @@ class YamlIncludeConstructor:
         if not tag.startswith('!'):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
-        yaml.add_constructor(tag, instance, loader_class)
+        if loader_class is None:
+            if FullLoader:
+                yaml.add_constructor(tag, instance, FullLoader)
+            else:
+                yaml.add_constructor(tag, instance)
+        else:
+            yaml.add_constructor(tag, instance, loader_class)
         return instance
