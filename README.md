@@ -12,7 +12,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c6c77ccafa6f4f9096a713480902ab34)](https://www.codacy.com/app/tanbro/pyyaml-include?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tanbro/pyyaml-include&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/c6c77ccafa6f4f9096a713480902ab34)](https://www.codacy.com/app/tanbro/pyyaml-include?utm_source=github.com&utm_medium=referral&utm_content=tanbro/pyyaml-include&utm_campaign=Badge_Coverage)
 
-Extending [PyYAML] with a custom constructor for including [YAML] files within [YAML] files.
+An extending constructor of [PyYAML][], which including [YAML][] files within [YAML][] files.
 
 ## Install
 
@@ -47,10 +47,10 @@ To include `1.yaml`, `2.yaml` in `0.yaml`, we shall first add `YamlIncludeConstr
 import yaml
 from yamlinclude import YamlIncludeConstructor
 
-YamlIncludeConstructor.add_to_loader_class(base_dir='/your/conf/dir')
+YamlIncludeConstructor.add_to_loader_class(yaml.FullLoader, base_dir='/your/conf/dir')
 
 with open('0.yaml') as f:
-    data = yaml.load(f)
+    data = yaml.load(f, Loader=yaml.FullLoader)
 
 print(data)
 ```
@@ -107,8 +107,9 @@ print(data)
     - name: "2"
   ```
 
-> **ℹ Note**:
-> File name can be either absolute (like `/usr/src/Python-1.5/Makefile`) or relative (like `../../img/banner.gif`).
+> ℹ **Note**:
+>
+> File name can be either absolute (like `/usr/conf/1.5/Make.yml`) or relative (like `../../cfg/img.yml`).
 
 ### Include files by wildcards
 
@@ -128,11 +129,12 @@ files:
   - name: "2"
 ```
 
-> **ℹ Note**:
+> ℹ **Note**:
+>
 > - For `Python>=3.5`, if `recursive` argument of `!include` [YAML] tag is `true`, the pattern `“**”` will match any files and zero or more directories and subdirectories.
 > - Using the `“**”` pattern in large directory trees may consume an inordinate amount of time because of recursive search.
 
-In order to enable `recursive` arugment, we shall write the `!include` tag in `Mapping` or `Sequence` mode:
+In order to enable `recursive` argument, we shall write the `!include` tag in `Mapping` or `Sequence` mode:
 
 - Arguments in `Sequence` mode:
 

@@ -14,8 +14,6 @@ _PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 
 class ConstructWithBaseDirTestCase(unittest.TestCase):
-    LOADER_CLASSES = []
-
     YAML1 = {'name': '1'}
     YAML2 = {'name': '2'}
     YAML_ZH_CN = {'name': '中文'}
@@ -25,31 +23,31 @@ class ConstructWithBaseDirTestCase(unittest.TestCase):
         return n['name']
 
     def setUp(self):
-        from yaml import SafeLoader, Loader
-        self.LOADER_CLASSES = [SafeLoader, Loader]
+        if yaml.__version__ < '4.0':
+            from yaml import BaseLoader, SafeLoader, Loader
+            self.loader_classes = [BaseLoader, SafeLoader, Loader]
+        elif yaml.__version__ >= '5.0':
+            from yaml import BaseLoader, SafeLoader, Loader, FullLoader
+            self.loader_classes = [BaseLoader, SafeLoader, Loader, FullLoader]
+        else:
+            raise RuntimeError('Un-supported pyyaml version')
         try:
-            from yaml import CSafeLoader
+            from yaml import CBaseLoader, CSafeLoader, CLoader
         except ImportError as err:
             print(err, file=stderr)
         else:
-            self.LOADER_CLASSES.append(CSafeLoader)
-        try:
-            from yaml import CLoader
-        except ImportError as err:
-            print(err, file=stderr)
-        else:
-            self.LOADER_CLASSES.append(CLoader)
+            self.loader_classes.append(CLoader)
 
         constructor = YamlIncludeConstructor(base_dir='tests/data')
 
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             loader_cls.add_constructor(constructor.DEFAULT_TAG_NAME, constructor)
 
     def test_include_single_in_top(self):
         yml = '''
 !include include.d/1.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, self.YAML1)
 
@@ -57,7 +55,7 @@ class ConstructWithBaseDirTestCase(unittest.TestCase):
         yml = '''
 file1: !include include.d/1.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {'file1': self.YAML1})
 
@@ -66,7 +64,7 @@ file1: !include include.d/1.yaml
 file1: !include include.d/1.yaml
 file2: !include include.d/2.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {
                 'file1': self.YAML1,
@@ -77,7 +75,7 @@ file2: !include include.d/2.yaml
         yml = '''
 - !include include.d/1.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(data, [self.YAML1])
 
@@ -86,7 +84,7 @@ file2: !include include.d/2.yaml
 - !include include.d/1.yaml
 - !include include.d/2.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(data, [self.YAML1, self.YAML2])
 
@@ -98,7 +96,7 @@ file2: !include include.d/2.yaml
             err_cls = FileNotFoundError
         else:
             err_cls = IOError
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             with self.assertRaises(err_cls):
                 yaml.load(StringIO(yml), loader_cls)
 
@@ -112,7 +110,7 @@ file2: !include include.d/2.yaml
 ''', '''
 !include {pathname: include.d/**/*.yaml, recursive: true}
 '''])
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader_cls)
                 self.assertIsInstance(data, list)
@@ -123,7 +121,7 @@ file2: !include include.d/2.yaml
 
 
 class ClassMethodConstructWithBaseDirTestCase(unittest.TestCase):
-    LOADER_CLASSES = []
+    loader_classes = []
 
     YAML1 = {'name': '1'}
     YAML2 = {'name': '2'}
@@ -135,30 +133,30 @@ class ClassMethodConstructWithBaseDirTestCase(unittest.TestCase):
 
     def setUp(self):
         from yaml import SafeLoader, Loader
-        self.LOADER_CLASSES = [SafeLoader, Loader]
+        self.loader_classes = [SafeLoader, Loader]
         try:
             from yaml import CSafeLoader
         except ImportError as err:
             print(err, file=stderr)
         else:
-            self.LOADER_CLASSES.append(CSafeLoader)
+            self.loader_classes.append(CSafeLoader)
         try:
             from yaml import CLoader
         except ImportError as err:
             print(err, file=stderr)
         else:
-            self.LOADER_CLASSES.append(CLoader)
+            self.loader_classes.append(CLoader)
 
         base_dir = 'tests/data'
 
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             YamlIncludeConstructor.add_to_loader_class(loader_cls, base_dir=base_dir)
 
     def test_include_single_in_top(self):
         yml = '''
 !include include.d/1.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, self.YAML1)
 
@@ -166,7 +164,7 @@ class ClassMethodConstructWithBaseDirTestCase(unittest.TestCase):
         yml = '''
 file1: !include include.d/1.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {'file1': self.YAML1})
 
@@ -175,7 +173,7 @@ file1: !include include.d/1.yaml
 file1: !include include.d/1.yaml
 file2: !include include.d/2.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {
                 'file1': self.YAML1,
@@ -186,7 +184,7 @@ file2: !include include.d/2.yaml
         yml = '''
 - !include include.d/1.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(data, [self.YAML1])
 
@@ -195,7 +193,7 @@ file2: !include include.d/2.yaml
 - !include include.d/1.yaml
 - !include include.d/2.yaml
         '''
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(data, [self.YAML1, self.YAML2])
 
@@ -207,7 +205,7 @@ file2: !include include.d/2.yaml
             err_cls = FileNotFoundError
         else:
             err_cls = IOError
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             with self.assertRaises(err_cls):
                 yaml.load(StringIO(yml), loader_cls)
 
@@ -221,7 +219,7 @@ file2: !include include.d/2.yaml
 ''', '''
 !include {pathname: include.d/**/*.yaml, recursive: true}
 '''])
-        for loader_cls in self.LOADER_CLASSES:
+        for loader_cls in self.loader_classes:
             for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader_cls)
                 self.assertIsInstance(data, list)

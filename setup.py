@@ -26,7 +26,7 @@ setup(
 
     setup_requires=['pytest-runner', 'setuptools_scm', 'setuptools_scm_git_archive'],
 
-    install_requires=['PyYAML>=3.12'],
+    install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
 
     tests_require=['pytest'],
     test_suite='tests',
@@ -43,6 +43,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup',
     ],

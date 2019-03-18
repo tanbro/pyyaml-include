@@ -6,7 +6,8 @@ name = "pypi"
 [packages]
 
 [dev-packages]
-"pyyaml-include" = {path = ".", editable = true}
+pyyaml-include = {path = ".",editable = true}
+pytest = "*"
 autopep8 = "*"
 pylint = "*"
 rope = "*"
