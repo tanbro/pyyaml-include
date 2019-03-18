@@ -36,7 +36,7 @@ class ConstructWithBaseDirTestCase(unittest.TestCase):
         except ImportError as err:
             print(err, file=stderr)
         else:
-            self.loader_classes.append(CLoader)
+            self.loader_classes += [CBaseLoader, CSafeLoader, CLoader]
 
         constructor = YamlIncludeConstructor(base_dir='tests/data')
 

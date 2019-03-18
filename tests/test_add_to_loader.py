@@ -38,7 +38,7 @@ class AddToMultiLoaderTestCase(unittest.TestCase):
         except ImportError as err:
             print(err, file=stderr)
         else:
-            self.loader_classes.append(CLoader)
+            self.loader_classes += [CBaseLoader, CSafeLoader, CLoader]
 
         for loader_cls in self.loader_classes:
             YamlIncludeConstructor.add_to_loader_class(loader_cls)
@@ -150,10 +150,13 @@ file2: !include tests/data/include.d/2.yaml
 
 
 class DefaultLoaderTestCase(unittest.TestCase):
+    YAML1 = {'name': '1'}
+
     def test_no_loader_class_argument(self):
         YamlIncludeConstructor.add_to_loader_class()
         yml = '!include tests/data/include.d/1.yaml'
-        yaml.load(StringIO(yml))
+        data = yaml.load(StringIO(yml))
+        self.assertDictEqual(data, self.YAML1)
 
 
 if __name__ == '__main__':

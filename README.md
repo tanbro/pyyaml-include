@@ -47,7 +47,7 @@ To include `1.yaml`, `2.yaml` in `0.yaml`, we shall first add `YamlIncludeConstr
 import yaml
 from yamlinclude import YamlIncludeConstructor
 
-YamlIncludeConstructor.add_to_loader_class(yaml.FullLoader, base_dir='/your/conf/dir')
+YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir='/your/conf/dir')
 
 with open('0.yaml') as f:
     data = yaml.load(f, Loader=yaml.FullLoader)
