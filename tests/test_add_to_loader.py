@@ -149,5 +149,12 @@ file2: !include tests/data/include.d/2.yaml
                 )
 
 
+class DefaultLoaderTestCase(unittest.TestCase):
+    def test_no_loader_class_argument(self):
+        YamlIncludeConstructor.add_to_loader_class()
+        yml = '!include tests/data/include.d/1.yaml'
+        yaml.load(StringIO(yml))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -6,7 +6,7 @@ Date: 2019-03-18
 
 - Change:
   - Update PyYAML to 5.*
-  - Argument `loader_class` of `YamlIncludeConstructor.add_to_loader_class()` renamed and required(former: `loader_cls`, default=`None`)
+  - Rename: Argument `loader_class` of `YamlIncludeConstructor.add_to_loader_class()` (former: `loader_cls`)
 
 ## 1.0.4
 
