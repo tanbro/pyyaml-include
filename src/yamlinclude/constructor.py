@@ -140,8 +140,7 @@ class YamlIncludeConstructor:
 
         :type loader_class: type(yaml.SafeLoader) | type(yaml.Loader) | type(yaml.CSafeLoader) | type(yaml.FullLoader)
 
-        :param str tag:
-          tag name for the include constructor.
+        :param str tag: Tag's name of the include constructor.
 
           :default: ``""``: use :attr:`DEFAULT_TAG_NAME` as tag name.
 
