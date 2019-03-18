@@ -12,7 +12,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c6c77ccafa6f4f9096a713480902ab34)](https://www.codacy.com/app/tanbro/pyyaml-include?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tanbro/pyyaml-include&amp;utm_campaign=Badge_Grade)
 [![Codacy Badge](https://api.codacy.com/project/badge/Coverage/c6c77ccafa6f4f9096a713480902ab34)](https://www.codacy.com/app/tanbro/pyyaml-include?utm_source=github.com&utm_medium=referral&utm_content=tanbro/pyyaml-include&utm_campaign=Badge_Coverage)
 
-Extending [PyYAML] with a custom constructor for including [YAML] files within [YAML] files.
+An extending constructor of [PyYAML][], which including [YAML][] files within [YAML][] files.
 
 ## Install
 
