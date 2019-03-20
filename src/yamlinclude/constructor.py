@@ -116,11 +116,11 @@ class YamlIncludeConstructor:
                 iterator = iglob(pathname)
             for path in iterator:
                 if os.path.isfile(path):
-                    with io.open(path, encoding=encoding) as f:  # pylint:disable=invalid-name
-                        result.append(yaml.load(f, type(loader)))
+                    with io.open(path, encoding=encoding) as fp:  # pylint:disable=invalid-name
+                        result.append(yaml.load(fp, type(loader)))
             return result
-        with io.open(pathname, encoding=encoding) as f:  # pylint:disable=invalid-name
-            return yaml.load(f, type(loader))
+        with io.open(pathname, encoding=encoding) as fp:  # pylint:disable=invalid-name
+            return yaml.load(fp, type(loader))
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):

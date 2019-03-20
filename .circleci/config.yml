@@ -10,18 +10,25 @@ references:
     steps:
       - checkout
       - run:
-          name: Install additional pip dependencies
-          command: sudo pip install coverage codacy-coverage
+          name: Setup dependencies of test
+          command: sudo pip install coverage
       - run:
-          name: Run setup test
-          command: coverage run setup.py test
-      - store_test_results:
-          path: test-reports
-      - run:
-          name: Upload coverage xml file to codacy
+          name: Setup Code Climate test-reporter
           command: |
-            coverage xml --include=src/*.py
-            python-codacy-coverage -r coverage.xml
+            # download test reporter as a static binary
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            chmod +x ./cc-test-reporter
+      - run:
+          name: Run tests
+          command: |
+            # notify Code Climate of a pending test report using `before-build`
+            ./cc-test-reporter before-build
+            # run unit test cases with coverage
+            coverage run --source=src setup.py test
+            # generate an XML report of coverage results
+            coverage xml
+            # upload test report to Code Climate using `after-build`
+            ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
 
   deploy_steps: &deploy_steps
     steps:
@@ -92,6 +99,6 @@ workflows:
             - test-python
           filters:
             tags:
-              only: /^(\d+(\.\d+)*)+(\.?(a|b|c|dev|alpha|beta|rc|preview)(\d+(\.\d+)*)+)?$/
+              only: /^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?/
             branches:
               ignore: /.*/
