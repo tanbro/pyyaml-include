@@ -69,7 +69,6 @@ class YamlIncludeConstructor:
 
     @property
     def base_dir(self):  # type: ()->str
-        # pylint:disable=missing-docstring
         return self._base_dir
 
     @base_dir.setter
@@ -78,7 +77,6 @@ class YamlIncludeConstructor:
 
     @property
     def encoding(self):  # type: ()->str
-        # pylint:disable=missing-docstring
         return self._encoding
 
     @encoding.setter
