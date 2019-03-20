@@ -9,8 +9,8 @@
 [![PyPI - Status](https://img.shields.io/pypi/status/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 [![PyPI - Implementation](https://img.shields.io/pypi/implementation/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c6c77ccafa6f4f9096a713480902ab34)](https://www.codacy.com/app/tanbro/pyyaml-include?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=tanbro/pyyaml-include&amp;utm_campaign=Badge_Grade)
-[![Codacy Badge](https://api.codacy.com/project/badge/Coverage/c6c77ccafa6f4f9096a713480902ab34)](https://www.codacy.com/app/tanbro/pyyaml-include?utm_source=github.com&utm_medium=referral&utm_content=tanbro/pyyaml-include&utm_campaign=Badge_Coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a155ced80ddaafe74cea/maintainability)](https://codeclimate.com/github/tanbro/pyyaml-include/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/a155ced80ddaafe74cea/test_coverage)](https://codeclimate.com/github/tanbro/pyyaml-include/test_coverage)
 
 An extending constructor of [PyYAML][], which including [YAML][] files within [YAML][] files.
 

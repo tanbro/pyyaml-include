@@ -96,7 +96,7 @@ workflows:
       - test-python3.7
       - deploy:
           requires:
-            - test-python
+            - test-python3
           filters:
             tags:
               only: /^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?/
