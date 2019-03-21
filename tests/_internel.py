@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from sys import version_info
 from warnings import warn
 
@@ -13,6 +15,7 @@ YAML_LOADERS = []
 
 if '3.12' <= yaml.__version__ < '4.0':
     from yaml import BaseLoader, SafeLoader, Loader
+
     YAML_LOADERS = [BaseLoader, SafeLoader, Loader]
     try:
         from yaml import CBaseLoader, CSafeLoader, CLoader
@@ -22,6 +25,7 @@ if '3.12' <= yaml.__version__ < '4.0':
         YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader]
 elif '5.0' <= yaml.__version__ < '6.0':
     from yaml import BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader
+
     YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
     try:
         from yaml import CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader
