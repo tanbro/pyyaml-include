@@ -9,7 +9,7 @@ PYTHON_VERSION_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 YAML1 = {'name': '1'}
 YAML2 = {'name': '2'}
-YAML_ZH_CN = {'name': '中文'}
+YAML_ZH_CN = {'name': u'中文'}
 
 YAML_LOADERS = []
 
