@@ -17,7 +17,6 @@ try:
 except ImportError:
     FullLoader = None
 
-
 __all__ = ['YamlIncludeConstructor']
 
 PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
@@ -26,7 +25,7 @@ WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
 
 
 class YamlIncludeConstructor:
-    """The `include constructor` for PyYAML's loader
+    """The `include constructor` for PyYAML Loaders
 
     Call :meth:`add_to_loader_class` or :meth:`yaml.Loader.add_constructor` to add it into loader.
 
@@ -36,7 +35,7 @@ class YamlIncludeConstructor:
 
     or::
 
-        !include {pathname: dir/abc.yml, encoding: utf-16}
+        !include {pathname: dir/abc.yml, encoding: utf-8}
 
     """
 
@@ -46,10 +45,13 @@ class YamlIncludeConstructor:
     def __init__(self, base_dir=None, encoding=None):
         # type:(str, str)->YamlIncludeConstructor
         """
-        :param str base_dir: Base directory from where finding YAML files
-        :param str encoding: encoding of the YAML files
+        :param str base_dir: Base directory where search including YAML files
 
-            * `None`: load YAML files from current working directory.
+            :default: ``None``:  include YAML files from current working directory.
+
+        :param str encoding: Encoding of the YAML files
+
+            :default: ``None``:  Not specified
         """
         self._base_dir = base_dir
         self._encoding = encoding
@@ -69,6 +71,10 @@ class YamlIncludeConstructor:
 
     @property
     def base_dir(self):  # type: ()->str
+        """Base directory where search including YAML files
+
+        :rtype: str
+        """
         return self._base_dir
 
     @base_dir.setter
@@ -77,6 +83,10 @@ class YamlIncludeConstructor:
 
     @property
     def encoding(self):  # type: ()->str
+        """Encoding of the YAML files
+
+        :rtype: str
+        """
         return self._encoding
 
     @encoding.setter
@@ -98,7 +108,7 @@ class YamlIncludeConstructor:
 
         :param str encoding: YAML file encoding
 
-            :default: ``None``: :attr:`encoding` or :attr:`DEFAULT_ENCODING` will be used
+            :default: ``None``: Attribute :attr:`encoding` or constant :attr:`DEFAULT_ENCODING` will be used to open it
 
         :return: included YAML file, in Python data type
 
@@ -108,7 +118,7 @@ class YamlIncludeConstructor:
             encoding = self._encoding or self.DEFAULT_ENCODING
         if self._base_dir:
             pathname = os.path.join(self._base_dir, pathname)
-        if WILDCARDS_REGEX.match(pathname):
+        if re.match(WILDCARDS_REGEX, pathname):
             result = []
             if PYTHON_MAYOR_MINOR >= '3.5':
                 iterator = iglob(pathname, recursive=recursive)
@@ -124,25 +134,39 @@ class YamlIncludeConstructor:
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
-        # type: (type(yaml.Loader), str, **str)-> yamlincludeconstructor
+        # type: (type(yaml.Loader), str, **str)-> YamlIncludeConstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
-        :param loader_class:
-          The `Loader` class add constructor to.
+        :param loader_class: The `Loader` class add constructor to.
 
-          :default: ``None``:
+            .. attention:: This parameter **SHOULD** be a **class type**, **NOT** object.
 
-            - When `pyyaml` 3.*: Add to PyYAML's default `Loader`
-            - When `pyyaml` 5.*: Add to `FullLoader`
+            It's one of following:
 
-        :type loader_class: type(yaml.SafeLoader) | type(yaml.Loader) | type(yaml.CSafeLoader) | type(yaml.FullLoader)
+                - :class:`yaml.BaseLoader`
+                - :class:`yaml.UnSafeLoader`
+                - :class:`yaml.SafeLoader`
+                - :class:`yaml.Loader`
+                - :class:`yaml.FullLoader`
+                - :class:`yaml.CBaseLoader`
+                - :class:`yaml.CUnSafeLoader`
+                - :class:`yaml.CSafeLoader`
+                - :class:`yaml.CLoader`
+                - :class:`yaml.CFullLoader`
+
+            :default: ``None``:
+
+                - When :mod:`pyyaml` 3.*: Add to PyYAML's default `Loader`
+                - When :mod:`pyyaml` 5.*: Add to `FullLoader`
+
+        :type loader_class: type
 
         :param str tag: Tag's name of the include constructor.
 
-          :default: ``""``: use :attr:`DEFAULT_TAG_NAME` as tag name.
+          :default: ``""``: Use :attr:`DEFAULT_TAG_NAME` as tag name.
 
-        :param kwargs: Arguments passed to constructor
+        :param kwargs: Arguments passed to construct function
 
         :return: New created object
         :rtype: YamlIncludeConstructor
