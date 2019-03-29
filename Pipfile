@@ -9,6 +9,7 @@ name = "pypi"
 pyyaml-include = {path = ".",editable = true}
 pylint = "*"
 autopep8 = "*"
+pytest = "*"
 coverage = "*"
 twine = "*"
 wheel = "*"
