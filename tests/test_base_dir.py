@@ -98,9 +98,10 @@ files: !include [include.d/**/*.yaml, true]
 '''
             for loader_cls in YAML_LOADERS:
                 data = yaml.load(StringIO(yml), loader_cls)
-                self.assertDictEqual(data, {
-                    'files': sorted([YAML1, YAML2], key=lambda m: m['name'])
-                })
+                self.assertListEqual(
+                    sorted(data['files'], key=lambda m: m['name']),
+                    [YAML1, YAML2]
+                )
 
         def test_include_wildcards_2(self):
             yml = '''
@@ -108,9 +109,10 @@ files: !include {pathname: include.d/**/*.yaml, recursive: true}
 '''
             for loader_cls in YAML_LOADERS:
                 data = yaml.load(StringIO(yml), loader_cls)
-                self.assertDictEqual(data, {
-                    'files': sorted([YAML1, YAML2], key=lambda m: m['name'])
-                })
+                self.assertListEqual(
+                    sorted(data['files'], key=lambda m: m['name']),
+                    [YAML1, YAML2]
+                )
 
 
 if __name__ == '__main__':
