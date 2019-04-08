@@ -32,14 +32,20 @@ file1: !include include.d/1.yaml
 
     def test_include_two_in_mapping(self):
         yml = '''
+a: A
 file1: !include include.d/1.yaml
+b: B
 file2: !include include.d/2.yaml
+c: C
         '''
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {
+                'a': 'A',
                 'file1': YAML1,
+                'b': 'B',
                 'file2': YAML2,
+                'c': 'C',
             })
 
     def test_include_one_in_sequence(self):
@@ -52,16 +58,19 @@ file2: !include include.d/2.yaml
 
     def test_include_two_in_sequence(self):
         yml = '''
+- a
 - !include include.d/1.yaml
+- b
 - !include include.d/2.yaml
+- c
         '''
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(data, [YAML1, YAML2])
+            self.assertListEqual(data, ['a', YAML1, 'b', YAML2, 'c'])
 
     def test_include_file_not_exists(self):
         yml = '''
-!include include.d/x.yaml
+file: !include include.d/x.yaml
             '''
         if PYTHON_VERSION_MAYOR_MINOR >= '3.3':
             err_cls = FileNotFoundError
@@ -72,23 +81,36 @@ file2: !include include.d/2.yaml
                 yaml.load(StringIO(yml), loader_cls)
 
     def test_include_wildcards(self):
-        ymllist = ['''
-!include include.d/*.yaml
-''']
-        if PYTHON_VERSION_MAYOR_MINOR >= '3.5':
-            ymllist.extend(['''
-!include [include.d/**/*.yaml, true]
-''', '''
-!include {pathname: include.d/**/*.yaml, recursive: true}
-'''])
+        yml = '''
+files: !include include.d/*.yaml
+'''
         for loader_cls in YAML_LOADERS:
-            for yml in ymllist:
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertDictEqual(data, {
+                'files': [YAML1, YAML2]
+            })
+
+    if PYTHON_VERSION_MAYOR_MINOR >= '3.5':
+
+        def test_include_wildcards_1(self):
+            yml = '''
+files: !include [include.d/**/*.yaml, true]
+'''
+            for loader_cls in YAML_LOADERS:
                 data = yaml.load(StringIO(yml), loader_cls)
-                self.assertIsInstance(data, list)
-                self.assertListEqual(
-                    sorted(data, key=lambda m: m['name']),
-                    [YAML1, YAML2]
-                )
+                self.assertDictEqual(data, {
+                    'files': [YAML1, YAML2]
+                })
+
+        def test_include_wildcards_2(self):
+            yml = '''
+files: !include {pathname: include.d/**/*.yaml, recursive: true}
+'''
+            for loader_cls in YAML_LOADERS:
+                data = yaml.load(StringIO(yml), loader_cls)
+                self.assertDictEqual(data, {
+                    'files': [YAML1, YAML2]
+                })
 
 
 if __name__ == '__main__':

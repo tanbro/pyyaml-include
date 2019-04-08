@@ -12,7 +12,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/a155ced80ddaafe74cea/maintainability)](https://codeclimate.com/github/tanbro/pyyaml-include/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a155ced80ddaafe74cea/test_coverage)](https://codeclimate.com/github/tanbro/pyyaml-include/test_coverage)
 
-An extending constructor of [PyYAML][], which including [YAML][] files within [YAML][] files.
+An extending constructor of [PyYAML][]: include [YAML][] files into [YAML][] document.
 
 ## Install
 
@@ -41,7 +41,7 @@ Consider we have such [YAML] files:
   name: "2"
   ```
 
-To include `1.yml`, `2.yml` in `0.yml`, we shall first add `YamlIncludeConstructor` to [PyYAML]'s loader, then write `!include` tag in file `0.yaml`, then load the file:
+To include `1.yml`, `2.yml` in `0.yml`, we shall add `YamlIncludeConstructor` to [PyYAML]'s loader, then add an `!include` tag in `0.yaml`:
 
 ```python
 import yaml
@@ -55,43 +55,41 @@ with open('0.yml') as f:
 print(data)
 ```
 
-### Include files by name
-
-- In mapping:
+### Mapping
   
-  If `0.yml` was:
+If `0.yml` was:
 
-  ```yaml
-  file1: !include include.d/1.yml
-  file2: !include include.d/2.yml
-  ```
+```yaml
+file1: !include include.d/1.yml
+file2: !include include.d/2.yml
+```
 
-  We'll get:
+We'll get:
 
-  ```yaml
-    file1:
-      name: "1"
-    file2:
-      name: "2"
-  ```
+```yaml
+file1:
+  name: "1"
+file2:
+  name: "2"
+```
 
-- In sequence:
+### Sequence
 
-  If `0.yml` was:
+If `0.yml` was:
 
-  ```yaml
-  files:
-    - !include include.d/1.yml
-    - !include include.d/2.yml
-  ```
+```yaml
+files:
+  - !include include.d/1.yml
+  - !include include.d/2.yml
+```
 
-  We'll get:
+We'll get:
 
-  ```yaml
-  files:
-    - name: "1"
-    - name: "2"
-  ```
+```yaml
+files:
+  - name: "1"
+  - name: "2"
+```
 
 > ℹ **Note**:
 >
@@ -120,7 +118,7 @@ files:
 > - For `Python>=3.5`, if `recursive` argument of `!include` [YAML] tag is `true`, the pattern `“**”` will match any files and zero or more directories and subdirectories.
 > - Using the `“**”` pattern in large directory trees may consume an inordinate amount of time because of recursive search.
 
-In order to enable `recursive` argument, we shall write the `!include` tag in `Mapping` or `Sequence` mode:
+In order to enable `recursive` argument, we shall set it in `Mapping` or `Sequence` arguments mode:
 
 - Arguments in `Sequence` mode:
 
