@@ -86,9 +86,10 @@ files: !include include.d/*.yaml
 '''
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {
-                'files': [YAML1, YAML2]
-            })
+            self.assertListEqual(
+                sorted(data['files'], key=lambda m: m['name']),
+                [YAML1, YAML2]
+            )
 
     if PYTHON_VERSION_MAYOR_MINOR >= '3.5':
 
