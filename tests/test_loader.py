@@ -46,22 +46,6 @@ class MultiLoadersTestCase(unittest.TestCase):
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors[YamlIncludeConstructor.DEFAULT_TAG_NAME]
 
-    def test_include_single_in_top(self):
-        yml = '''
-!include tests/data/include.d/1.yaml
-        '''
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, YAML1)
-
-    def test_include_non_ascii_single_in_top(self):
-        yml = '''
-!include tests/data/zh_cn.yaml
-            '''
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, YAML_ZH_CN)
-
     def test_include_one_in_mapping(self):
         yml = '''
 file1: !include tests/data/include.d/1.yaml
