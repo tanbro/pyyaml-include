@@ -86,9 +86,10 @@ files: !include include.d/*.yaml
 '''
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {
-                'files': [YAML1, YAML2]
-            })
+            self.assertListEqual(
+                sorted(data['files'], key=lambda m: m['name']),
+                [YAML1, YAML2]
+            )
 
     if PYTHON_VERSION_MAYOR_MINOR >= '3.5':
 
@@ -98,9 +99,10 @@ files: !include [include.d/**/*.yaml, true]
 '''
             for loader_cls in YAML_LOADERS:
                 data = yaml.load(StringIO(yml), loader_cls)
-                self.assertDictEqual(data, {
-                    'files': [YAML1, YAML2]
-                })
+                self.assertListEqual(
+                    sorted(data['files'], key=lambda m: m['name']),
+                    [YAML1, YAML2]
+                )
 
         def test_include_wildcards_2(self):
             yml = '''
@@ -108,9 +110,10 @@ files: !include {pathname: include.d/**/*.yaml, recursive: true}
 '''
             for loader_cls in YAML_LOADERS:
                 data = yaml.load(StringIO(yml), loader_cls)
-                self.assertDictEqual(data, {
-                    'files': [YAML1, YAML2]
-                })
+                self.assertListEqual(
+                    sorted(data['files'], key=lambda m: m['name']),
+                    [YAML1, YAML2]
+                )
 
 
 if __name__ == '__main__':

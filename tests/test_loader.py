@@ -68,11 +68,12 @@ file2: !include tests/data/include.d/2.yaml
 
     def test_include_one_in_sequence(self):
         yml = '''
-- !include tests/data/include.d/1.yaml
+file:
+    - !include tests/data/include.d/1.yaml
         '''
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(data, [YAML1])
+            self.assertDictEqual(data, {'file': [YAML1]})
 
     def test_include_two_in_sequence(self):
         yml = '''
@@ -85,7 +86,7 @@ file2: !include tests/data/include.d/2.yaml
 
     def test_include_file_not_exists(self):
         yml = '''
-!include tests/data/include.d/x.yaml
+file: !include tests/data/include.d/x.yaml
             '''
         if PYTHON_VERSION_MAYOR_MINOR >= '3.3':
             err_cls = FileNotFoundError
@@ -97,11 +98,11 @@ file2: !include tests/data/include.d/2.yaml
 
     def test_include_recursive(self):
         yml = '''
-!include tests/data/0.yaml
+file: !include tests/data/0.yaml
             '''
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {
+            self.assertDictEqual(data['file'], {
                 'files': [YAML1, YAML2],
                 'file1': YAML1,
                 'file2': YAML2,
@@ -110,28 +111,27 @@ file2: !include tests/data/include.d/2.yaml
     def test_include_abs(self):
         dirpath = os.path.abspath('')
         yml = '''
-!include {0}/tests/data/include.d/1.yaml
+file: !include {0}/tests/data/include.d/1.yaml
         '''.format(dirpath)
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, YAML1)
+            self.assertDictEqual(data['file'], YAML1)
 
     def test_include_wildcards(self):
         ymllist = ['''
-!include tests/data/include.d/*.yaml
+files: !include tests/data/include.d/*.yaml
 ''']
         if PYTHON_VERSION_MAYOR_MINOR >= '3.5':
             ymllist.extend(['''
-!include [tests/data/include.d/**/*.yaml, true]
+files: !include [tests/data/include.d/**/*.yaml, true]
 ''', '''
-!include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
+files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
 '''])
         for loader_cls in YAML_LOADERS:
             for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader_cls)
-                self.assertIsInstance(data, list)
                 self.assertListEqual(
-                    sorted(data, key=lambda m: m['name']),
+                    sorted(data['files'], key=lambda m: m['name']),
                     [YAML1, YAML2]
                 )
 
