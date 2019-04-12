@@ -24,7 +24,7 @@ setup(
 
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
 
-    setup_requires=['pytest-runner', 'setuptools_scm', 'setuptools_scm_git_archive'],
+    setup_requires=['setuptools_scm', 'setuptools_scm_git_archive'],
 
     install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
 
