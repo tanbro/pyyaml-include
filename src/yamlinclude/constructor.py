@@ -127,10 +127,17 @@ class YamlIncludeConstructor:
             for path in iterator:
                 if os.path.isfile(path):
                     with io.open(path, encoding=encoding) as fp:  # pylint:disable=invalid-name
-                        result.append(yaml.load(fp, type(loader)))
+                        result.append(YamlIncludeConstructor.loadYaml(path,fp,loader))
             return result
         with io.open(pathname, encoding=encoding) as fp:  # pylint:disable=invalid-name
-            return yaml.load(fp, type(loader))
+            return YamlIncludeConstructor.loadYaml(pathname,fp,loader)
+
+    @classmethod
+    def loadYaml(cls, path, file, loader):
+        if path.lower().endswith(('.yaml', '.yml')):
+            return yaml.load(file, type(loader))
+        else:
+            return file.read()
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
@@ -180,10 +187,7 @@ class YamlIncludeConstructor:
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
         if loader_class is None:
-            if FullLoader:
-                yaml.add_constructor(tag, instance, FullLoader)
-            else:
-                yaml.add_constructor(tag, instance)
+            yaml.add_constructor(tag, instance)
         else:
             yaml.add_constructor(tag, instance, loader_class)
         return instance
