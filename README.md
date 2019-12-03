@@ -24,10 +24,12 @@ pip install pyyaml-include
 
 Consider we have such [YAML] files:
 
-    ├── 0.yml
-    └── include.d
-        ├── 1.yml
-        └── 2.yml
+```sh
+├── 0.yml
+└── include.d
+    ├── 1.yml
+    └── 2.yml
+```
 
 - `1.yml` 's content:
 
@@ -56,7 +58,7 @@ print(data)
 ```
 
 ### Mapping
-  
+
 If `0.yml` was:
 
 ```yaml
@@ -99,6 +101,12 @@ files:
 
 File name can contain shell-style wildcards. Data loaded from the file(s) found by wildcards will be set in a sequence.
 
+That is to say, a list will be returned when including file name contains wildcards.
+Length of the returned list equals number of matched files:
+
+- when only 1 file matched, length of list will be 1
+- when there are no files matched, an empty list will be returned
+
 If `0.yml` was:
 
 ```yaml
@@ -131,6 +139,18 @@ In order to enable `recursive` argument, we shall set it in `Mapping` or `Sequen
   ```yaml
   !include {pathname: tests/data/include.d/**/*.yml, recursive: true}
   ```
+
+### Non YAML files
+
+This extending constructor can now load data from non YAML files, supported file types are:
+
+- `json`
+- `toml` (only available when with [toml](https://pypi.org/project/toml/) installed)
+- `ini`
+
+The constructor read non YAML files by different readers according to a pattern table defined in `src/yamlinclude/readers.py`.
+
+Default reader table can be replaced by a custom `reader_map` when call `add_to_loader_class`.
 
 [YAML]: http://yaml.org/
 [PyYaml]: https://pypi.org/project/PyYAML/

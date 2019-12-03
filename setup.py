@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name='pyyaml-include',
@@ -24,7 +24,11 @@ setup(
 
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
 
-    setup_requires=['pytest-runner', 'setuptools_scm', 'setuptools_scm_git_archive'],
+    setup_requires=['toml', 'setuptools_scm', 'setuptools_scm_git_archive'],
+    extras_require={
+        'all': ['toml'],
+        'toml': ['toml'],
+    },
 
     install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
 

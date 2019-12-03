@@ -1,0 +1,11 @@
+autopep8
+pylint
+pytest
+coverage
+twine
+wheel
+sphinx
+recommonmark
+PyYaml
+toml
+

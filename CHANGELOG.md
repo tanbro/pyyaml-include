@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2
+
+Date: 2019-02-03
+
+- New:
+  - non YAML file including
+
+- Misc:
+  - adjust docs
+  - add pip and conda configure file of development environment
+
 ## 1.1
 
 Date: 2019-03-18

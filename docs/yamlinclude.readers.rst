@@ -1,7 +1,7 @@
-yamlinclude.version module
+yamlinclude.readers module
 ==========================
 
-.. automodule:: yamlinclude.version
+.. automodule:: yamlinclude.readers
    :members:
    :undoc-members:
    :show-inheritance:
