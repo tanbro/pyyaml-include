@@ -140,5 +140,17 @@ In order to enable `recursive` argument, we shall set it in `Mapping` or `Sequen
   !include {pathname: tests/data/include.d/**/*.yml, recursive: true}
   ```
 
+### Non YAML files
+
+This extending constructor can now load data from non YAML files, supported file types are:
+
+- `json`
+- `toml` (only available when with [toml](https://pypi.org/project/toml/) installed)
+- `ini`
+
+The constructor read non YAML files by different readers according to a pattern table defined in `src/yamlinclude/readers.py`.
+
+Default reader table can be replaced by a custom `reader_map` when call `add_to_loader_class`.
+
 [YAML]: http://yaml.org/
 [PyYaml]: https://pypi.org/project/PyYAML/

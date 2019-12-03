@@ -49,7 +49,7 @@ class YamlIncludeConstructor:
 
             :default: ``None``:  Not specified
 
-        :param dict reader_map: A dictionary of `{file-name-regex : reader-class}`
+        :param dict reader_map: A dictionary of `{path-pattern : reader-class}`
 
             :default: ``None``: set :data:`readers.READER_TABLE` as default readers map
         """
