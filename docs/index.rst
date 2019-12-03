@@ -4,22 +4,35 @@
    contain the root `toctree` directive.
 
 pyyaml-include documentation
-############################
+============================
 
 :Release: |release|
 :Version: |version|
 :Date:    |today|
 
+Docs
+----
+
 .. toctree::
-    :maxdepth: 2
+   :glob:
+   :maxdepth: 1
+
+   README <README>
+   CHANGELOG
+   AUTHORS
+
+API Reference
+-------------
+
+.. toctree::
+    :glob:
+    :maxdepth: 4
     :caption: Contents:
 
     modules
 
-
-
 Indices and tables
-******************
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

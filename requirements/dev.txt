@@ -5,6 +5,7 @@ coverage
 twine
 wheel
 sphinx
+recommonmark
 PyYaml
 toml
 

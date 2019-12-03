@@ -47,12 +47,12 @@ autoclass_content = 'both'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'recommonmark',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
+    'sphinx.ext.napoleon',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
-    'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
 ]
@@ -63,7 +63,10 @@ templates_path = ['_templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-source_suffix = '.rst'
+source_suffix = {
+    '.md': 'markdown',
+    '.rst': 'restructuredtext',
+}
 # The suffix of source filenames.
 
 # Markdown support
@@ -85,7 +88,7 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path .
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+exclude_patterns = ['_build', '**.ipynb_checkpoints', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'
@@ -198,7 +201,7 @@ epub_exclude_files = ['search.html']
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/{0[0]}.{0[1]}'.format(sys.version_info), None),
+    'python': ('https://docs.python.org/{0[0]}'.format(sys.version_info), None),
 
 }
 

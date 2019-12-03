@@ -38,7 +38,7 @@ def get_reader_class_by_name(name):  # type:(str)->type
 def get_reader_class_by_path(path, table=None):  # type:(str)->type
     table = table or READER_TABLE
     for pat, clz in table:
-        if re.fullmatch(pat, path):
+        if re.match(pat, path):
             return clz
     raise RuntimeError('Un-supported file name "{}"'.format(path))
 
