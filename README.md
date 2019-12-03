@@ -101,6 +101,12 @@ files:
 
 File name can contain shell-style wildcards. Data loaded from the file(s) found by wildcards will be set in a sequence.
 
+That is to say, a list will be returned when including file name contains wildcards.
+Length of the returned list equals number of matched files:
+
+- when only 1 file matched, length of list will be 1
+- when there are no files matched, an empty list will be returned
+
 If `0.yml` was:
 
 ```yaml

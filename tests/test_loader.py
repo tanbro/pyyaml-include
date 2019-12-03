@@ -15,16 +15,7 @@ from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2, Y
 class DefaultLoaderTestCase(unittest.TestCase):
 
     def setUp(self):
-        if yaml.__version__ >= '5.0':
-            self.LOADER = yaml.FullLoader
-        else:
-            self.LOADER = yaml.Loader
-
         YamlIncludeConstructor.add_to_loader_class()
-        self.assertIn(YamlIncludeConstructor.DEFAULT_TAG_NAME, self.LOADER.yaml_constructors)
-
-    def tearDown(self):
-        del self.LOADER.yaml_constructors[YamlIncludeConstructor.DEFAULT_TAG_NAME]
 
     def test_no_loader_class_argument(self):
         yml = '!include tests/data/include.d/1.yaml'

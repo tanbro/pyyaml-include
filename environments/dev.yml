@@ -1,11 +1,7 @@
 name: pyyaml_include-dev
 
 dependencies:
-  - git
   - python
-  - setuptools
-  - pip
-  - wheel
   - ipython
   - ipywidgets
   - nb_conda
@@ -19,4 +15,5 @@ dependencies:
   - autopep8
   - pylint
   - pyyaml
+  - toml
 

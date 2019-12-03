@@ -4,7 +4,6 @@
 Include YAML files within YAML
 """
 
-import io
 import os.path
 import re
 from glob import iglob
@@ -12,10 +11,7 @@ from sys import version_info
 
 import yaml
 
-try:
-    from yaml import FullLoader
-except ImportError:
-    FullLoader = None
+from .readers import make_reader
 
 __all__ = ['YamlIncludeConstructor']
 
@@ -42,7 +38,7 @@ class YamlIncludeConstructor:
     DEFAULT_ENCODING = 'utf-8'
     DEFAULT_TAG_NAME = '!include'
 
-    def __init__(self, base_dir=None, encoding=None):
+    def __init__(self, base_dir=None, encoding=None, reader_map=None, **_):
         # type:(str, str)->YamlIncludeConstructor
         """
         :param str base_dir: Base directory where search including YAML files
@@ -52,9 +48,14 @@ class YamlIncludeConstructor:
         :param str encoding: Encoding of the YAML files
 
             :default: ``None``:  Not specified
+
+        :param dict reader_map: A dictionary of `{file-name-regex : reader-class}`
+
+            :default: ``None``: set :data:`readers.READER_TABLE` as default readers map
         """
         self._base_dir = base_dir
         self._encoding = encoding
+        self._reader_map = reader_map
 
     def __call__(self, loader, node):
         args = []
@@ -99,12 +100,11 @@ class YamlIncludeConstructor:
         on parsing ``"!include"`` tag
 
         :param loader: Instance of PyYAML's loader class
-        :param str pathname: pathname can be either absolute (like /usr/src/Python-1.5/Makefile) or relative (like ../../Tools/*/*.gif), and can contain shell-style wildcards
+        :param str pathname: pathname can be either absolute (like /usr/src/Python-1.5/*.yml) or relative (like ../../Tools/*/*.yml), and can contain shell-style wildcards
 
         :param bool recursive: If recursive is true, the pattern ``"**"`` will match any files and zero or more directories and subdirectories. If the pattern is followed by an os.sep, only directories and subdirectories match.
 
-            Note:
-             Using the ``"**"`` pattern in large directory trees may consume an inordinate amount of time.
+            .. note:: Using the ``"**"`` pattern in large directory trees may consume an inordinate amount of time.
 
         :param str encoding: YAML file encoding
 
@@ -121,23 +121,17 @@ class YamlIncludeConstructor:
         if re.match(WILDCARDS_REGEX, pathname):
             result = []
             if PYTHON_MAYOR_MINOR >= '3.5':
-                iterator = iglob(pathname, recursive=recursive)
+                iterable = iglob(pathname, recursive=recursive)
             else:
-                iterator = iglob(pathname)
-            for path in iterator:
-                if os.path.isfile(path):
-                    with io.open(path, encoding=encoding) as fp:  # pylint:disable=invalid-name
-                        result.append(YamlIncludeConstructor.loadYaml(path,fp,loader))
+                iterable = iglob(pathname)
+            for path in filter(os.path.isfile, iterable):
+                result.append(self._read_file(path, loader, encoding))
             return result
-        with io.open(pathname, encoding=encoding) as fp:  # pylint:disable=invalid-name
-            return YamlIncludeConstructor.loadYaml(pathname,fp,loader)
+        return self._read_file(pathname, loader, encoding)
 
-    @classmethod
-    def loadYaml(cls, path, file, loader):
-        if path.lower().endswith(('.yaml', '.yml')):
-            return yaml.load(file, type(loader))
-        else:
-            return file.read()
+    def _read_file(self, path, loader, encoding):
+        reader = make_reader(path, self._reader_map, encoding=encoding, loader_class=type(loader))
+        return reader()
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
@@ -147,9 +141,9 @@ class YamlIncludeConstructor:
 
         :param loader_class: The `Loader` class add constructor to.
 
-            .. attention:: This parameter **SHOULD** be a **class type**, **NOT** object.
+            .. attention:: This parameter **SHOULD** be a **class type**, **NOT** an object.
 
-            It's one of following:
+            It's one of followings:
 
                 - :class:`yaml.BaseLoader`
                 - :class:`yaml.UnSafeLoader`
@@ -164,8 +158,8 @@ class YamlIncludeConstructor:
 
             :default: ``None``:
 
-                - When :mod:`pyyaml` 3.*: Add to PyYAML's default `Loader`
-                - When :mod:`pyyaml` 5.*: Add to `FullLoader`
+                - When :mod:`pyyaml` `3.*`: :class:`yaml.Loader`
+                - When :mod:`pyyaml` `5.*`: :class:`yaml.FullLoader`
 
         :type loader_class: type
 
@@ -185,9 +179,11 @@ class YamlIncludeConstructor:
             tag = cls.DEFAULT_TAG_NAME
         if not tag.startswith('!'):
             raise ValueError('`tag` argument should start with character "!"')
-        instance = cls(**kwargs)
         if loader_class is None:
-            yaml.add_constructor(tag, instance)
-        else:
-            yaml.add_constructor(tag, instance, loader_class)
+            if yaml.__version__ >= '5.0':
+                loader_class = yaml.FullLoader
+            else:
+                loader_class = yaml.Loader
+        instance = cls(**kwargs)
+        yaml.add_constructor(tag, instance, loader_class)
         return instance
