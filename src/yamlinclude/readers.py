@@ -56,7 +56,7 @@ class Reader:
 class IniReader(Reader):
     # pylint: disable=too-few-public-methods
     def __init__(self, path, *args, **kwargs):  # pylint:disable=unused-argument
-        super(Reader, self).__init__(path, None, *args, **kwargs)
+        super(IniReader, self).__init__(path, None, *args, **kwargs)
 
     def __call__(self):
         config = configparser.ConfigParser()
@@ -92,7 +92,7 @@ class TomlReader(Reader):
 class YamlReader(Reader):
     # pylint: disable=too-few-public-methods
     def __init__(self, path, encoding, loader_class, *args, **kwargs):  # pylint:disable=unused-argument
-        super(Reader, self).__init__(path, encoding)
+        super(YamlReader, self).__init__(path, encoding)
         self._loader_class = loader_class
 
     def __call__(self):
