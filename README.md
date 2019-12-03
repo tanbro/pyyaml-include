@@ -24,10 +24,12 @@ pip install pyyaml-include
 
 Consider we have such [YAML] files:
 
-    ├── 0.yml
-    └── include.d
-        ├── 1.yml
-        └── 2.yml
+```sh
+├── 0.yml
+└── include.d
+    ├── 1.yml
+    └── 2.yml
+```
 
 - `1.yml` 's content:
 
@@ -56,7 +58,7 @@ print(data)
 ```
 
 ### Mapping
-  
+
 If `0.yml` was:
 
 ```yaml
