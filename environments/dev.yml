@@ -1,0 +1,22 @@
+name: pyyaml_include-dev
+
+dependencies:
+  - git
+  - python
+  - setuptools
+  - pip
+  - wheel
+  - ipython
+  - ipywidgets
+  - nb_conda
+  - pytest
+  - coverage
+  - twine
+  - sphinx
+  - pytest-runner
+  - setuptools_scm
+  - setuptools_scm_git_archive
+  - autopep8
+  - pylint
+  - pyyaml
+
