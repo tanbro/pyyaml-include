@@ -16,19 +16,31 @@ except ImportError:
     toml = None
 
 
-__all__ = ['READER_TABLE', 'make_reader', 'Reader', 'IniReader', 'JsonReader', 'TomlReader', 'YamlReader']
+__all__ = ['READER_TABLE', 'get_reader_class_by_path', 'get_reader_class_by_name',
+           'Reader', 'IniReader', 'JsonReader', 'TomlReader', 'YamlReader']
 
 
-def make_reader(path, table=None, **kwargs):  # type: (str, list)->Reader
-    if table is None:
-        table = READER_TABLE
-    reader_cls = None
+def get_reader_class_by_name(name):  # type:(str)->type
+    name = name.strip().lower()
+    if name == 'ini':
+        return IniReader
+    if name == 'json':
+        return JsonReader
+    if name == 'toml':
+        return TomlReader
+    if name in ('plain', 'plaintext', 'plain_text', 'plain-text', 'text', 'txt'):
+        return PlainTextReader
+    if name in ('yaml', 'yml'):
+        return YamlReader
+    raise ValueError('Un-supported name reader "{0}"'.format(name))
+
+
+def get_reader_class_by_path(path, table=None):  # type:(str)->type
+    table = table or READER_TABLE
     for pat, clz in table:
-        if re.match(pat, path):
-            reader_cls = clz
-    if reader_cls is None:
-        raise RuntimeError('Un-supported file name "{}"'.format(path))
-    return reader_cls(path=path, **kwargs)
+        if re.fullmatch(pat, path):
+            return clz
+    raise RuntimeError('Un-supported file name "{}"'.format(path))
 
 
 class Reader:

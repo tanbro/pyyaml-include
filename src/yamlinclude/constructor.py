@@ -11,7 +11,7 @@ from sys import version_info
 
 import yaml
 
-from .readers import make_reader
+from .readers import get_reader_class_by_name, get_reader_class_by_path
 
 __all__ = ['YamlIncludeConstructor']
 
@@ -94,7 +94,7 @@ class YamlIncludeConstructor:
     def encoding(self, value):  # type: (str)->None
         self._encoding = value
 
-    def load(self, loader, pathname, recursive=False, encoding=None):
+    def load(self, loader, pathname, recursive=False, encoding=None, reader=None):
         """Once add the constructor to PyYAML loader class,
         Loader will use this function to include other YAML fils
         on parsing ``"!include"`` tag
@@ -110,6 +110,18 @@ class YamlIncludeConstructor:
 
             :default: ``None``: Attribute :attr:`encoding` or constant :attr:`DEFAULT_ENCODING` will be used to open it
 
+        :param str reader: name of the reader for loading files
+
+            it's typically one of:
+
+            - `ini`
+            - `json`
+            - `yaml`
+            - `toml`
+            - `txt`
+
+            if not specified, reader would be decided by `reader_map` parameter passed in constructor
+
         :return: included YAML file, in Python data type
 
         .. warning:: It's called by :mod:`yaml`. Do NOT call it yourself.
@@ -118,6 +130,9 @@ class YamlIncludeConstructor:
             encoding = self._encoding or self.DEFAULT_ENCODING
         if self._base_dir:
             pathname = os.path.join(self._base_dir, pathname)
+        reader_clz = None
+        if reader:
+            reader_clz = get_reader_class_by_name(reader)
         if re.match(WILDCARDS_REGEX, pathname):
             result = []
             if PYTHON_MAYOR_MINOR >= '3.5':
@@ -125,13 +140,19 @@ class YamlIncludeConstructor:
             else:
                 iterable = iglob(pathname)
             for path in filter(os.path.isfile, iterable):
-                result.append(self._read_file(path, loader, encoding))
+                if reader_clz:
+                    result.append(reader_clz(path, encoding=encoding, loader_class=type(loader))())
+                else:
+                    result.append(self._read_file(path, loader, encoding))
             return result
+        if reader_clz:
+            return reader_clz(pathname, encoding=encoding, loader_class=type(loader))()
         return self._read_file(pathname, loader, encoding)
 
     def _read_file(self, path, loader, encoding):
-        reader = make_reader(path, self._reader_map, encoding=encoding, loader_class=type(loader))
-        return reader()
+        reader_clz = get_reader_class_by_path(path, self._reader_map)
+        reader_obj = reader_clz(path, encoding=encoding, loader_class=type(loader))
+        return reader_obj()
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):

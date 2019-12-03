@@ -317,7 +317,24 @@ class PlainTextTestCase(unittest.TestCase):
         else:
             data = yaml.load(StringIO(yml))
         with open('tests/data/include.d/1.txt') as fp:
-            self.assertEqual(data['text'], fp.read())
+            s = fp.read()
+        self.assertDictEqual(data, {'text': s})
+
+class ReaderTestCase(unittest.TestCase):
+
+    def setUp(self):
+        YamlIncludeConstructor.add_to_loader_class()
+
+    def test_txt(self):
+        yml = 'text: !include {pathname: tests/data/include.d/1.json, reader: txt}'
+        if yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
+            with self.assertWarns(yaml.YAMLLoadWarning):
+                data = yaml.load(StringIO(yml))
+        else:
+            data = yaml.load(StringIO(yml))
+        with open('tests/data/include.d/1.json') as fp:
+            s = fp.read()
+        self.assertDictEqual(data, {'text': s})
 
 
 if __name__ == '__main__':
