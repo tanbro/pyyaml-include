@@ -32,7 +32,6 @@ setup(
 
     install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
 
-
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
         'Development Status :: 5 - Production/Stable',
