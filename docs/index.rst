@@ -14,7 +14,6 @@ Docs
 ----
 
 .. toctree::
-   :glob:
    :maxdepth: 1
 
    README <README>
@@ -25,9 +24,7 @@ API Reference
 -------------
 
 .. toctree::
-    :glob:
-    :maxdepth: 4
-    :caption: Contents:
+    :caption: Package
 
     modules
 
