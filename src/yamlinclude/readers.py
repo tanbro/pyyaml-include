@@ -3,12 +3,16 @@
 """readers for different type of files
 """
 
-import configparser
 import io
 import json
 import re
 
 import yaml
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 try:
     import toml
@@ -43,7 +47,7 @@ def get_reader_class_by_path(path, table=None):  # type:(str)->type
     raise RuntimeError('Un-supported file name "{}"'.format(path))
 
 
-class Reader:
+class Reader(object):
     # pylint: disable=too-few-public-methods
     def __init__(self, path, encoding, *args, **kwargs):  # pylint:disable=unused-argument
         self._path = path
