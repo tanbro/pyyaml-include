@@ -24,13 +24,13 @@ setup(
 
     python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
 
-    setup_requires=['toml', 'setuptools_scm', 'setuptools_scm_git_archive'],
+    setup_requires=['setuptools_scm', 'setuptools_scm_git_archive'],
+    install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
     extras_require={
         'all': ['toml'],
         'toml': ['toml'],
     },
-
-    install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
+    tests_require=['toml'],
 
     classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',

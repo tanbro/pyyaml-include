@@ -5,16 +5,13 @@ dependencies:
   - ipython
   - ipywidgets
   - nb_conda
-  - pytest
   - coverage
   - twine
   - sphinx
   - recommonmark
-  - pytest-runner
   - setuptools_scm
   - setuptools_scm_git_archive
   - autopep8
-  - pylint
   - pyyaml
   - toml
 
