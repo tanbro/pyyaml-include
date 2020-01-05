@@ -39,7 +39,7 @@ class YamlIncludeConstructor:
     DEFAULT_TAG_NAME = '!include'
 
     def __init__(self, base_dir=None, encoding=None, reader_map=None, **_):
-        # type:(str, str)->YamlIncludeConstructor
+        # type:(str, str, dict, ...)->YamlIncludeConstructor
         """
         :param str base_dir: Base directory where search including YAML files
 
@@ -156,7 +156,7 @@ class YamlIncludeConstructor:
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
-        # type: (type(yaml.Loader), str, **str)-> YamlIncludeConstructor
+        # type: (type(yaml.Loader), str, ...)-> YamlIncludeConstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
