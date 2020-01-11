@@ -10,16 +10,16 @@ references:
     steps:
       - checkout
       - run:
-          name: Setup dependencies of test
-          command: sudo pip install coverage
+          name: Install coverage
+          command: sudo pip install --upgrade coverage
       - run:
-          name: Setup Code Climate test-reporter
+          name: Install Code Climate test-reporter
           command: |
             # download test reporter as a static binary
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
             chmod +x ./cc-test-reporter
       - run:
-          name: Run tests
+          name: Run coverage test
           command: |
             # notify Code Climate of a pending test report using `before-build`
             ./cc-test-reporter before-build
@@ -34,8 +34,8 @@ references:
     steps:
       - checkout
       - run:
-          name: Install additional pip dependencies
-          command: sudo pip install wheel twine
+          name: Install PyPI packaging tools
+          command: sudo pip install --upgrade wheel twine
       - run:
           name: Build and upload dist
           command: |
@@ -99,6 +99,7 @@ workflows:
       - test-python3.5
       - test-python3.6
       - test-python3.7
+      - test-python3.8
       - deploy:
           requires:
             - test-python3
