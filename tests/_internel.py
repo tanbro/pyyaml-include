@@ -30,7 +30,7 @@ elif '5.0' <= yaml.__version__ < '6.0':
     try:
         from yaml import CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader
     except ImportError as err:
-        warn(err)
+        warn('{}'.format(err))
     else:
         YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]
 else:

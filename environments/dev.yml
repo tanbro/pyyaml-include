@@ -14,4 +14,4 @@ dependencies:
   - autopep8
   - pyyaml
   - toml
-
+  - pytest

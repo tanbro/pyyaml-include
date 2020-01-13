@@ -4,3 +4,4 @@ sphinx
 recommonmark
 PyYaml
 toml
+pytest
