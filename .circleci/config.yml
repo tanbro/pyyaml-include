@@ -6,7 +6,7 @@
 version: 2
 
 references:
-  tests_steps: &test_steps
+  test_steps: &test_steps
     steps:
       - checkout
       - run:
