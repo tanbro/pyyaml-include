@@ -26,7 +26,7 @@ references:
             # notify Code Climate of a pending test report using `before-build`
             ./cc-test-reporter before-build
             # run unit test cases with coverage
-            coverage run -m unittest
+            coverage run -m unittest discover
             # generate an XML report of coverage results
             coverage xml
             # upload test report to Code Climate using `after-build`

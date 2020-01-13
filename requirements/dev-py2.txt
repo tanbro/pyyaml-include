@@ -1,0 +1,6 @@
+autopep8
+coverage
+sphinx
+recommonmark
+PyYaml
+toml
