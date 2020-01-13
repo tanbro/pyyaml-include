@@ -50,7 +50,7 @@ jobs:
       - image: circleci/python
     <<: *test_steps
 
-  test-py2:
+  test_py2:
     docker:
       - image: circleci/python:2
     <<: *test_steps
@@ -65,10 +65,10 @@ workflows:
   test-and-deploy: # name of your workflow
     jobs:
       - test
-      - test-py2
+      - test_py2
       - deploy:
           requires:
-            - test-python
+            - test
           filters:
             tags:
               only: /^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?/
