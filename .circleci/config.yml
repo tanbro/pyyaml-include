@@ -39,7 +39,7 @@ references:
       - checkout
       - run:
           command: |
-            if [echo $(git describe --tag) | grep -x -P "^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?$"] then
+            if echo $(git describe --tag) | grep -x -P "^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?$" ; then
               sudo pip install --upgrade wheel twine
               python setup.py sdist bdist_wheel
               twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
