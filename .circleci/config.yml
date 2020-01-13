@@ -36,6 +36,7 @@ references:
 
   deploy_steps: &deploy_steps
     steps:
+      - checkout
       - run:
           command: |
             if echo $(git describe --tag) | grep -q -x -P "^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?$"; then
