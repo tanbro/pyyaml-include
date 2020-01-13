@@ -6,25 +6,27 @@
 version: 2
 
 references:
-  tests_steps: &tests_steps
+  tests_steps: &test_steps
     steps:
       - checkout
       - run:
-          name: Install coverage
-          command: sudo pip install --upgrade coverage
+          name: Install developing package
+          command: sudo pip install --editable ".[all]"
       - run:
-          name: Install Code Climate test-reporter
+          name: Setup codeclimate reporter
           command: |
+            # install coverage
+            sudo pip install coverage
             # download test reporter as a static binary
             curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
             chmod +x ./cc-test-reporter
       - run:
-          name: Run coverage test
+          name: Run coverage unit test
           command: |
             # notify Code Climate of a pending test report using `before-build`
             ./cc-test-reporter before-build
             # run unit test cases with coverage
-            coverage run --source=src setup.py test
+            coverage run -m unittest
             # generate an XML report of coverage results
             coverage xml
             # upload test report to Code Climate using `after-build`
@@ -43,45 +45,15 @@ references:
             twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
 
 jobs:
-  test-python:
+  test:
     docker:
       - image: circleci/python
-    <<: *tests_steps
+    <<: *test_steps
 
-  test-python2:
+  test-py2:
     docker:
       - image: circleci/python:2
-    <<: *tests_steps
-
-  test-python3:
-    docker:
-      - image: circleci/python:3
-    <<: *tests_steps
-
-  test-python3.4:
-    docker:
-      - image: circleci/python:3.4
-    <<: *tests_steps
-
-  test-python3.5:
-    docker:
-      - image: circleci/python:3.5
-    <<: *tests_steps
-
-  test-python3.6:
-    docker:
-      - image: circleci/python:3.6
-    <<: *tests_steps
-
-  test-python3.7:
-    docker:
-      - image: circleci/python:3.7
-    <<: *tests_steps
-
-  test-python3.8:
-    docker:
-      - image: circleci/python:3.8
-    <<: *tests_steps
+    <<: *test_steps
 
   deploy:
     docker:
@@ -92,17 +64,11 @@ workflows:
   version: 2
   test-and-deploy: # name of your workflow
     jobs:
-      - test-python
-      - test-python2
-      - test-python3
-      - test-python3.4
-      - test-python3.5
-      - test-python3.6
-      - test-python3.7
-      - test-python3.8
+      - test
+      - test-py2
       - deploy:
           requires:
-            - test-python3
+            - test-python
           filters:
             tags:
               only: /^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?/
