@@ -31,18 +31,18 @@ references:
             coverage xml
             # upload test report to Code Climate using `after-build`
             ./cc-test-reporter after-build --coverage-input-type coverage.py --exit-code $?
+      - store_test_results:
+          path: test-results
 
   deploy_steps: &deploy_steps
     steps:
-      - checkout
       - run:
-          name: Install PyPI packaging tools
-          command: sudo pip install --upgrade wheel twine
-      - run:
-          name: Build and upload dist
           command: |
-            python setup.py sdist bdist_wheel
-            twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+            if echo $(git describe --tag) | grep -q -x -P "^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?$"; then
+              sudo pip install --upgrade wheel twine
+              python setup.py sdist bdist_wheel
+              twine upload -u ${PYPI_USER} -p ${PYPI_PASSWORD} dist/*
+            fi
 
 jobs:
   test:
@@ -69,8 +69,3 @@ workflows:
       - deploy:
           requires:
             - test
-          filters:
-            tags:
-              only: /^\d+(\.\d+)*(\.?(a|b|rc|post)\d+(\.\d+)*)?/
-            branches:
-              ignore: /.*/
