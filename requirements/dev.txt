@@ -1,9 +1,0 @@
-autopep8
-coverage
-twine
-wheel
-sphinx
-recommonmark
-PyYaml
-toml
-pytest

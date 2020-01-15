@@ -7,8 +7,12 @@ name = "pypi"
 
 [dev-packages]
 pyyaml-include = {editable = true,extras = ["all"],path = "."}
-autopep8 = "*"
-coverage = "*"
-twine = "*"
 wheel = "*"
+twine = "*"
 sphinx = "*"
+recommonmark = "*"
+coverage = "*"
+pytest = "*"
+autopep8 = "*"
+pylint = "*"
+ipython = "*"

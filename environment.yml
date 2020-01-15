@@ -2,16 +2,20 @@ name: pyyaml_include-dev
 
 dependencies:
   - python
+  - pip
   - ipython
   - ipywidgets
   - nb_conda
-  - coverage
-  - twine
-  - sphinx
-  - recommonmark
-  - setuptools_scm
-  - setuptools_scm_git_archive
-  - autopep8
   - pyyaml
   - toml
   - pytest
+  - sphinx
+  - recommonmark
+  - coverage
+  - setuptools_scm
+  - setuptools_scm_git_archive
+  - twine
+  - autopep8
+  - pylint
+  - pip:
+    - "-e ."
