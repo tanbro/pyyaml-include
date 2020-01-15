@@ -1,4 +1,5 @@
--e .[all]
+PyYAML
+toml
 wheel
 twine
 sphinx

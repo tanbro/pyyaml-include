@@ -17,5 +17,3 @@ dependencies:
   - twine
   - autopep8
   - pylint
-  - pip:
-    - "-e ."
