@@ -40,7 +40,7 @@ class YamlIncludeConstructor:
     DEFAULT_ENCODING = 'utf-8'
     DEFAULT_TAG_NAME = '!include'
 
-    def __init__(self, base_dir=None, encoding=None, reader_map=None, **_):
+    def __init__(self, base_dir=None, encoding=None, reader_map=None):
         # type:(str, str, dict, ...)->YamlIncludeConstructor
         """
         :param str base_dir: Base directory where search including YAML files
@@ -51,7 +51,7 @@ class YamlIncludeConstructor:
 
             :default: ``None``:  Not specified
 
-        :param dict reader_map: A dictionary of `{path-pattern : reader-class}`
+        :param list reader_map: A List of `(path-pattern, reader-class)` tuple
 
             :default: ``None``: set :data:`readers.READER_TABLE` as default readers map
         """

@@ -6,11 +6,11 @@
 import io
 import json
 import re
-import sys
+from sys import version_info
 
 import yaml
 
-_PY2 = sys.version_info[0] < 3
+_PY2 = version_info[0] < 3
 
 if _PY2:
     from ConfigParser import ConfigParser
