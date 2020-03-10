@@ -4,6 +4,8 @@
 Include YAML files within YAML
 """
 
+from __future__ import absolute_import
+
 import os.path
 import re
 from glob import iglob

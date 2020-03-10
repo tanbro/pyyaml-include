@@ -6,19 +6,21 @@
 import io
 import json
 import re
+import sys
 
 import yaml
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+_PY2 = sys.version_info[0] < 3
+
+if _PY2:
+    from ConfigParser import ConfigParser
+else:
+    from configparser import ConfigParser
 
 try:
     import toml
 except ImportError:
     toml = None
-
 
 __all__ = ['READER_TABLE', 'get_reader_class_by_path', 'get_reader_class_by_name',
            'Reader', 'IniReader', 'JsonReader', 'TomlReader', 'YamlReader']
@@ -63,12 +65,12 @@ class IniReader(Reader):
         super(IniReader, self).__init__(path, None, *args, **kwargs)
 
     def __call__(self):
-        config = configparser.ConfigParser()
-        config.read(self._path)
+        parser = ConfigParser()
+        parser.read(self._path)
         result = {}
-        for section in config.sections():
+        for section in parser.sections():
             d = result[section] = {}
-            section_obj = config[section]
+            section_obj = parser[section]
             for key in section_obj:
                 d[key] = section_obj[key]
         return result
