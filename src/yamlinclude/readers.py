@@ -39,7 +39,7 @@ def get_reader_class_by_name(name):  # type:(str)->type
     raise ValueError('Un-supported name reader "{0}"'.format(name))
 
 
-def get_reader_class_by_path(path, table=None):  # type:(str)->type
+def get_reader_class_by_path(path, table=None):  # type:(str, list)->type
     table = table or READER_TABLE
     for pat, clz in table:
         if re.match(pat, path):
