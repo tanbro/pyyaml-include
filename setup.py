@@ -22,10 +22,10 @@ setup(
         'write_to': 'src/yamlinclude/version.py',
     },
 
-    python_requires='>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*',
+    python_requires='>=3.5',
 
     setup_requires=['setuptools_scm', 'setuptools_scm_git_archive'],
-    install_requires=['PyYAML>=3.12,!=4.*,<6.0'],
+    install_requires=['PyYAML>=5.3.1,<6.0'],
     extras_require={
         'all': ['toml'],
         'toml': ['toml'],
@@ -37,14 +37,7 @@ setup(
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Topic :: Text Processing :: Markup',
     ],

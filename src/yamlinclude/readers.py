@@ -6,16 +6,10 @@
 import io
 import json
 import re
+from configparser import ConfigParser
 from sys import version_info
 
 import yaml
-
-_PY2 = version_info[0] < 3
-
-if _PY2:
-    from ConfigParser import ConfigParser
-else:
-    from configparser import ConfigParser
 
 try:
     import toml
@@ -62,7 +56,7 @@ class Reader(object):
 class IniReader(Reader):
     # pylint: disable=too-few-public-methods
     def __init__(self, path, *args, **kwargs):  # pylint:disable=unused-argument
-        super(IniReader, self).__init__(path, None, *args, **kwargs)
+        super().__init__(path, encoding=None)
 
     def __call__(self):
         parser = ConfigParser()

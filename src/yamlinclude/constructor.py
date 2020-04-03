@@ -137,10 +137,7 @@ class YamlIncludeConstructor:
             reader_clz = get_reader_class_by_name(reader)
         if re.match(WILDCARDS_REGEX, pathname):
             result = []
-            if PYTHON_MAYOR_MINOR >= '3.5':
-                iterable = iglob(pathname, recursive=recursive)
-            else:
-                iterable = iglob(pathname)
+            iterable = iglob(pathname, recursive=recursive)
             for path in filter(os.path.isfile, iterable):
                 if reader_clz:
                     result.append(reader_clz(path, encoding=encoding, loader_class=type(loader))())
@@ -202,11 +199,6 @@ class YamlIncludeConstructor:
             tag = cls.DEFAULT_TAG_NAME
         if not tag.startswith('!'):
             raise ValueError('`tag` argument should start with character "!"')
-        if loader_class is None:
-            if yaml.__version__ >= '5.0':
-                loader_class = yaml.FullLoader
-            else:
-                loader_class = yaml.Loader
         instance = cls(**kwargs)
         yaml.add_constructor(tag, instance, loader_class)
         return instance
