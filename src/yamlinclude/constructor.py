@@ -41,7 +41,7 @@ class YamlIncludeConstructor:
     DEFAULT_TAG_NAME = '!include'
 
     def __init__(self, base_dir=None, encoding=None, reader_map=None):
-        # type:(str, str, dict, ...)->YamlIncludeConstructor
+        # type: (YamlIncludeConstructor, str, str, list)->YamlIncludeConstructor
         """
         :param str base_dir: Base directory where search including YAML files
 
@@ -102,9 +102,12 @@ class YamlIncludeConstructor:
         on parsing ``"!include"`` tag
 
         :param loader: Instance of PyYAML's loader class
-        :param str pathname: pathname can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
+        :param str pathname: pathname can be either absolute (like `/usr/src/Python-1.5/*.yml`)
+            or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
 
-        :param bool recursive: If recursive is true, the pattern ``"**"`` will match any files and zero or more directories and subdirectories. If the pattern is followed by an os.sep, only directories and subdirectories match.
+        :param bool recursive: If recursive is true, the pattern ``"**"`` will match any files and zero
+            or more directories and subdirectories.
+            If the pattern is followed by an os.sep, only directories and subdirectories match.
 
             .. note:: Using the ``"**"`` pattern in large directory trees may consume an inordinate amount of time.
 
@@ -155,7 +158,7 @@ class YamlIncludeConstructor:
 
     @classmethod
     def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
-        # type: (type(yaml.Loader), str, ...)-> YamlIncludeConstructor
+        # type: (type(YamlIncludeConstructor), type(yaml.Loader), str, ...)-> YamlIncludeConstructor
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
