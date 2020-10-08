@@ -7,7 +7,6 @@ import io
 import json
 import re
 from configparser import ConfigParser
-from sys import version_info
 
 import yaml
 

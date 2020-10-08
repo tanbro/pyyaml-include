@@ -19,7 +19,7 @@ __all__ = ['YamlIncludeConstructor']
 
 PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
-WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+\]).*$')
+WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+]).*$')
 
 
 class YamlIncludeConstructor:

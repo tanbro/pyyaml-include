@@ -20,7 +20,7 @@ if '3.12' <= yaml.__version__ < '4.0':
     try:
         from yaml import CBaseLoader, CSafeLoader, CLoader
     except ImportError as err:
-        warn(err)
+        warn(Warning(err))
     else:
         YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader]
 elif '5.0' <= yaml.__version__ < '6.0':
