@@ -4,16 +4,15 @@
 Include YAML files within YAML
 """
 
-from __future__ import absolute_import
-
 import os.path
 import re
 from glob import iglob
 from sys import version_info
+from typing import Collection, Tuple, Union
 
 import yaml
 
-from .readers import get_reader_class_by_name, get_reader_class_by_path
+from .readers import Reader, get_reader_class_by_name, get_reader_class_by_path
 
 __all__ = ['YamlIncludeConstructor']
 
@@ -40,18 +39,22 @@ class YamlIncludeConstructor:
     DEFAULT_ENCODING = 'utf-8'
     DEFAULT_TAG_NAME = '!include'
 
-    def __init__(self, base_dir=None, encoding=None, reader_map=None):
-        # type: (YamlIncludeConstructor, str, str, list)->YamlIncludeConstructor
+    def __init__(
+        self,
+        base_dir: str = '',
+        encoding: str = '',
+        reader_map: Collection[Tuple[Union[str, re.Pattern], Reader]] = None
+    ):
         """
         :param str base_dir: Base directory where search including YAML files
 
-            :default: ``None``:  include YAML files from current working directory.
+            :default: ``""``:  include YAML files from current working directory.
 
         :param str encoding: Encoding of the YAML files
 
-            :default: ``None``:  Not specified
+            :default: ``""``:  Not specified
 
-        :param list reader_map: A List of `(path-pattern, reader-class)` tuple
+        :param Collection reader_map: A collection of `(path-pattern, reader-class)` tuple
 
             :default: ``None``: set :data:`readers.READER_TABLE` as default readers map
         """
@@ -62,18 +65,18 @@ class YamlIncludeConstructor:
     def __call__(self, loader, node):
         args = []
         kwargs = {}
-        if isinstance(node, yaml.nodes.ScalarNode):
+        if isinstance(node, yaml.nodes.ScalarNode):  # type: ignore
             args = [loader.construct_scalar(node)]
-        elif isinstance(node, yaml.nodes.SequenceNode):
+        elif isinstance(node, yaml.nodes.SequenceNode):  # type: ignore
             args = loader.construct_sequence(node)
-        elif isinstance(node, yaml.nodes.MappingNode):
+        elif isinstance(node, yaml.nodes.MappingNode):  # type: ignore
             kwargs = loader.construct_mapping(node)
         else:
             raise TypeError('Un-supported YAML node {!r}'.format(node))
         return self.load(loader, *args, **kwargs)
 
     @property
-    def base_dir(self):  # type: ()->str
+    def base_dir(self) -> str:
         """Base directory where search including YAML files
 
         :rtype: str
@@ -81,11 +84,11 @@ class YamlIncludeConstructor:
         return self._base_dir
 
     @base_dir.setter
-    def base_dir(self, value):  # type: (str)->None
+    def base_dir(self, value: str):
         self._base_dir = value
 
     @property
-    def encoding(self):  # type: ()->str
+    def encoding(self) -> str:
         """Encoding of the YAML files
 
         :rtype: str
@@ -93,10 +96,17 @@ class YamlIncludeConstructor:
         return self._encoding
 
     @encoding.setter
-    def encoding(self, value):  # type: (str)->None
+    def encoding(self, value: str):
         self._encoding = value
 
-    def load(self, loader, pathname, recursive=False, encoding=None, reader=None):
+    def load(
+        self,
+        loader: Union[yaml.Loader, yaml.FullLoader],
+        pathname: str,
+        recursive: bool = False,
+        encoding: str = '',
+        reader: str = ''
+    ):  # pylint:disable=too-many-arguments
         """Once add the constructor to PyYAML loader class,
         Loader will use this function to include other YAML fils
         on parsing ``"!include"`` tag
@@ -157,12 +167,16 @@ class YamlIncludeConstructor:
         return reader_obj()
 
     @classmethod
-    def add_to_loader_class(cls, loader_class=None, tag=None, **kwargs):
-        # type: (type(YamlIncludeConstructor), type(yaml.Loader), str, ...)-> YamlIncludeConstructor
+    def add_to_loader_class(
+        cls,
+        loader_class=None,
+        tag: str = None,
+        **kwargs
+    ):
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
-        :param loader_class: The `Loader` class add constructor to.
+        :param loader_class: The `Loader` **class** add constructor to.
 
             .. attention:: This parameter **SHOULD** be a **class type**, **NOT** an object.
 
@@ -181,10 +195,8 @@ class YamlIncludeConstructor:
 
             :default: ``None``:
 
-                - When :mod:`pyyaml` `3.*`: :class:`yaml.Loader`
-                - When :mod:`pyyaml` `5.*`: :class:`yaml.FullLoader`
-
-        :type loader_class: type
+                - When :mod:`pyyaml` `3.*`: it's :class:`yaml.Loader`
+                - When :mod:`pyyaml` `5.*`: it's :class:`yaml.FullLoader`
 
         :param str tag: Tag's name of the include constructor.
 
