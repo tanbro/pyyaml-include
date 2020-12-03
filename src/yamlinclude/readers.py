@@ -103,7 +103,7 @@ class PlainTextReader(Reader):
     # pylint: disable=too-few-public-methods
     def __call__(self):
         with io.open(self._path, encoding=self._encoding) as fp:
-            return fp.read()
+            return list(map(str.rstrip, fp.readlines()))
 
 
 READER_TABLE = [
