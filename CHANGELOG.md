@@ -11,6 +11,9 @@ Date: 2019-02-03
   - adjust docs
   - add pip and conda configure file of development environment
 
+- Fix:
+  - add `PlainTextReader` into `__all__` list of `reders` module 
+
 ## 1.1
 
 Date: 2019-03-18
