@@ -51,11 +51,6 @@ jobs:
       - image: circleci/python
     <<: *test_steps
 
-  test_py2:
-    docker:
-      - image: circleci/python:2
-    <<: *test_steps
-
   deploy:
     docker:
       - image: circleci/python
@@ -66,7 +61,6 @@ workflows:
   test-and-deploy: # name of your workflow
     jobs:
       - test
-      - test_py2
       - deploy:
           requires:
             - test
