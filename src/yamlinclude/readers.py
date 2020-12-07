@@ -84,11 +84,11 @@ class PlainTextReader(Reader):
 
 
 READER_TABLE = [
-    (re.compile(r'^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$'), YamlReader),
-    (re.compile(r'^.+\.[jJ][sS][oO][nN]$'), JsonReader),
-    (re.compile(r'^.+\.[iI][nN][iI]$'), IniReader),
-    (re.compile(r'^.+\.[tT][oO][mL][lL]$'), TomlReader),
-    (re.compile(r'^.+\.[tT][xX][tT]$'), PlainTextReader),
+    (re.compile(r'^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$'), YamlReader),  # *.yml, *.yaml
+    (re.compile(r'^.+\.[jJ][sS][oO][nN]$'), JsonReader),  # *.json
+    (re.compile(r'^.+\.[iI][nN][iI]$'), IniReader),  # *.ini
+    (re.compile(r'^.+\.[tT][oO][mL][lL]$'), TomlReader),  # *.toml
+    (re.compile(r'^.+\.[tT][xX][tT]$'), PlainTextReader),  # *.txt
 ]
 
 
