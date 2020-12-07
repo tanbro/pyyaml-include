@@ -16,7 +16,7 @@ except ImportError:
     toml = None
 
 __all__ = ['READER_TABLE', 'get_reader_class_by_path', 'get_reader_class_by_name',
-           'Reader', 'IniReader', 'JsonReader', 'TomlReader', 'YamlReader']
+           'Reader', 'IniReader', 'JsonReader', 'TomlReader', 'YamlReader', 'PlainTextReader']
 
 
 def get_reader_class_by_name(name):  # type:(str)->type
