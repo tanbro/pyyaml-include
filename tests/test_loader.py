@@ -9,7 +9,7 @@ from io import StringIO
 import yaml
 
 from yamlinclude import YamlIncludeConstructor
-from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2, YAML_ZH_CN
+from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
 
 
 class DefaultLoaderTestCase(unittest.TestCase):
@@ -215,7 +215,6 @@ files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
                 )
 
 
-
 class TomlTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -319,6 +318,7 @@ class PlainTextTestCase(unittest.TestCase):
         with open('tests/data/include.d/1.txt') as fp:
             s = fp.read()
         self.assertDictEqual(data, {'text': s})
+
 
 class ReaderTestCase(unittest.TestCase):
 

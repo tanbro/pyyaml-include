@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import, print_function, unicode_literals
-from typing import Iterable
 
 import unittest
 
@@ -13,6 +12,7 @@ from yamlinclude import YamlIncludeConstructor
 
 YAML1 = {'name': '1'}
 YAML2 = {'name': '2'}
+
 
 class MultiLoaderTestCase(unittest.TestCase):
 
@@ -37,5 +37,3 @@ class MultiLoaderTestCase(unittest.TestCase):
                 self.assertEqual(data, {'file2': YAML2})
             else:
                 raise RuntimeError()
-
-

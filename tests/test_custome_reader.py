@@ -51,4 +51,4 @@ class CustomReaderTestCase(unittest.TestCase):
 
     def test_custom_reader(self):
         # Read the main yaml file and include the other yaml files.
-        data = yaml.load(self.YAML_STRING, Loader=yaml.FullLoader)
+        yaml.load(self.YAML_STRING, Loader=yaml.FullLoader)

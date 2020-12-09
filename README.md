@@ -9,8 +9,6 @@
 [![PyPI - Status](https://img.shields.io/pypi/status/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 [![PyPI - Implementation](https://img.shields.io/pypi/implementation/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a155ced80ddaafe74cea/maintainability)](https://codeclimate.com/github/tanbro/pyyaml-include/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/a155ced80ddaafe74cea/test_coverage)](https://codeclimate.com/github/tanbro/pyyaml-include/test_coverage)
 
 An extending constructor of [PyYAML][]: include [YAML][] files into [YAML][] document.
 
