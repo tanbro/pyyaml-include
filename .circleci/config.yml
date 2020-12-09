@@ -48,7 +48,12 @@ references:
 jobs:
   test:
     docker:
-      - image: circleci/python
+      - image: circleci/python:3.5
+      - image: circleci/python:3.6
+      - image: circleci/python:3.7
+      - image: circleci/python:3.8
+      - image: circleci/python:3.9
+      - image: circleci/python:3.10
     <<: *test_steps
 
   deploy:
