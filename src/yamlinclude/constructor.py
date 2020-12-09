@@ -6,9 +6,10 @@ Include YAML files within YAML
 
 import os.path
 import re
+import typing
 from glob import iglob
 from sys import version_info
-from typing import Collection, Tuple, Union
+from typing import List, Tuple, Union
 
 import yaml
 
@@ -40,10 +41,10 @@ class YamlIncludeConstructor:
     DEFAULT_TAG_NAME = '!include'
 
     def __init__(
-        self,
-        base_dir: str = '',
-        encoding: str = '',
-        reader_map: Collection[Tuple[Union[str, re.Pattern], Reader]] = None
+            self,
+            base_dir: str = '',
+            encoding: str = '',
+            reader_map: List[Tuple[Union[str, typing.re.Pattern], Reader]] = None  # noqa
     ):
         """
         :param str base_dir: Base directory where search including YAML files
@@ -100,12 +101,12 @@ class YamlIncludeConstructor:
         self._encoding = value
 
     def load(
-        self,
-        loader: Union[yaml.Loader, yaml.FullLoader],
-        pathname: str,
-        recursive: bool = False,
-        encoding: str = '',
-        reader: str = ''
+            self,
+            loader: Union[yaml.Loader, yaml.FullLoader],
+            pathname: str,
+            recursive: bool = False,
+            encoding: str = '',
+            reader: str = ''
     ):  # pylint:disable=too-many-arguments
         """Once add the constructor to PyYAML loader class,
         Loader will use this function to include other YAML files
@@ -168,10 +169,10 @@ class YamlIncludeConstructor:
 
     @classmethod
     def add_to_loader_class(
-        cls,
-        loader_class=None,
-        tag: str = None,
-        **kwargs
+            cls,
+            loader_class=None,
+            tag: str = None,
+            **kwargs
     ):
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
