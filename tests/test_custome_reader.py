@@ -44,7 +44,7 @@ class CustomReaderTestCase(unittest.TestCase):
     def setUpClass(cls) -> None:
         reader_table = [
             (re.compile(r'^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$'), YamlReader),
-            (re.compile(r'^.+\.(([j][2]))$'), YamlReader),
+            (re.compile(r'^.+\.([j][2])$'), YamlReader),
         ]
         constructor = YamlIncludeConstructor(reader_map=reader_table)
         yaml.FullLoader.add_constructor('!inc', constructor)

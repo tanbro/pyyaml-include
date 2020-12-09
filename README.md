@@ -1,6 +1,6 @@
 # pyyaml-include
 
-[![CircleCI](https://img.shields.io/circleci/project/github/tanbro/pyyaml-include.svg)](https://circleci.com/gh/tanbro/workflows/pyyaml-include)
+[![Python Package](https://github.com/tanbro/pyyaml-include/workflows/Python%20package/badge.svg)](https://github.com/tanbro/pyyaml-include/actions?query=workflow%3A%22Python+package%22)
 [![Documentation Status](https://readthedocs.org/projects/pyyaml-include/badge/?version=stable)](https://pyyaml-include.readthedocs.io/en/stable/?badge=stable)
 [![GitHub tag](https://img.shields.io/github/tag/tanbro/pyyaml-include.svg)](https://github.com/tanbro/pyyaml-include)
 [![PyPI](https://img.shields.io/pypi/v/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
@@ -22,7 +22,7 @@ pip install pyyaml-include
 
 Consider we have such [YAML] files:
 
-```sh
+```text
 ├── 0.yml
 └── include.d
     ├── 1.yml
