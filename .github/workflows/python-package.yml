@@ -25,9 +25,13 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
+        # ensure pip, setuptools, wheel
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
+        pip install --upgrade setuptools wheel
+        # install the package itself
         pip install -e .
+        # install lint and test tools
+        pip install flake8 pytest
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
