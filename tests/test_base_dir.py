@@ -5,6 +5,7 @@ from __future__ import unicode_literals, absolute_import, print_function
 import os
 import unittest
 from io import StringIO
+from textwrap import dedent
 
 import yaml
 
@@ -29,6 +30,18 @@ file1: !include include.d/1.yaml
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {'file1': YAML1})
+
+    def test_continuous_including(self):
+        yml = dedent('''
+        foo:
+            - !include include.d/1.yaml
+            - !include include.d/2.yaml
+        ''')
+        for loader_cls in YAML_LOADERS:
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertDictEqual(data, {
+                'foo': [YAML1, YAML2]
+            })
 
     def test_include_two_in_mapping(self):
         yml = '''

@@ -1,0 +1,7 @@
+[build-system]
+requires = ["setuptools>=48.0", "wheel", "setuptools_scm[toml]>=3.4", "setuptools_scm_git_archive>=1.1"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "guess-next-dev" # or post-release
+write_to = "src/yamlinclude/version.py"

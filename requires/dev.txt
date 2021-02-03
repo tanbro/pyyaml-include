@@ -1,0 +1,6 @@
+autopep8
+coverage
+ipython
+pylint
+pytest
+toml
