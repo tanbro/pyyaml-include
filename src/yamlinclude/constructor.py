@@ -9,7 +9,7 @@ import re
 import typing
 from glob import iglob
 from sys import version_info
-from typing import List, Tuple, Union
+from typing import List, Tuple, Union, Type, Optional
 
 import yaml
 
@@ -44,7 +44,7 @@ class YamlIncludeConstructor:
             self,
             base_dir: str = '',
             encoding: str = '',
-            reader_map: List[Tuple[typing.re.Pattern, Reader]] = None  # noqa
+            reader_map: Optional[List[Tuple[typing.re.Pattern, Type[Reader]]]] = None  # noqa
     ):
         """
         :param str base_dir: Base directory where search including YAML files
