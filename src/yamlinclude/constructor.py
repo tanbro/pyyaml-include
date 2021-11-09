@@ -7,6 +7,7 @@ Include YAML files within YAML
 import os.path
 import re
 from glob import iglob
+from re import Pattern
 from sys import version_info
 from typing import Sequence, Tuple
 
