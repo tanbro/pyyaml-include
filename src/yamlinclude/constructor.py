@@ -44,7 +44,7 @@ class YamlIncludeConstructor:
             self,
             base_dir: str = '',
             encoding: str = '',
-            reader_map: Sequence[Tuple[Pattern, Reader]] = None  # noqa
+            reader_map: Sequence[Tuple[re.Pattern, Reader]] = None  # noqa
     ):
         """
         :param str base_dir: Base directory where search including YAML files
