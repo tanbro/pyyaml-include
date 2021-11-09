@@ -6,10 +6,10 @@ Include YAML files within YAML
 
 import os.path
 import re
-import typing
 from glob import iglob
+from re import Pattern
 from sys import version_info
-from typing import Sequence, Mapping, Pattern, Tuple, Union
+from typing import Sequence, Tuple
 
 import yaml
 
