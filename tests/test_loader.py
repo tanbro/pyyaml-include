@@ -17,14 +17,16 @@ class DefaultLoaderTestCase(unittest.TestCase):
     def setUp(self):
         YamlIncludeConstructor.add_to_loader_class()
 
-    def test_no_loader_class_argument(self):
-        yml = '!include tests/data/include.d/1.yaml'
-        if yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
-            with self.assertWarns(yaml.YAMLLoadWarning):
+    if yaml.__version__ < '6.0':
+
+        def test_no_loader_class_argument(self):
+            yml = '!include tests/data/include.d/1.yaml'
+            if yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
+                with self.assertWarns(yaml.YAMLLoadWarning):
+                    data = yaml.load(StringIO(yml))
+            else:
                 data = yaml.load(StringIO(yml))
-        else:
-            data = yaml.load(StringIO(yml))
-        self.assertDictEqual(data, YAML1)
+            self.assertDictEqual(data, YAML1)
 
 
 class MultiLoadersTestCase(unittest.TestCase):
@@ -310,7 +312,9 @@ class PlainTextTestCase(unittest.TestCase):
 
     def test_txt(self):
         yml = 'text: !include tests/data/include.d/1.txt'
-        if yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
+        if yaml.__version__ >= '6.0':
+            data = yaml.load(StringIO(yml), yaml.Loader)
+        elif yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
             with self.assertWarns(yaml.YAMLLoadWarning):
                 data = yaml.load(StringIO(yml))
         else:
@@ -327,7 +331,9 @@ class ReaderTestCase(unittest.TestCase):
 
     def test_txt(self):
         yml = 'text: !include {pathname: tests/data/include.d/1.json, reader: txt}'
-        if yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
+        if yaml.__version__ >= '6.0':
+            data = yaml.load(StringIO(yml), yaml.Loader)
+        elif '6.0' > yaml.__version__ >= '5.0' and PYTHON_VERSION_MAYOR_MINOR >= '3.2':
             with self.assertWarns(yaml.YAMLLoadWarning):
                 data = yaml.load(StringIO(yml))
         else:
