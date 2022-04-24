@@ -5,7 +5,7 @@ name: Python package
 
 on:
   push:
-    branches: [master, develop]
+    branches: [master]
     tags: ["*"]
   pull_request:
     branches: [master]
@@ -22,7 +22,7 @@ jobs:
           PEP440_VERSION=""
           VERSION_PREFIX="v"
           BRANCH_OR_TAG="$(echo ${{ github.event.ref }} | cut -d / -f 3)"
-          if [[ "${BRANCH_OR_TAG}" =~ ^v?(([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?)$ ]]
+          if [[ "${BRANCH_OR_TAG}" =~ ^v?(([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*(\.?(a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?)$ ]]
           then
             PEP440_VERSION="${BRANCH_OR_TAG#$VERSION_PREFIX}"
           fi
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
