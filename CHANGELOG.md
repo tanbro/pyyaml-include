@@ -1,11 +1,14 @@
 # Changelog
 
-## 1.3 beta4
+## 1.3
 
 Date: 2022-04-24
 
 - New:
   - PyYAML 6.0 supported
+
+- Misc:
+  - Better CI processes
 
 ## 1.2
 
