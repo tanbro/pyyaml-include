@@ -5,39 +5,94 @@ name: Python package
 
 on:
   push:
-    branches: [ master ]
+    branches: [master, develop]
+    tags: ["*"]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
-  build:
+  check-pep440:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+    steps:
+      - name: Check PEP-440 style version
+        id: get-version
+        run: |
+          PEP440_VERSION=""
+          VERSION_PREFIX="v"
+          BRANCH_OR_TAG="$(echo ${{ github.event.ref }} | cut -d / -f 3)"
+          if [[ "${BRANCH_OR_TAG}" =~ ^v?(([1-9][0-9]*!)?(0|[1-9][0-9]*)(\.(0|[1-9][0-9]*))*((a|b|rc)(0|[1-9][0-9]*))?(\.post(0|[1-9][0-9]*))?(\.dev(0|[1-9][0-9]*))?)$ ]]
+          then
+            PEP440_VERSION="${BRANCH_OR_TAG#$VERSION_PREFIX}"
+          fi
+          echo ::set-output name=version::${PEP440_VERSION}
 
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.5', '3.6', '3.7', '3.8', '3.9']
-
+        python-version: ["3.5", "3.6", "3.7", "3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        # ensure pip, setuptools, wheel
-        python -m pip install --upgrade pip
-        pip install --upgrade setuptools wheel
-        # install the package itself
-        pip install -e .
-        # install lint and test tools
-        pip install flake8 pytest
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          # ensure pip, setuptools, wheel
+          python -m pip install --upgrade pip
+          pip install --upgrade setuptools wheel
+          # install the package itself
+          pip install -e .
+          # install lint and test tools
+          pip install flake8 pytest
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Test with pytest
+        run: |
+          pytest
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, check-pep440]
+    if: needs.check-pep440.outputs.version != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          cache: "pip"
+      - name: Install builder
+        run: pip install build
+      - name: Build Python distribution
+        run: pyproject-build
+      - name: Upload dist to artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: pyyaml_include-dist-${{ needs.check-pep440.outputs.version }}
+          path: dist
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download dist from artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: pyyaml_include-dist-${{needs.check-pep440.outputs.version}}
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
