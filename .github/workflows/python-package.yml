@@ -92,6 +92,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: pyyaml_include-dist-${{needs.check-pep440.outputs.version}}
+          path: dist
       - name: Publish package
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
