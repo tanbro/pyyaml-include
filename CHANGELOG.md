@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3b1
+
+Date: 2022-04-24
+
+- New:
+  - PyYAML 6.0 supported
+
 ## 1.2
 
 Date: 2019-02-03
@@ -12,7 +19,7 @@ Date: 2019-02-03
   - add pip and conda configure file of development environment
 
 - Fix:
-  - add `PlainTextReader` into `__all__` list of `reders` module 
+  - add `PlainTextReader` into `__all__` list of `reders` module
 
 ## 1.1
 
