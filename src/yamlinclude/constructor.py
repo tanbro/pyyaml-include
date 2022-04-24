@@ -8,7 +8,7 @@ import os.path
 import re
 from glob import iglob
 from sys import version_info
-from typing import Optional, Pattern, Sequence, Tuple
+from typing import Optional, Pattern, Sequence, Tuple, Type
 
 import yaml
 
@@ -169,8 +169,8 @@ class YamlIncludeConstructor:
     @classmethod
     def add_to_loader_class(
             cls,
-            loader_class=None,
-            tag: str = None,
+            loader_class: Optional[Type] = None,
+            tag: Optional[str] = None,
             **kwargs
     ):
         """
