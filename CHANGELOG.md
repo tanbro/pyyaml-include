@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.3.beta 3
+## 1.3 beta4
 
 Date: 2022-04-24
 
