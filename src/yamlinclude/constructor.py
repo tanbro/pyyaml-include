@@ -7,9 +7,8 @@ Include YAML files within YAML
 import os.path
 import re
 from glob import iglob
-from re import Pattern
 from sys import version_info
-from typing import Sequence, Tuple
+from typing import Optional, Pattern, Sequence, Tuple
 
 import yaml
 
@@ -44,7 +43,7 @@ class YamlIncludeConstructor:
             self,
             base_dir: str = '',
             encoding: str = '',
-            reader_map: Sequence[Tuple[re.Pattern, Reader]] = None  # noqa
+            reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None
     ):
         """
         :param str base_dir: Base directory where search including YAML files
