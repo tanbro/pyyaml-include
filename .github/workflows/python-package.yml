@@ -85,7 +85,8 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [check-pep440, build]
+    if: needs.check-pep440.outputs.version != ''
     steps:
       - name: Download dist from artifact
         uses: actions/download-artifact@v3
