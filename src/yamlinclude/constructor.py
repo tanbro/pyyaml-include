@@ -51,7 +51,8 @@ class YamlIncludeConstructor:
             self,
             base_dir: str = '',
             encoding: str = '',
-            reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None
+            reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None,
+            relative: bool = False,
     ):
         """
         :param str base_dir: Base directory where search including YAML files
@@ -65,10 +66,16 @@ class YamlIncludeConstructor:
         :param Collection reader_map: A collection of `(path-pattern, reader-class)` tuple
 
             :default: ``None``: set :data:`readers.READER_TABLE` as default readers map
+
+        :param bool relative: Use the yaml files location for relative includes
+
+            :default: ``False``:  include YAML files from current working directory.
+
         """
         self._base_dir = base_dir
         self._encoding = encoding
         self._reader_map = reader_map
+        self._relative = relative
 
     def __call__(self, loader, node):
         args = []
@@ -153,6 +160,17 @@ class YamlIncludeConstructor:
             encoding = self._encoding or self.DEFAULT_ENCODING
         if self._base_dir:
             pathname = os.path.join(self._base_dir, pathname)
+        elif self._relative:
+            if loader.__module__ == "yaml.cyaml":
+                raise YamlIncludeLibYamlException(
+                    f"Relative import not supported for libyaml based loaders, please set the `base_dir` manually"
+                )
+            loader_name = loader.name # dirty hack to enable mocking
+            if loader_name in [ "<unicode string>" ,"<byte string>", "<file>" ]:
+                raise YamlIncludeFileTypeException(
+                    f"Relative include only supported for regular files, got {loader.name} instead."
+                    )
+            pathname = os.path.join(os.path.dirname(loader.name), pathname)
         reader_clz = None
         if reader:
             reader_clz = get_reader_class_by_name(reader)
