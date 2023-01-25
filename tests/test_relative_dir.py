@@ -36,6 +36,17 @@ class BaseRelativeDirTestCase(unittest.TestCase):
                 f.write(_content)
             cls.addClassCleanup(lambda: os.remove(os.path.join(cls._include_path, example_file)))
 
+        with open(os.path.join(cls._include_path, "relative.yml"), "w") as f:
+            f.write("\nrelative: !include foo/nested.yml\nrelative_data: 'relative_data'")
+        cls.addClassCleanup(lambda: os.remove(os.path.join(cls._include_path, "relative.yml")))
+
+        os.mkdir(os.path.join(cls._include_path, "foo"))
+        cls.addClassCleanup(lambda: os.rmdir(os.path.join(cls._include_path, "foo")))
+
+        with open(os.path.join(cls._include_path, "foo", "nested.yml"), "w") as f:
+            f.write("\nnested: 'nested_data'\n")
+        cls.addClassCleanup(lambda: os.remove(os.path.join(cls._include_path, "foo", "nested.yml")))
+
     def create_yaml(self, yml):
         test_file_path = os.path.join(self._tmpdir, "test.yml")
         with open(test_file_path, "w") as f:
@@ -167,6 +178,15 @@ files: !include {pathname: include.d/**/*.yaml, recursive: true}
                     sorted(data['files'], key=lambda m: m['name']),
                     [YAML1, YAML2]
                 )
+
+    def test_nested(self):
+        yml = '''
+root: !include include.d/relative.yml
+'''
+        for loader_cls in self.non_c_loaders:
+            data = yaml.load(self.create_yaml(yml), loader_cls)
+            self.assertDictEqual(
+                data, {'root': {'relative': {'nested': 'nested_data'}, 'relative_data': 'relative_data'}})
 
 
 class LibYamlExceptionRelativeDirExceptionTest(BaseRelativeDirTestCase):
