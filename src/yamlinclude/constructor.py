@@ -20,6 +20,14 @@ PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+]).*$')
 
+class YamlIncludeException(Exception):
+    pass
+
+class YamlIncludeFileTypeException(YamlIncludeException, TypeError):
+    pass
+
+class YamlIncludeLibYamlException(YamlIncludeException, ValueError):
+    pass
 
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML Loaders
