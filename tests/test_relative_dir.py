@@ -13,7 +13,7 @@ import tempfile
 
 from yamlinclude import YamlIncludeConstructor
 from yamlinclude.constructor import YamlIncludeFileTypeException, YamlIncludeLibYamlException
-from _internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
+from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
 
 
 EXAMPLE_DIR = "tests/data/include.d"
