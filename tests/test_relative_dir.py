@@ -3,6 +3,7 @@
 from __future__ import unicode_literals, absolute_import, print_function
 
 import os
+import sys
 import unittest
 from io import BytesIO, StringIO
 from textwrap import dedent
@@ -19,6 +20,7 @@ from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
 EXAMPLE_DIR = "tests/data/include.d"
 
 
+@unittest.skipIf(sys.version_info < (3, 8), "requires python3.8 or higher")
 class BaseRelativeDirTestCase(unittest.TestCase):
 
     @classmethod
