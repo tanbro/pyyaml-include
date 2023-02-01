@@ -10,7 +10,7 @@ from textwrap import dedent
 import yaml
 
 from yamlinclude import YamlIncludeConstructor
-from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
+from ._internal import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
 
 
 class BaseDirTestCase(unittest.TestCase):

@@ -123,8 +123,7 @@ class YamlIncludeConstructor:
             reader: str = ''
     ):  # pylint:disable=too-many-arguments
         """Once add the constructor to PyYAML loader class,
-        Loader will use this function to include other YAML files
-        on parsing ``"!include"`` tag
+        the loader will invoke this function to include other YAML files when parsing a ``"!include"`` tag.
 
         :param loader: Instance of PyYAML's loader class
         :param str pathname: pathname can be either absolute (like `/usr/src/Python-1.5/*.yml`)

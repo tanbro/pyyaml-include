@@ -9,7 +9,7 @@ from io import StringIO
 import yaml
 
 from yamlinclude import YamlIncludeConstructor
-from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
+from ._internal import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
 
 
 class DefaultLoaderTestCase(unittest.TestCase):

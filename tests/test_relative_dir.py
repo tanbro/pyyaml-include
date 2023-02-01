@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import os
 import sys
+import tempfile
 import unittest
 from io import BytesIO, StringIO
 from textwrap import dedent
 
-from contextlib import suppress
 import yaml
-import tempfile
 
 from yamlinclude import YamlIncludeConstructor
-from yamlinclude.constructor import YamlIncludeFileTypeException, YamlIncludeLibYamlException
-from ._internel import PYTHON_VERSION_MAYOR_MINOR, YAML_LOADERS, YAML1, YAML2
+from yamlinclude.constructor import (YamlIncludeFileTypeException,
+                                     YamlIncludeLibYamlException)
 
+from ._internal import PYTHON_VERSION_MAYOR_MINOR, YAML1, YAML2, YAML_LOADERS
 
 EXAMPLE_DIR = "tests/data/include.d"
 
@@ -51,16 +51,11 @@ class BaseRelativeDirTestCase(unittest.TestCase):
 
     def create_yaml(self, yml):
         test_file_path = os.path.join(self._tmpdir, "test.yml")
-        with open(test_file_path, "w") as f:
-            f.write(yml)
+        with open(test_file_path, "w") as fp:
+            fp.write(yml)
 
-        def remove_yaml():
-            with suppress(FileNotFoundError):
-                os.remove(test_file_path)
-
-        self.addCleanup(remove_yaml)
         f = open(test_file_path, "r")
-        self.addCleanup(lambda: f.close())
+        self.addCleanup(f.close)
 
         return f
 
