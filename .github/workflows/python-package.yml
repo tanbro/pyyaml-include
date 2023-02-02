@@ -26,7 +26,7 @@ jobs:
           then
             PEP440_VERSION="${BRANCH_OR_TAG#$VERSION_PREFIX}"
           fi
-          echo ::set-output name=version::${PEP440_VERSION}
+          echo "version=${PEP440_VERSION}" >> $GITHUB_OUTPUT
 
   test:
     runs-on: ubuntu-latest
