@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1b1
+
+Date: 2023-02-02
+
+- New:
+  - relative include for pure python PyYAML
+
 ## 1.3
 
 Date: 2022-04-24
@@ -22,7 +29,7 @@ Date: 2019-02-03
   - add pip and conda configure file of development environment
 
 - Fix:
-  - add `PlainTextReader` into `__all__` list of `reders` module
+  - add `PlainTextReader` into `__all__` list of `readers` module
 
 ## 1.1
 
