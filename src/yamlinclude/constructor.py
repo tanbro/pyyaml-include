@@ -124,6 +124,7 @@ class YamlIncludeConstructor:
             pathname: str,
             recursive: bool = False,
             encoding: str = '',
+            default: str = '',
             reader: str = ''
     ):
         """Once add the constructor to PyYAML loader class,
@@ -142,6 +143,8 @@ class YamlIncludeConstructor:
         :param str encoding: YAML file encoding
 
             :default: ``None``: Attribute :attr:`encoding` or constant :attr:`DEFAULT_ENCODING` will be used to open it
+
+        :param default: When specified, the string will be parsed as YAML then returned if file `pathname` not exists
 
         :param str reader: name of the reader for loading files
 
@@ -186,9 +189,18 @@ class YamlIncludeConstructor:
                 else:
                     result.append(self._read_file(path, loader, encoding))
             return result
-        if reader_clz:
-            return reader_clz(pathname, encoding=encoding, loader_class=type(loader))()
-        return self._read_file(pathname, loader, encoding)
+        try:
+            if reader_clz:
+                return reader_clz(pathname, encoding=encoding, loader_class=type(loader))()
+            return self._read_file(pathname, loader, encoding)
+        except FileNotFoundError:
+            if default:
+                try:
+                    loader = yaml.CSafeLoader
+                except AttributeError:
+                    loader = yaml.SafeLoader
+                return yaml.load(default, loader)
+            raise
 
     def _read_file(self, path, loader, encoding):
         reader_clz = get_reader_class_by_path(path, self._reader_map)
