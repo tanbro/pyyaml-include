@@ -23,13 +23,14 @@ class DefaultValueTestCase(unittest.TestCase):
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors[YamlIncludeConstructor.DEFAULT_TAG_NAME]
 
-    def test_include_one_default(self):
+    def test_include_string_default(self):
         yml = dedent('''
-        file1: !include {pathname: include.d/not_exist.yaml, default: null}
+        file1: !include {pathname: include.d/not_exist.yaml, default: not found}
         ''')
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {'file1': None})
+            print(data)
+            self.assertDictEqual(data, {'file1': 'not found'})
 
     def test_include_one_notfound(self):
         yml = dedent('''
@@ -56,6 +57,19 @@ class DefaultValueTestCase(unittest.TestCase):
         for loader_cls in YAML_LOADERS:
             with self.assertRaises(FileNotFoundError):
                 yaml.load(StringIO(yml), loader_cls)
+
+    def test_include_non_scalar_default(self):
+        yml = dedent('''
+        file1: !include {pathname: include.d/not_exist1.yaml, default: []}
+        file2: !include {pathname: include.d/not_exist2.yaml, default: {}}
+        ''')
+        for loader_cls in YAML_LOADERS:
+            data = yaml.load(StringIO(yml), loader_cls)
+            print(data)
+            self.assertDictEqual(data, {
+                'file1': [],
+                'file2': {},
+            })
 
 
 if __name__ == '__main__':
