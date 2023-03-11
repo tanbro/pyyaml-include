@@ -20,8 +20,7 @@ __all__ = ['READER_TABLE', 'get_reader_class_by_path', 'get_reader_class_by_name
 
 
 class Reader:
-    # pylint: disable=too-few-public-methods, missing-class-docstring
-    def __init__(self, path, encoding, *args, **kwargs):  # pylint:disable=unused-argument
+    def __init__(self, path, encoding, *args, **kwargs):
         self._path = path
         self._encoding = encoding
 
@@ -30,8 +29,7 @@ class Reader:
 
 
 class IniReader(Reader):
-    # pylint: disable=too-few-public-methods, missing-class-docstring
-    def __init__(self, path, *args, **kwargs):  # pylint:disable=unused-argument
+    def __init__(self, path, *args, **kwargs):
         super().__init__(path, encoding=None)
 
     def __call__(self):
@@ -39,7 +37,7 @@ class IniReader(Reader):
         parser.read(self._path)
         result = {}
         for section in parser.sections():
-            d = result[section] = {}  # pylint:disable=invalid-name
+            d = result[section] = {}
             section_obj = parser[section]
             for key in section_obj:
                 d[key] = section_obj[key]
@@ -47,39 +45,35 @@ class IniReader(Reader):
 
 
 class JsonReader(Reader):
-    # pylint: disable=too-few-public-methods, missing-class-docstring
     def __call__(self):
-        with open(self._path, encoding=self._encoding) as fp:  # pylint:disable=invalid-name
+        with open(self._path, encoding=self._encoding) as fp:
             return json.load(fp)
 
 
 class TomlReader(Reader):
-    # pylint: disable=too-few-public-methods, missing-class-docstring
     def __call__(self):
         if toml is None:
             raise RuntimeError(
                 'Un-supported file "{0}".\n'
                 '`pip install toml` shall solve this problem.'.format(self._path)
             )
-        with open(self._path, encoding=self._encoding) as fp:  # pylint:disable=invalid-name
+        with open(self._path, encoding=self._encoding) as fp:
             return toml.load(fp)
 
 
 class YamlReader(Reader):
-    # pylint: disable=too-few-public-methods, missing-class-docstring
-    def __init__(self, path, encoding, loader_class, *args, **kwargs):  # pylint:disable=unused-argument
+    def __init__(self, path, encoding, loader_class, *args, **kwargs):
         super().__init__(path, encoding)
         self._loader_class = loader_class
 
     def __call__(self):
-        with open(self._path, encoding=self._encoding) as fp:  # pylint:disable=invalid-name
-            return yaml.load(fp, self._loader_class)
+        with open(self._path, encoding=self._encoding) as fp:
+            return yaml.load(fp, self._loader_class)  # type: ignore
 
 
 class PlainTextReader(Reader):
-    # pylint: disable=too-few-public-methods, missing-class-docstring
     def __call__(self):
-        with open(self._path, encoding=self._encoding) as fp:  # pylint:disable=invalid-name
+        with open(self._path, encoding=self._encoding) as fp:
             return fp.read()
 
 
@@ -93,7 +87,6 @@ READER_TABLE = [
 
 
 def get_reader_class_by_name(name: str):
-    # pylint: disable=missing-function-docstring
     name = name.strip().lower()
     if name == 'ini':
         return IniReader
@@ -109,7 +102,6 @@ def get_reader_class_by_name(name: str):
 
 
 def get_reader_class_by_path(path: str, table=None) -> Type[Reader]:
-    # pylint: disable=missing-function-docstring
     if table is None:
         table = READER_TABLE
     for pat, clz in table:

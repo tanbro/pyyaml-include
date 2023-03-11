@@ -20,14 +20,18 @@ PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
 WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+]).*$')
 
+
 class YamlIncludeException(Exception):
     pass
+
 
 class YamlIncludeFileTypeException(YamlIncludeException, TypeError):
     pass
 
+
 class YamlIncludeLibYamlException(YamlIncludeException, ValueError):
     pass
+
 
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML Loaders
@@ -121,7 +125,7 @@ class YamlIncludeConstructor:
             recursive: bool = False,
             encoding: str = '',
             reader: str = ''
-    ):  # pylint:disable=too-many-arguments
+    ):
         """Once add the constructor to PyYAML loader class,
         the loader will invoke this function to include other YAML files when parsing a ``"!include"`` tag.
 
@@ -164,11 +168,11 @@ class YamlIncludeConstructor:
                 raise YamlIncludeLibYamlException(
                     f"Relative import not supported for libyaml based loaders, please set the `base_dir` manually"
                 )
-            loader_name = loader.name # dirty hack to enable mocking
-            if loader_name in [ "<unicode string>" ,"<byte string>", "<file>" ]:
+            loader_name = loader.name  # dirty hack to enable mocking
+            if loader_name in ["<unicode string>", "<byte string>", "<file>"]:
                 raise YamlIncludeFileTypeException(
                     f"Relative include only supported for regular files, got {loader.name} instead."
-                    )
+                )
             pathname = os.path.join(os.path.dirname(loader.name), pathname)
         reader_clz = None
         if reader:
