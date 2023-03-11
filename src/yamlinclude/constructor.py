@@ -46,6 +46,10 @@ class YamlIncludeConstructor:
 
         !include {pathname: dir/abc.yml, encoding: utf-8}
 
+    or::
+
+        !include {pathname: dir/abc.yml, default: []}
+
     """
 
     DEFAULT_ENCODING = 'utf-8'
@@ -118,13 +122,15 @@ class YamlIncludeConstructor:
     def encoding(self, value: str):
         self._encoding = value
 
+    __notfound_default__ = object()
+
     def load(
             self,
             loader,
             pathname: str,
             recursive: bool = False,
             encoding: str = '',
-            default: str = '',
+            default=__notfound_default__,
             reader: str = ''
     ):
         """Once add the constructor to PyYAML loader class,
@@ -145,6 +151,10 @@ class YamlIncludeConstructor:
             :default: ``None``: Attribute :attr:`encoding` or constant :attr:`DEFAULT_ENCODING` will be used to open it
 
         :param default: When specified, the string will be parsed as YAML then returned if file `pathname` not exists
+
+            .. attention::
+
+                The argument will be parsed to ``string`` by PyYAML!
 
         :param str reader: name of the reader for loading files
 
@@ -194,12 +204,8 @@ class YamlIncludeConstructor:
                 return reader_clz(pathname, encoding=encoding, loader_class=type(loader))()
             return self._read_file(pathname, loader, encoding)
         except FileNotFoundError:
-            if default:
-                try:
-                    loader = yaml.CSafeLoader
-                except AttributeError:
-                    loader = yaml.SafeLoader
-                return yaml.load(default, loader)
+            if default != self.__notfound_default__:
+                return default
             raise
 
     def _read_file(self, path, loader, encoding):
