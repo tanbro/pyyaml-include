@@ -33,6 +33,13 @@ class YamlIncludeLibYamlException(YamlIncludeException, ValueError):
     pass
 
 
+def override_compose_document(self):
+    self.get_event()
+    node = self.compose_node(None, None)
+    self.get_event()
+    return node
+
+
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML Loaders
 
@@ -61,6 +68,7 @@ class YamlIncludeConstructor:
             encoding: str = '',
             reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None,
             relative: bool = False,
+            persist_anchors: Optional[bool] = False,
     ):
         """
         :param str base_dir: Base directory where search including YAML files
@@ -79,11 +87,16 @@ class YamlIncludeConstructor:
 
             :default: ``False``:  include YAML files from current working directory.
 
+        :param bool persist_anchors: Pass anchors to included yaml files
+
+            :default: ``False``:  do not pass anchors to included files
+
         """
         self._base_dir = base_dir
         self._encoding = encoding
         self._reader_map = reader_map
         self._relative = relative
+        self._persist_anchors = persist_anchors
 
     def __call__(self, loader, node):
         args = []
@@ -179,7 +192,7 @@ class YamlIncludeConstructor:
         elif self._relative:
             if loader.__module__ == "yaml.cyaml":
                 raise YamlIncludeLibYamlException(
-                    f"Relative import not supported for libyaml based loaders, please set the `base_dir` manually"
+                    "Relative import not supported for libyaml based loaders, please set the `base_dir` manually"
                 )
             loader_name = loader.name  # dirty hack to enable mocking
             if loader_name in ["<unicode string>", "<byte string>", "<file>"]:
@@ -195,13 +208,13 @@ class YamlIncludeConstructor:
             iterable = iglob(pathname, recursive=recursive)
             for path in filter(os.path.isfile, iterable):
                 if reader_clz:
-                    result.append(reader_clz(path, encoding=encoding, loader_class=type(loader))())
+                    result.append(reader_clz(path, encoding=encoding, loader=loader, persist_anchors=self._persist_anchors)())
                 else:
                     result.append(self._read_file(path, loader, encoding))
             return result
         try:
             if reader_clz:
-                return reader_clz(pathname, encoding=encoding, loader_class=type(loader))()
+                return reader_clz(pathname, encoding=encoding, loader=loader, persist_anchors=self._persist_anchors)()
             return self._read_file(pathname, loader, encoding)
         except FileNotFoundError:
             if default != self.__notfound_default__:
@@ -210,7 +223,7 @@ class YamlIncludeConstructor:
 
     def _read_file(self, path, loader, encoding):
         reader_clz = get_reader_class_by_path(path, self._reader_map)
-        reader_obj = reader_clz(path, encoding=encoding, loader_class=type(loader))
+        reader_obj = reader_clz(path, encoding=encoding, loader=loader, persist_anchors=self._persist_anchors)
         return reader_obj()
 
     @classmethod
@@ -262,5 +275,7 @@ class YamlIncludeConstructor:
         if not tag.startswith('!'):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
+        if instance._persist_anchors:
+            loader_class.compose_document = override_compose_document
         yaml.add_constructor(tag, instance, loader_class)
         return instance
