@@ -29,7 +29,6 @@ class DefaultValueTestCase(unittest.TestCase):
         ''')
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            print(data)
             self.assertDictEqual(data, {'file1': 'not found'})
 
     def test_include_one_notfound(self):
@@ -65,7 +64,6 @@ class DefaultValueTestCase(unittest.TestCase):
         ''')
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            print(data)
             self.assertDictEqual(data, {
                 'file1': [],
                 'file2': {},
