@@ -7,19 +7,14 @@ import json
 import re
 import sys
 
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    tomllib = None
 from configparser import ConfigParser
 from typing import Type
 
 import yaml
 
-try:
-    import toml
-except ImportError:
-    toml = None
+if sys.version_info >= (3, 11):
+    import tomllib
+
 
 __all__ = [
     "READER_TABLE",
@@ -67,17 +62,17 @@ class JsonReader(Reader):
 
 class TomlReader(Reader):
     def __call__(self):
-        if tomllib is not None:
+        if sys.version_info >= (3, 11):
             with open(self._path, "rb") as fp:
                 return tomllib.load(fp)
-        elif toml is not None:
-            with open(self._path, encoding=self._encoding) as fp:
-                return toml.load(fp)
         else:
-            raise RuntimeError(
-                'Un-supported file "{0}".\n'
-                "`pip install toml` shall solve this problem.".format(self._path)
-            )
+            try:
+                import toml
+            except ImportError as err:
+                raise ImportError(f'Un-supported file "{self._path}".\n`pip install toml` shall solve this problem.\n\n{err}')
+            else:
+                with open(self._path, encoding=self._encoding) as fp:
+                    return toml.load(fp)
 
 
 class YamlReader(Reader):

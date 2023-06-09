@@ -1,3 +1,0 @@
-[flake8]
-ignore = D203
-exclude = .git,.eggs,__pycache__,docs,old,build,dist,.venv,env,venv,.pytest_cache,test-results
