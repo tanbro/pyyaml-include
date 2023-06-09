@@ -5,10 +5,11 @@
 
 import json
 import re
+import sys
 
-try:
+if sys.version_info >= (3, 11):
     import tomllib
-except ImportError:
+else:
     tomllib = None
 from configparser import ConfigParser
 from typing import Type
