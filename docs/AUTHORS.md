@@ -1,1 +1,2 @@
-../AUTHORS.md
+```{include} ../AUTHORS.md
+```
