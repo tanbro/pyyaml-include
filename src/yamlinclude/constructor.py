@@ -7,18 +7,16 @@ Include YAML files within YAML
 import os.path
 import re
 from glob import iglob
-from sys import version_info
 from typing import Optional, Pattern, Sequence, Tuple, Type
 
 import yaml
 
 from .readers import Reader, get_reader_class_by_name, get_reader_class_by_path
 
-__all__ = ['YamlIncludeConstructor']
+__all__ = ["YamlIncludeConstructor"]
 
-PYTHON_MAYOR_MINOR = '{0[0]}.{0[1]}'.format(version_info)
 
-WILDCARDS_REGEX = re.compile(r'^.*(\*|\?|\[!?.+]).*$')
+WILDCARDS_REGEX = re.compile(r"^.*(\*|\?|\[!?.+]).*$")
 
 
 class YamlIncludeException(Exception):
@@ -59,8 +57,8 @@ class YamlIncludeConstructor:
 
     """
 
-    DEFAULT_ENCODING = 'utf-8'
-    DEFAULT_TAG_NAME = '!include'
+    DEFAULT_ENCODING = "utf-8"
+    DEFAULT_TAG_NAME = "!include"
 
     def __init__(
             self,
@@ -81,7 +79,7 @@ class YamlIncludeConstructor:
 
         :param Collection reader_map: A collection of `(path-pattern, reader-class)` tuple
 
-            :default: ``None``: set :data:`readers.READER_TABLE` as default readers map
+            :default: ``None``: :data:`readers.READER_TABLE` is the default readers map
 
         :param bool relative: Use the yaml files location for relative includes
 
@@ -101,14 +99,14 @@ class YamlIncludeConstructor:
     def __call__(self, loader, node):
         args = []
         kwargs = {}
-        if isinstance(node, yaml.nodes.ScalarNode):  # type: ignore
+        if isinstance(node, yaml.nodes.ScalarNode):
             args = [loader.construct_scalar(node)]
-        elif isinstance(node, yaml.nodes.SequenceNode):  # type: ignore
+        elif isinstance(node, yaml.nodes.SequenceNode):
             args = loader.construct_sequence(node)
-        elif isinstance(node, yaml.nodes.MappingNode):  # type: ignore
+        elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
         else:
-            raise TypeError('Un-supported YAML node {!r}'.format(node))
+            raise TypeError(f"Un-supported YAML node {node!r}")
         return self.load(loader, *args, **kwargs)
 
     @property
@@ -138,13 +136,13 @@ class YamlIncludeConstructor:
     __notfound_default__ = object()
 
     def load(
-            self,
-            loader,
-            pathname: str,
-            recursive: bool = False,
-            encoding: str = '',
-            default=__notfound_default__,
-            reader: str = ''
+        self,
+        loader,
+        pathname: str,
+        recursive: bool = False,
+        encoding: str = "",
+        default=__notfound_default__,
+        reader: str = "",
     ):
         """Once add the constructor to PyYAML loader class,
         the loader will invoke this function to include other YAML files when parsing a ``"!include"`` tag.
@@ -227,12 +225,7 @@ class YamlIncludeConstructor:
         return reader_obj()
 
     @classmethod
-    def add_to_loader_class(
-            cls,
-            loader_class: Optional[Type] = None,
-            tag: Optional[str] = None,
-            **kwargs
-    ):
+    def add_to_loader_class(cls, loader_class: Optional[Type] = None, tag: Optional[str] = None, **kwargs):
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
@@ -268,11 +261,11 @@ class YamlIncludeConstructor:
         :rtype: YamlIncludeConstructor
         """
         if tag is None:
-            tag = ''
+            tag = ""
         tag = tag.strip()
         if not tag:
             tag = cls.DEFAULT_TAG_NAME
-        if not tag.startswith('!'):
+        if not tag.startswith("!"):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
         if instance._persist_anchors:

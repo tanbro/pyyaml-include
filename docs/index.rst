@@ -1,32 +1,32 @@
 .. pyyaml-include documentation master file, created by
-   sphinx-quickstart on Tue Jul  3 12:06:15 2018.
+   sphinx-quickstart on Fri Jun  9 13:18:20 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-pyyaml-include documentation
-============================
+pyyaml-include
+==============
 
-:Release: |release|
-:Version: |version|
-:Date:    |today|
+:release:  |release|
+:version:  |version|
+:built at: |today|
 
-Docs
-----
+Contents
+--------
+
+.. toctree::
+   :caption: Documentations
+   :titlesonly:
+
+   README <README.md>
+   CHANGELOG <CHANGELOG.md>
+   AUTHORS <AUTHORS.md>
 
 .. toctree::
    :maxdepth: 1
+   :caption: References
+   :titlesonly:
 
-   README <README>
-   CHANGELOG
-   AUTHORS
-
-API Reference
--------------
-
-.. toctree::
-    :caption: Package
-
-    modules
+   yamlinclude
 
 Indices and tables
 ------------------
