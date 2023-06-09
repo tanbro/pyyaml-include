@@ -5,6 +5,11 @@
 
 import json
 import re
+
+try:
+    import tomllib
+except ImportError:
+    tomllib = None
 from configparser import ConfigParser
 from typing import Type
 
@@ -15,8 +20,17 @@ try:
 except ImportError:
     toml = None
 
-__all__ = ['READER_TABLE', 'get_reader_class_by_path', 'get_reader_class_by_name',
-           'Reader', 'IniReader', 'JsonReader', 'TomlReader', 'YamlReader', 'PlainTextReader']
+__all__ = [
+    "READER_TABLE",
+    "get_reader_class_by_path",
+    "get_reader_class_by_name",
+    "Reader",
+    "IniReader",
+    "JsonReader",
+    "TomlReader",
+    "YamlReader",
+    "PlainTextReader",
+]
 
 
 class Reader:
@@ -52,13 +66,17 @@ class JsonReader(Reader):
 
 class TomlReader(Reader):
     def __call__(self):
-        if toml is None:
+        if tomllib is not None:
+            with open(self._path, "rb") as fp:
+                return tomllib.load(fp)
+        elif toml is not None:
+            with open(self._path, encoding=self._encoding) as fp:
+                return toml.load(fp)
+        else:
             raise RuntimeError(
                 'Un-supported file "{0}".\n'
-                '`pip install toml` shall solve this problem.'.format(self._path)
+                "`pip install toml` shall solve this problem.".format(self._path)
             )
-        with open(self._path, encoding=self._encoding) as fp:
-            return toml.load(fp)
 
 
 class YamlReader(Reader):
@@ -78,25 +96,28 @@ class PlainTextReader(Reader):
 
 
 READER_TABLE = [
-    (re.compile(r'^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$'), YamlReader),  # *.yml, *.yaml
-    (re.compile(r'^.+\.[jJ][sS][oO][nN]$'), JsonReader),  # *.json
-    (re.compile(r'^.+\.[iI][nN][iI]$'), IniReader),  # *.ini
-    (re.compile(r'^.+\.[tT][oO][mL][lL]$'), TomlReader),  # *.toml
-    (re.compile(r'^.+\.[tT][xX][tT]$'), PlainTextReader),  # *.txt
+    (
+        re.compile(r"^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$"),
+        YamlReader,
+    ),  # *.yml, *.yaml
+    (re.compile(r"^.+\.[jJ][sS][oO][nN]$"), JsonReader),  # *.json
+    (re.compile(r"^.+\.[iI][nN][iI]$"), IniReader),  # *.ini
+    (re.compile(r"^.+\.[tT][oO][mL][lL]$"), TomlReader),  # *.toml
+    (re.compile(r"^.+\.[tT][xX][tT]$"), PlainTextReader),  # *.txt
 ]
 
 
 def get_reader_class_by_name(name: str):
     name = name.strip().lower()
-    if name == 'ini':
+    if name == "ini":
         return IniReader
-    if name == 'json':
+    if name == "json":
         return JsonReader
-    if name == 'toml':
+    if name == "toml":
         return TomlReader
-    if name in ('plain', 'plaintext', 'plain_text', 'plain-text', 'text', 'txt'):
+    if name in ("plain", "plaintext", "plain_text", "plain-text", "text", "txt"):
         return PlainTextReader
-    if name in ('yaml', 'yml'):
+    if name in ("yaml", "yml"):
         return YamlReader
     raise ValueError('Un-supported name reader "{0}"'.format(name))
 
