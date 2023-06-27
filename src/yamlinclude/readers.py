@@ -6,7 +6,6 @@
 import json
 import re
 import sys
-
 from configparser import ConfigParser
 from typing import Type
 
@@ -69,7 +68,7 @@ class TomlReader(Reader):
             try:
                 import toml
             except ImportError as err:
-                raise ImportError(f'Un-supported file "{self._path}".\n`pip install toml` shall solve this problem.\n\n{err}')
+                raise ImportError(f'Un-supported file "{self._path}".\n`pip install toml` should solve the problem.\n\n{err}')
             else:
                 with open(self._path, encoding=self._encoding) as fp:
                     return toml.load(fp)

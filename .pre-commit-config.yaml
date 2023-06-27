@@ -1,0 +1,31 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-added-large-files
+      - id: check-symlinks
+      - id: detect-private-key
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+      - id: check-yaml
+        args: [--unsafe]
+      - id: check-toml
+      - id: check-ast
+      - id: check-builtin-literals
+      - id: check-docstring-first
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.0.275
+    hooks:
+      - id: ruff
+
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: "0.23.2"
+    hooks:
+      - id: check-github-workflows
+      - id: check-readthedocs

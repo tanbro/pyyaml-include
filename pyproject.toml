@@ -46,4 +46,6 @@ where = ["src"]
 write_to = "src/yamlinclude/version.py"
 
 [tool.black]
-line-length = 127
+line-length = 128
+[tool.isort]
+profile = "black"

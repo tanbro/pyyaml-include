@@ -1,0 +1,9 @@
+# The file defines requirements for the project's local development.
+# It's NOT package install dependencies.
+
+-e .[toml]
+-r docs/requirements.txt
+-r tests/requirements.txt
+build
+pre-commit
+ruff

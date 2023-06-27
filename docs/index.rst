@@ -22,11 +22,10 @@ Contents
    AUTHORS <AUTHORS.md>
 
 .. toctree::
-   :maxdepth: 1
-   :caption: References
+   :caption: API References
    :titlesonly:
 
-   yamlinclude
+   apidoc/modules
 
 Indices and tables
 ------------------
