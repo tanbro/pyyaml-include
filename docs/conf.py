@@ -31,6 +31,7 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.githubpages",
     "sphinx.ext.intersphinx",
+    "sphinx_tippy",
     "sphinx_inline_tabs",
     "sphinx_copybutton",
 ]
@@ -47,7 +48,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Automatically extract typehints when specified and place them in
 # descriptions of the relevant function/method.
-autodoc_typehints = "description"
+autodoc_typehints = "both"
 
 # Don't show class signature with the class' name.
 autodoc_class_signature = "separated"
@@ -59,9 +60,14 @@ autodoc_member_order = "bysource"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-# html_theme = "alabaster"
+html_theme = "furo"
 html_static_path = ["_static"]
-
+html_theme_options = {
+    "source_repository": "https://github.com/tanbro/pyyamlinclude",
+    "source_branch": "master",
+    "source_directory": "docs/",
+    "top_of_page_button": "edit",
+}
 
 # -- Options for intersphinx extension ---------------------------------------
 

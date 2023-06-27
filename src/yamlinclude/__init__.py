@@ -4,6 +4,6 @@
 Include YAML files within YAML
 """
 
-from .constructor import *  # noqa
-from .readers import *  # noqa
-from .version import version as __version__  # noqa
+from .constructor import *
+from .readers import *
+from .version import version as __version__
