@@ -177,7 +177,7 @@ class YamlIncludeConstructor:
         elif self._relative:
             if loader.__module__ == "yaml.cyaml":
                 raise YamlIncludeLibYamlException(
-                    f"Relative import not supported for libyaml based loaders, please set the `base_dir` manually"
+                    "Relative import not supported for libyaml based loaders, please set the `base_dir` manually"
                 )
             loader_name = loader.name  # dirty hack to enable mocking
             if loader_name in ["<unicode string>", "<byte string>", "<file>"]:

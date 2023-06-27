@@ -6,7 +6,6 @@
 import json
 import re
 import sys
-
 from configparser import ConfigParser
 from typing import Type
 
