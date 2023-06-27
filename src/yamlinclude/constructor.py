@@ -16,9 +16,6 @@ from .readers import Reader, get_reader_class_by_name, get_reader_class_by_path
 __all__ = ["YamlIncludeConstructor"]
 
 
-WILDCARDS_REGEX = re.compile(r"^.*(\*|\?|\[!?.+]).*$")
-
-
 class YamlIncludeException(Exception):
     pass
 
@@ -185,21 +182,21 @@ class YamlIncludeConstructor:
                     f"Relative include only supported for regular files, got {loader.name} instead."
                 )
             pathname = os.path.join(os.path.dirname(loader.name), pathname)
-        reader_clz = None
+        reader_cls = None
         if reader:
-            reader_clz = get_reader_class_by_name(reader)
-        if re.match(WILDCARDS_REGEX, pathname):
+            reader_cls = get_reader_class_by_name(reader)
+        if re.match(r"^.*(\*|\?|\[!?.+]).*$", pathname):
             result = []
             iterable = iglob(pathname, recursive=recursive)
             for path in filter(os.path.isfile, iterable):
-                if reader_clz:
-                    result.append(reader_clz(path, encoding=encoding, loader_class=type(loader))())
+                if reader_cls:
+                    result.append(reader_cls(path, encoding=encoding, loader_class=type(loader))())
                 else:
                     result.append(self._read_file(path, loader, encoding))
             return result
         try:
-            if reader_clz:
-                return reader_clz(pathname, encoding=encoding, loader_class=type(loader))()
+            if reader_cls:
+                return reader_cls(pathname, encoding=encoding, loader_class=type(loader))()
             return self._read_file(pathname, loader, encoding)
         except FileNotFoundError:
             if default != self.__notfound_default__:
@@ -222,12 +219,12 @@ class YamlIncludeConstructor:
 
             It's one of followings:
 
-                - :class:`yaml.BaseLoader`
+                - :class:`yaml.BaseLoader` (Not advised)
                 - :class:`yaml.UnSafeLoader`
                 - :class:`yaml.SafeLoader`
                 - :class:`yaml.Loader`
                 - :class:`yaml.FullLoader`
-                - :class:`yaml.CBaseLoader`
+                - :class:`yaml.CBaseLoader` (Not advised)
                 - :class:`yaml.CUnSafeLoader`
                 - :class:`yaml.CSafeLoader`
                 - :class:`yaml.CLoader`

@@ -33,7 +33,7 @@ class Reader:
         self._path = path
         self._encoding = encoding
 
-    def __call__(self):
+    def __call__(self):  # pragma: no cover
         raise NotImplementedError()
 
 
