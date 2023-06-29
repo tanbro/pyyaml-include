@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """
 Include YAML files within YAML
 """

@@ -1,11 +1,21 @@
 # Changelog
 
-## 1.3.1b1
+## 1.3.1
 
-Date: 2023-02-02
+Date: 2023-06-29
+
+- Remove:
+  - No longer support python version earlier than 3.7
 
 - New:
-  - relative include for pure python PyYAML
+  - New feature: relative include for PyYAML's pure python loaders
+
+- Misc:
+  - Migrate project's build configure to `pyproject.toml` completely
+  - Improved CI
+
+- Docs:
+  - New Sphinx-Docs theme: furo.
 
 ## 1.3
 
