@@ -23,9 +23,9 @@ class Reader(object):
 
 class YamlReader(Reader):
     # pylint: disable=too-few-public-methods
-    def __init__(self, path, encoding, loader_class, *args, **kwargs):  # pylint:disable=unused-argument
+    def __init__(self, path, encoding, loader, *args, **kwargs):  # pylint:disable=unused-argument
         super(YamlReader, self).__init__(path, encoding)
-        self._loader_class = loader_class
+        self._loader_class = type(loader)
 
     def __call__(self):
         with io.open(self._path, encoding=self._encoding) as fp:

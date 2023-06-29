@@ -26,6 +26,13 @@ class YamlIncludeLibYamlException(YamlIncludeException, ValueError):
     pass
 
 
+def override_compose_document(self):
+    self.get_event()
+    node = self.compose_node(None, None)
+    self.get_event()
+    return node
+
+
 class YamlIncludeConstructor:
     """The `include constructor` for PyYAML Loaders
 
@@ -49,11 +56,12 @@ class YamlIncludeConstructor:
     DEFAULT_TAG_NAME = "!include"
 
     def __init__(
-        self,
-        base_dir: str = "",
-        encoding: str = "",
-        reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None,
-        relative: bool = False,
+            self,
+            base_dir: str = '',
+            encoding: str = '',
+            reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None,
+            relative: bool = False,
+            persist_anchors: Optional[bool] = False,
     ):
         """
         :param str base_dir: Base directory where search including YAML files
@@ -72,11 +80,16 @@ class YamlIncludeConstructor:
 
             :default: ``False``:  include YAML files from current working directory.
 
+        :param bool persist_anchors: Pass anchors to included yaml files
+
+            :default: ``False``:  do not pass anchors to included files
+
         """
         self._base_dir = base_dir
         self._encoding = encoding
         self._reader_map = reader_map
         self._relative = relative
+        self._persist_anchors = persist_anchors
 
     def __call__(self, loader, node):
         args = []
@@ -203,7 +216,7 @@ class YamlIncludeConstructor:
 
     def _read_file(self, path, loader, encoding):
         reader_clz = get_reader_class_by_path(path, self._reader_map)
-        reader_obj = reader_clz(path, encoding=encoding, loader_class=type(loader))
+        reader_obj = reader_clz(path, encoding=encoding, loader=loader, persist_anchors=self._persist_anchors)
         return reader_obj()
 
     @classmethod
@@ -250,5 +263,7 @@ class YamlIncludeConstructor:
         if not tag.startswith("!"):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
+        if instance._persist_anchors:
+            loader_class.compose_document = override_compose_document
         yaml.add_constructor(tag, instance, loader_class)
         return instance

@@ -73,13 +73,25 @@ class TomlReader(Reader):
 
 
 class YamlReader(Reader):
-    def __init__(self, path, encoding, loader_class, *args, **kwargs):
+    def __init__(self, path, encoding, loader, persist_anchors, *args, **kwargs):
         super().__init__(path, encoding)
-        self._loader_class = loader_class
+        self._loader_class = type(loader)
+        self._persist_anchors = persist_anchors
+        if self._persist_anchors:
+            self.anchors = loader.anchors
 
     def __call__(self):
         with open(self._path, encoding=self._encoding) as fp:
-            return yaml.load(fp, self._loader_class)  # type: ignore
+            if self._persist_anchors:
+                loader = self._loader_class(fp)
+                if self.anchors:
+                    loader.anchors = self.anchors
+                try:
+                    return loader.get_single_data()
+                finally:
+                    loader.dispose()
+            else:
+                return yaml.load(fp, self._loader_class)  # type: ignore
 
 
 class PlainTextReader(Reader):
