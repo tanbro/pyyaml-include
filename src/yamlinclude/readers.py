@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """readers for different type of files
 """
 

@@ -1,13 +1,9 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os
-import sys
-import tempfile
 import shutil
+import tempfile
 import unittest
 from io import BytesIO, StringIO
+from sys import version_info
 from textwrap import dedent
 
 import yaml
@@ -18,12 +14,12 @@ from yamlinclude.constructor import (
     YamlIncludeLibYamlException,
 )
 
-from ._internal import PYTHON_VERSION_MAYOR_MINOR, YAML1, YAML2, YAML_LOADERS
+from ._internal import YAML1, YAML2, YAML_LOADERS
 
 EXAMPLE_DIR = "tests/data/include.d"
 
 
-@unittest.skipIf(sys.version_info < (3, 8), "requires python3.8 or higher")
+@unittest.skipIf(version_info < (3, 8), "requires python3.8 or higher")
 class BaseRelativeDirTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -39,21 +35,15 @@ class BaseRelativeDirTestCase(unittest.TestCase):
                 f.write(_content)
 
         with open(os.path.join(cls._include_path, "relative.yml"), "w") as f:
-            f.write(
-                "\nrelative: !include foo/nested.yml\nrelative_data: 'relative_data'"
-            )
-        cls.addClassCleanup(
-            lambda: os.remove(os.path.join(cls._include_path, "relative.yml"))
-        )
+            f.write("\nrelative: !include foo/nested.yml\nrelative_data: 'relative_data'")
+        cls.addClassCleanup(lambda: os.remove(os.path.join(cls._include_path, "relative.yml")))
 
         os.mkdir(os.path.join(cls._include_path, "foo"))
         cls.addClassCleanup(lambda: os.rmdir(os.path.join(cls._include_path, "foo")))
 
         with open(os.path.join(cls._include_path, "foo", "nested.yml"), "w") as f:
             f.write("\nnested: 'nested_data'\n")
-        cls.addClassCleanup(
-            lambda: os.remove(os.path.join(cls._include_path, "foo", "nested.yml"))
-        )
+        cls.addClassCleanup(lambda: os.remove(os.path.join(cls._include_path, "foo", "nested.yml")))
 
     def create_yaml(self, yml):
         test_file_path = os.path.join(self._tmpdir, "test.yml")
@@ -67,9 +57,7 @@ class BaseRelativeDirTestCase(unittest.TestCase):
 
 
 class RelativeDirTestCase(BaseRelativeDirTestCase):
-    non_c_loaders = [
-        loader for loader in YAML_LOADERS if loader.__module__ != "yaml.cyaml"
-    ]
+    non_c_loaders = [loader for loader in YAML_LOADERS if loader.__module__ != "yaml.cyaml"]
 
     def setUp(self):
         for loader_cls in self.non_c_loaders:
@@ -144,7 +132,7 @@ c: C
         yml = """
 file: !include include.d/x.yaml
             """
-        if PYTHON_VERSION_MAYOR_MINOR >= "3.3":
+        if version_info >= (3, 3):
             err_cls = FileNotFoundError
         else:
             err_cls = IOError
@@ -158,11 +146,9 @@ files: !include include.d/*.yaml
 """
         for loader_cls in self.non_c_loaders:
             data = yaml.load(self.create_yaml(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
-    if PYTHON_VERSION_MAYOR_MINOR >= "3.5":
+    if version_info >= (3, 5):
 
         def test_include_wildcards_1(self):
             yml = """
@@ -170,9 +156,7 @@ files: !include [include.d/**/*.yaml, true]
 """
             for loader_cls in self.non_c_loaders:
                 data = yaml.load(self.create_yaml(yml), loader_cls)
-                self.assertListEqual(
-                    sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-                )
+                self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
         def test_include_wildcards_2(self):
             yml = """
@@ -180,9 +164,7 @@ files: !include {pathname: include.d/**/*.yaml, recursive: true}
 """
             for loader_cls in self.non_c_loaders:
                 data = yaml.load(self.create_yaml(yml), loader_cls)
-                self.assertListEqual(
-                    sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-                )
+                self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
     def test_nested(self):
         yml = """
@@ -222,9 +204,7 @@ file1: !include include.d/1.yaml
 
 
 class FileTypeExceptionRelativeDirExceptionTest(BaseRelativeDirTestCase):
-    non_c_loaders = [
-        loader for loader in YAML_LOADERS if loader.__module__ != "yaml.cyaml"
-    ]
+    non_c_loaders = [loader for loader in YAML_LOADERS if loader.__module__ != "yaml.cyaml"]
 
     def setUp(self):
         for loader_cls in self.non_c_loaders:
