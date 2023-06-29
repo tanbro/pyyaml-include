@@ -92,17 +92,17 @@ class PlainTextReader(Reader):
 
 READER_TABLE = [
     (
-        re.compile(r"^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$"),
+        r"^.+\.(([yY][mM][lL])|([Yy][aA][mM][lL]))$",
         YamlReader,
     ),  # *.yml, *.yaml
-    (re.compile(r"^.+\.[jJ][sS][oO][nN]$"), JsonReader),  # *.json
-    (re.compile(r"^.+\.[iI][nN][iI]$"), IniReader),  # *.ini
-    (re.compile(r"^.+\.[tT][oO][mL][lL]$"), TomlReader),  # *.toml
-    (re.compile(r"^.+\.[tT][xX][tT]$"), PlainTextReader),  # *.txt
+    (r"^.+\.[jJ][sS][oO][nN]$", JsonReader),  # *.json
+    (r"^.+\.[iI][nN][iI]$", IniReader),  # *.ini
+    (r"^.+\.[tT][oO][mL][lL]$", TomlReader),  # *.toml
+    (r"^.+\.[tT][xX][tT]$", PlainTextReader),  # *.txt
 ]
 
 
-def get_reader_class_by_name(name: str):
+def get_reader_class_by_name(name: str) -> Type[Reader]:
     name = name.strip().lower()
     if name == "ini":
         return IniReader
