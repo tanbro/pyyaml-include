@@ -56,12 +56,12 @@ class YamlIncludeConstructor:
     DEFAULT_TAG_NAME = "!include"
 
     def __init__(
-            self,
-            base_dir: str = '',
-            encoding: str = '',
-            reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None,
-            relative: bool = False,
-            persist_anchors: Optional[bool] = False,
+        self,
+        base_dir: str = "",
+        encoding: str = "",
+        reader_map: Optional[Sequence[Tuple[Pattern, Reader]]] = None,
+        relative: bool = False,
+        persist_anchors: Optional[bool] = False,
     ):
         """
         :param str base_dir: Base directory where search including YAML files
@@ -264,6 +264,7 @@ class YamlIncludeConstructor:
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
         if instance._persist_anchors:
+            assert loader_class, "`loader_class` can not be `None` when `persist_anchors` specified"
             loader_class.compose_document = override_compose_document
         yaml.add_constructor(tag, instance, loader_class)
         return instance
