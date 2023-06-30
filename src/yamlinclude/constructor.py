@@ -3,7 +3,6 @@ Include YAML files within YAML
 """
 
 import os.path
-import re
 from glob import iglob
 from typing import Optional, Pattern, Sequence, Tuple, Type
 
@@ -196,7 +195,7 @@ class YamlIncludeConstructor:
         reader_cls = None
         if reader:
             reader_cls = get_reader_class_by_name(reader)
-        if re.match(r"^.*(\*|\?|\[!?.+]).*$", pathname):
+        if any(c in pathname for c in "*?[]"):
             result = []
             iterable = iglob(pathname, recursive=recursive)
             for path in filter(os.path.isfile, iterable):

@@ -1,10 +1,8 @@
 exclude .*
+exclude *.requirements.txt
 exclude coverage.*
 exclude sonar-project.properties
 
 prune .*
-prune build
-prune dist
 prune docs
-prune requires
 prune tests
