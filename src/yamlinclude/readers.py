@@ -9,7 +9,7 @@ from typing import Type
 
 import yaml
 
-if sys.version_info >= (3, 11):
+if sys.version_info >= (3, 11):  # pragma: no cover
     import tomllib
 
 
@@ -65,7 +65,7 @@ class TomlReader(Reader):
         else:
             try:
                 import toml
-            except ImportError as err:
+            except ImportError as err:  # pragma: no cover
                 raise ImportError(f'Un-supported file "{self._path}".\n`pip install toml` should solve the problem.\n\n{err}')
             else:
                 with open(self._path, encoding=self._encoding) as fp:
@@ -77,12 +77,12 @@ class YamlReader(Reader):
         super().__init__(path, encoding)
         self._loader_class = type(loader)
         self._persist_anchors = persist_anchors
-        if self._persist_anchors:
+        if self._persist_anchors:  # pragma: no cover
             self.anchors = loader.anchors
 
     def __call__(self):
         with open(self._path, encoding=self._encoding) as fp:
-            if self._persist_anchors:
+            if self._persist_anchors:  # pragma: no cover
                 loader = self._loader_class(fp)
                 if self.anchors:
                     loader.anchors = self.anchors
@@ -124,7 +124,7 @@ def get_reader_class_by_name(name: str) -> Type[Reader]:
         return PlainTextReader
     if name in ("yaml", "yml"):
         return YamlReader
-    raise ValueError('Un-supported name reader "{0}"'.format(name))
+    raise ValueError('Un-supported name reader "{0}"'.format(name))  # pragma: no cover
 
 
 def get_reader_class_by_path(path: str, table=None) -> Type[Reader]:
@@ -133,4 +133,4 @@ def get_reader_class_by_path(path: str, table=None) -> Type[Reader]:
     for pat, clz in table:
         if re.match(pat, path):
             return clz
-    raise RuntimeError('Un-supported file name "{}"'.format(path))
+    raise RuntimeError('Un-supported file name "{}"'.format(path))  # pragma: no cover

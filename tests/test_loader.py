@@ -329,6 +329,24 @@ files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
                 self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
 
+class IniTestCase(unittest.TestCase):
+    def setUp(self):
+        for loader_cls in YAML_LOADERS:
+            YamlIncludeConstructor.add_to_loader_class(loader_cls)
+
+    def tearDown(self):
+        for loader_class in YAML_LOADERS:
+            del loader_class.yaml_constructors[YamlIncludeConstructor.DEFAULT_TAG_NAME]
+
+    def test_ini_1(self):
+        yml = """
+file1: !include tests/data/include.d/1.ini
+        """
+        for loader_cls in YAML_LOADERS:
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertDictEqual({"key1": "value 1"}, data["file1"]["section_1"])
+
+
 class PlainTextTestCase(unittest.TestCase):
     def setUp(self):
         YamlIncludeConstructor.add_to_loader_class()

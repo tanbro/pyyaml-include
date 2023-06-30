@@ -25,7 +25,7 @@ class YamlIncludeLibYamlException(YamlIncludeException, ValueError):
     pass
 
 
-def override_compose_document(self):
+def override_compose_document(self):  # pragma: no cover
     self.get_event()
     node = self.compose_node(None, None)
     self.get_event()
@@ -82,7 +82,6 @@ class YamlIncludeConstructor:
         :param bool persist_anchors: Pass anchors to included yaml files
 
             :default: ``False``:  do not pass anchors to included files
-
         """
         self._base_dir = base_dir
         self._encoding = encoding
@@ -99,16 +98,13 @@ class YamlIncludeConstructor:
             args = loader.construct_sequence(node)
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
-        else:
+        else:  # pragma: no cover
             raise TypeError(f"Un-supported YAML node {node!r}")
         return self.load(loader, *args, **kwargs)
 
     @property
     def base_dir(self) -> str:
-        """Base directory where search including YAML files
-
-        :rtype: str
-        """
+        """Base directory where search including YAML files"""
         return self._base_dir
 
     @base_dir.setter
@@ -117,17 +113,14 @@ class YamlIncludeConstructor:
 
     @property
     def encoding(self) -> str:
-        """Encoding of the YAML files
-
-        :rtype: str
-        """
+        """Encoding of the YAML files"""
         return self._encoding
 
     @encoding.setter
     def encoding(self, value: str):
         self._encoding = value
 
-    __notfound_default__ = object()
+    __notfound_default__ = object()  # pragma: no cover
 
     def load(
         self,
@@ -195,7 +188,7 @@ class YamlIncludeConstructor:
         reader_cls = None
         if reader:
             reader_cls = get_reader_class_by_name(reader)
-        if any(c in pathname for c in "*?[]"):
+        if any(c in pathname for c in "*?[]!"):
             result = []
             iterable = iglob(pathname, recursive=recursive)
             for path in filter(os.path.isfile, iterable):
@@ -219,7 +212,9 @@ class YamlIncludeConstructor:
         return reader_obj()
 
     @classmethod
-    def add_to_loader_class(cls, loader_class: Optional[Type] = None, tag: Optional[str] = None, **kwargs):
+    def add_to_loader_class(
+        cls, loader_class: Optional[Type] = None, tag: Optional[str] = None, **kwargs
+    ) -> "YamlIncludeConstructor":
         """
         Create an instance of the constructor, and add it to the YAML `Loader` class
 
@@ -251,8 +246,7 @@ class YamlIncludeConstructor:
 
         :param kwargs: Arguments passed to construct function
 
-        :return: New created object
-        :rtype: YamlIncludeConstructor
+        :return: New created constructor
         """
         if tag is None:
             tag = ""
@@ -262,7 +256,7 @@ class YamlIncludeConstructor:
         if not tag.startswith("!"):
             raise ValueError('`tag` argument should start with character "!"')
         instance = cls(**kwargs)
-        if instance._persist_anchors:
+        if instance._persist_anchors:  # pragma: no cover
             assert loader_class, "`loader_class` can not be `None` when `persist_anchors` specified"
             loader_class.compose_document = override_compose_document
         yaml.add_constructor(tag, instance, loader_class)
