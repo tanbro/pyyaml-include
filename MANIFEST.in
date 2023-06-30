@@ -1,5 +1,6 @@
 exclude .*
 exclude coverage.*
+exclude sonar-project.properties
 
 prune .*
 prune build
