@@ -1,2 +1,4 @@
 [run]
+branch = True
 source = src
+relative_files = True
