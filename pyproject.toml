@@ -13,7 +13,7 @@ readme = "README.md"
 requires-python = ">=3.7"
 
 dependencies = [
-  "PyYAML>=5.1,<7.0",
+  "PyYAML>=6.0,<7.0",
 ]
 
 keywords = ["yaml", "PyYAML", "include"]

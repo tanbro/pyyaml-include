@@ -1,35 +1,15 @@
-# -*- coding: utf-8 -*-
-
 from warnings import warn
 
-import yaml
+from yaml import BaseLoader, FullLoader, Loader, SafeLoader, UnsafeLoader
 
+YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
+try:
+    from yaml import CBaseLoader, CFullLoader, CLoader, CSafeLoader, CUnsafeLoader
+except ImportError as err:
+    warn(f"PyYAML was not build with libyaml: {err}")
+else:
+    YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]
 
 YAML1 = {"name": "1"}
 YAML2 = {"name": "2"}
 YAML_ZH_CN = {"name": "中文"}
-
-YAML_LOADERS = []
-
-if "3.12" <= yaml.__version__ < "4.0":
-    from yaml import BaseLoader, SafeLoader, Loader
-
-    YAML_LOADERS = [BaseLoader, SafeLoader, Loader]
-    try:
-        from yaml import CBaseLoader, CSafeLoader, CLoader
-    except ImportError as err:
-        warn(Warning(err))
-    else:
-        YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader]
-elif "5.0" <= yaml.__version__ < "7.0":
-    from yaml import BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader
-
-    YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
-    try:
-        from yaml import CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader
-    except ImportError as err:
-        warn("{}".format(err))
-    else:
-        YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]
-else:
-    raise RuntimeError("Un-supported pyyaml version: {}".format(yaml.__version__))

@@ -1,29 +1,12 @@
 import os
 import unittest
 from io import StringIO
-from sys import version_info
 
 import yaml
 
 from yamlinclude import YamlIncludeConstructor
 
 from ._internal import YAML1, YAML2, YAML_LOADERS
-
-
-class DefaultLoaderTestCase(unittest.TestCase):
-    def setUp(self):
-        YamlIncludeConstructor.add_to_loader_class()
-
-    if yaml.__version__ < "6.0":
-
-        def test_no_loader_class_argument(self):
-            yml = "!include tests/data/include.d/1.yaml"
-            if yaml.__version__ >= "5.0" and version_info >= (3, 2):
-                with self.assertWarns(yaml.YAMLLoadWarning):  # type: ignore
-                    data = yaml.load(StringIO(yml))  # type: ignore
-            else:
-                data = yaml.load(StringIO(yml))  # type: ignore
-            self.assertDictEqual(data, YAML1)
 
 
 class MultiLoadersTestCase(unittest.TestCase):
@@ -80,12 +63,8 @@ file:
         yml = """
 file: !include tests/data/include.d/x.yaml
             """
-        if version_info >= (3, 3):
-            err_cls = FileNotFoundError
-        else:
-            err_cls = IOError
         for loader_cls in YAML_LOADERS:
-            with self.assertRaises(err_cls):
+            with self.assertRaises(FileNotFoundError):
                 yaml.load(StringIO(yml), loader_cls)
 
     def test_include_recursive(self):
@@ -117,20 +96,16 @@ file: !include {0}/tests/data/include.d/1.yaml
     def test_include_wildcards(self):
         ymllist = [
             """
-files: !include tests/data/include.d/*.yaml
-"""
+            files: !include tests/data/include.d/*.yaml
+            """,
+            """
+            files: !include [tests/data/include.d/**/*.yaml, true]
+            """,
+            """
+            files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
+            """,
         ]
-        if version_info >= (3, 5):
-            ymllist.extend(
-                [
-                    """
-files: !include [tests/data/include.d/**/*.yaml, true]
-""",
-                    """
-files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
-""",
-                ]
-            )
+
         for loader_cls in YAML_LOADERS:
             for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader_cls)
@@ -191,12 +166,8 @@ file:
         yml = """
 file: !include tests/data/include.d/x.json
             """
-        if version_info >= (3, 3):
-            err_cls = FileNotFoundError
-        else:
-            err_cls = IOError
         for loader_cls in YAML_LOADERS:
-            with self.assertRaises(err_cls):
+            with self.assertRaises(FileNotFoundError):
                 yaml.load(StringIO(yml), loader_cls)
 
     def test_include_abs(self):
@@ -213,20 +184,16 @@ file: !include {0}/tests/data/include.d/1.json
     def test_include_wildcards(self):
         ymllist = [
             """
-files: !include tests/data/include.d/*.json
-"""
+            files: !include tests/data/include.d/*.json
+            """,
+            """
+            files: !include [tests/data/include.d/**/*.json, true]
+            """,
+            """
+            files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
+            """,
         ]
-        if version_info >= (3, 5):
-            ymllist.extend(
-                [
-                    """
-files: !include [tests/data/include.d/**/*.json, true]
-""",
-                    """
-files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
-""",
-                ]
-            )
+
         for loader_cls in YAML_LOADERS:
             for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader_cls)
@@ -267,41 +234,35 @@ file2: !include tests/data/include.d/2.toml
 
     def test_include_one_in_sequence(self):
         yml = """
-file:
-    - !include tests/data/include.d/1.toml
-        """
+              file:
+                - !include tests/data/include.d/1.toml
+              """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data, {"file": [YAML1]})
 
     def test_include_two_in_sequence(self):
         yml = """
-- !include tests/data/include.d/1.toml
-- !include tests/data/include.d/2.toml
-        """
+              - !include tests/data/include.d/1.toml
+              - !include tests/data/include.d/2.toml
+              """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(data, [YAML1, YAML2])
 
     def test_include_file_not_exists(self):
         yml = """
-file: !include tests/data/include.d/x.toml
-            """
-        if version_info >= (3, 3):
-            err_cls = FileNotFoundError
-        else:
-            err_cls = IOError
+              file: !include tests/data/include.d/x.toml
+              """
         for loader_cls in YAML_LOADERS:
-            with self.assertRaises(err_cls):
+            with self.assertRaises(FileNotFoundError):
                 yaml.load(StringIO(yml), loader_cls)
 
     def test_include_abs(self):
         dirpath = os.path.abspath("")
-        yml = """
-file: !include {0}/tests/data/include.d/1.toml
-        """.format(
-            dirpath
-        )
+        yml = f"""
+              file: !include {dirpath}/tests/data/include.d/1.toml
+              """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data["file"], YAML1)
@@ -309,20 +270,15 @@ file: !include {0}/tests/data/include.d/1.toml
     def test_include_wildcards(self):
         ymllist = [
             """
-files: !include tests/data/include.d/*.toml
-"""
+            files: !include tests/data/include.d/*.toml
+            """,
+            """
+            files: !include [tests/data/include.d/**/*.toml, true]
+            """,
+            """
+            files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
+            """,
         ]
-        if version_info >= (3, 5):
-            ymllist.extend(
-                [
-                    """
-files: !include [tests/data/include.d/**/*.toml, true]
-""",
-                    """
-files: !include {pathname: tests/data/include.d/**/*.yaml, recursive: true}
-""",
-                ]
-            )
         for loader_cls in YAML_LOADERS:
             for yml in ymllist:
                 data = yaml.load(StringIO(yml), loader_cls)
@@ -353,13 +309,7 @@ class PlainTextTestCase(unittest.TestCase):
 
     def test_txt(self):
         yml = "text: !include tests/data/include.d/1.txt"
-        if yaml.__version__ >= "6.0":
-            data = yaml.load(StringIO(yml), yaml.Loader)
-        elif yaml.__version__ >= "5.0" and version_info >= (3, 2):
-            with self.assertWarns(yaml.YAMLLoadWarning):  # type: ignore
-                data = yaml.load(StringIO(yml))  # type: ignore
-        else:
-            data = yaml.load(StringIO(yml))  # type: ignore
+        data = yaml.load(StringIO(yml), yaml.Loader)
         with open("tests/data/include.d/1.txt") as fp:
             s = fp.read()
         self.assertDictEqual(data, {"text": s})
@@ -371,13 +321,7 @@ class ReaderTestCase(unittest.TestCase):
 
     def test_txt(self):
         yml = "text: !include {pathname: tests/data/include.d/1.json, reader: txt}"
-        if yaml.__version__ >= "6.0":
-            data = yaml.load(StringIO(yml), yaml.Loader)
-        elif "6.0" > yaml.__version__ >= "5.0" and version_info >= (3, 2):
-            with self.assertWarns(yaml.YAMLLoadWarning):  # type: ignore
-                data = yaml.load(StringIO(yml))  # type: ignore
-        else:
-            data = yaml.load(StringIO(yml))  # type: ignore
+        data = yaml.load(StringIO(yml), yaml.Loader)
         with open("tests/data/include.d/1.json") as fp:
             s = fp.read()
         self.assertDictEqual(data, {"text": s})
