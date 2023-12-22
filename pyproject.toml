@@ -18,7 +18,7 @@ dependencies = [
 
 keywords = ["yaml", "PyYAML", "include"]
 
-license = {text = "AGPLv3+"}
+license = {text = "GPLv3+"}
 
 classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
