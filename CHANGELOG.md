@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.2
+
+Date: 2023-12-25 🎅🤶
+
+- Fix:
+  - Correct license field in pyproject.toml #39
+
+- Misc:
+  - Update ruff hooks
+
 ## 1.3.1
 
 Date: 2023-06-29
