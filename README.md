@@ -37,16 +37,16 @@ Consider we have such [YAML] files:
   name: "2"
   ```
 
-To include `1.yml`, `2.yml` in `0.yml`, we shall add `YamlIncludeConstructor` to [PyYAML]'s loader, then add an `!include` tag in `0.yaml`:
+To include `1.yml`, `2.yml` in `0.yml`, we shall add `YamlInclude to [PyYAML]'s loader, then add an `!inc` tag in `0.yaml`:
 
 ```python
 import yaml
-from yamlinclude import YamlIncludeConstructor
+from yamlinclude import YamlInclude
 
-YamlIncludeConstructor.add_to_loader_class(loader_class=yaml.FullLoader, base_dir='/your/conf/dir')
+yaml.add_constructor(YamlInclude(base_dir='/your/conf/dir'), yaml.Loader)
 
 with open('0.yml') as f:
-    data = yaml.load(f, Loader=yaml.FullLoader)
+    data = yaml.load(f, Loader=yaml.Loader)
 
 print(data)
 ```
@@ -56,8 +56,8 @@ print(data)
 If `0.yml` was:
 
 ```yaml
-file1: !include include.d/1.yml
-file2: !include include.d/2.yml
+file1: !inc include.d/1.yml
+file2: !inc include.d/2.yml
 ```
 
 We'll get:
@@ -75,8 +75,8 @@ If `0.yml` was:
 
 ```yaml
 files:
-  - !include include.d/1.yml
-  - !include include.d/2.yml
+  - !inc include.d/1.yml
+  - !inc include.d/2.yml
 ```
 
 We'll get:
@@ -104,7 +104,7 @@ Length of the returned list equals number of matched files:
 If `0.yml` was:
 
 ```yaml
-files: !include include.d/*.yml
+files: !inc include.d/*.yml
 ```
 
 We'll get:
@@ -117,7 +117,7 @@ files:
 
 > ℹ **Note**:
 >
-> - For `Python>=3.5`, if `recursive` argument of `!include` [YAML] tag is `true`, the pattern `“**”` will match any files and zero or more directories and subdirectories.
+> - For `Python>=3.5`, if `recursive` argument of `!inc` [YAML] tag is `true`, the pattern `“**”` will match any files and zero or more directories and subdirectories.
 > - Using the `“**”` pattern in large directory trees may consume an inordinate amount of time because of recursive search.
 
 In order to enable `recursive` argument, we shall set it in `Mapping` or `Sequence` arguments mode:
@@ -125,13 +125,13 @@ In order to enable `recursive` argument, we shall set it in `Mapping` or `Sequen
 - Arguments in `Sequence` mode:
 
   ```yaml
-  !include [tests/data/include.d/**/*.yml, true]
+  !inc [tests/data/include.d/**/*.yml, true]
   ```
 
 - Arguments in `Mapping` mode:
 
   ```yaml
-  !include {pathname: tests/data/include.d/**/*.yml, recursive: true}
+  !inc {pathname: tests/data/include.d/**/*.yml, recursive: true}
   ```
 
 ### Non YAML files

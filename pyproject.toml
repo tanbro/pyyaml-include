@@ -1,24 +1,20 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=61.0.0", "wheel", "setuptools_scm>=6.2"]
+requires = ["setuptools>=64", "wheel", "setuptools_scm>=8"]
 
 [project]
-authors = [
-  {name = "liu xue yan", email = "liu_xue_yan@foxmail.com"},
-]
+authors = [{ name = "liu xue yan", email = "liu_xue_yan@foxmail.com" }]
 description = "Extending PyYAML with a custom constructor for including YAML files within YAML files"
 name = "pyyaml-include"
 readme = "README.md"
 
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
-dependencies = [
-  "PyYAML>=6.0,<7.0",
-]
+dependencies = ["PyYAML>=6.0,<7.0", "fsspec>=2021.04.0"]
 
 keywords = ["yaml", "PyYAML", "include"]
 
-license = {text = "GPLv3+"}
+license = { text = "GPLv3+" }
 
 classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
@@ -30,23 +26,16 @@ classifiers = [
   "Topic :: Text Processing :: Markup",
 ]
 
-dynamic = ["version"]
+version = "2.0dev1"
+# dynamic = ["version"]
 
 [project.urls]
 Homepage = "https://github.com/tanbro/pyyaml-include"
 Repository = "https://github.com/tanbro/pyyaml-include.git"
 Documentation = "https://pyyaml-include.readthedocs.io/en/latest/"
 
-[project.optional-dependencies]
-toml = ["toml;python_version<='3.11'"]
-
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools_scm]
-write_to = "src/yamlinclude/version.py"
-
-[tool.black]
-line-length = 128
-[tool.isort]
-profile = "black"
+write_to = "src/yamlinclude/_version.py"

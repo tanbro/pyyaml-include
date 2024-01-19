@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+==============
 pyyaml-include
 ==============
 
@@ -41,6 +42,7 @@ pyyaml-include
    `pyyaml-include` is an extending of PyYAML_: include other YAML_ files into YAML_ document.
 
 
+--------
 Contents
 --------
 
@@ -48,9 +50,9 @@ Contents
    :caption: Documentations
    :titlesonly:
 
-   README <README.md>
-   CHANGELOG <CHANGELOG.md>
-   AUTHORS <AUTHORS.md>
+   README
+   CHANGELOG
+   AUTHORS
 
 .. toctree::
    :caption: API References
@@ -58,13 +60,16 @@ Contents
 
    apidoc/modules
 
+------------------
 Indices and tables
 ------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
 
+.. furo has no search page
 .. * :ref:`search`
 
 .. _YAML: http://yaml.org/
 .. _PyYaml: https://pypi.org/project/PyYAML/
+.. _fsspec: https://github.com/fsspec/filesystem_spec
