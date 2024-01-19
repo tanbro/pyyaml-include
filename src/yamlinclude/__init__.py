@@ -69,7 +69,7 @@ class YamlInclude:
             )
         return self.load(loader, *args, **kwargs)
 
-    def load(self, loader, pathname: str, maxdepth: Optional[int] = None):
+    def load(self, loader, pathname: str, maxdepth: Optional[int] = None, **kwargs):
         """Once add the constructor to PyYAML loader class,
         the loader will invoke this function to include other YAML files when parsing a ``"!include"`` tag.
 
@@ -78,18 +78,19 @@ class YamlInclude:
             loader:
                 Instance of PyYAML's loader class
 
-            pathname (str):
+            pathname:
                 pathname can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
 
-                glob-matching is supported:
+                We support "**", "?" and "[..]". We do not support "^" for pattern negation.
+                The `maxdepth` option is applied on the first "**" found in the path.
 
-                * If the path ends with ‘/’, only folders are returned.
-                * We support "**", "?" and "[..]". We do not support "^" for pattern negation.
-                * The `maxdepth` option is applied on the first "**" found in the path
+                Note:
+                    Using the ``"**"`` pattern in large directory trees or remote files may consume an inordinate amount of time.
 
-            .. note:: Using the ``"**"`` pattern in large directory trees may consume an inordinate amount of time.
+            kwargs:
+                may have additional :mod:`fsspec` backend-specific options
 
-        Return:
+        Returns:
             included YAML file, in Python data type
 
         Warning:

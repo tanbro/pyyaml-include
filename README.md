@@ -11,7 +11,7 @@ An extending constructor of [PyYAML][]: include other [YAML][] files into [YAML]
 ## Install
 
 ```sh
-pip install pyyaml-include
+pip install "pyyaml-include>=2.0"
 ```
 
 ## Usage
@@ -37,21 +37,29 @@ Consider we have such [YAML] files:
   name: "2"
   ```
 
-To include `1.yml`, `2.yml` in `0.yml`, we shall add `YamlInclude to [PyYAML]'s loader, then add an `!inc` tag in `0.yaml`:
+To include `1.yml`, `2.yml` in `0.yml`, we shall add `YamlInclude` to [PyYAML]'s loader, then add an `!inc` tag in `0.yaml`:
 
 ```python
 import yaml
 from yamlinclude import YamlInclude
 
-yaml.add_constructor(YamlInclude(base_dir='/your/conf/dir'), yaml.Loader)
+# add the tag
+yaml.add_constructor(
+    tag="!inc",
+    constructor=YamlInclude(base_dir='/your/conf/dir'),
+    Loader=yaml.Loader
+)
 
 with open('0.yml') as f:
     data = yaml.load(f, Loader=yaml.Loader)
 
 print(data)
+
+# remove the tag
+del yaml.Loader.yaml_constructors["!inc"]
 ```
 
-### Mapping
+### Include in Mapping
 
 If `0.yml` was:
 
@@ -69,7 +77,7 @@ file2:
   name: "2"
 ```
 
-### Sequence
+### Include in Sequence
 
 If `0.yml` was:
 
@@ -86,10 +94,6 @@ files:
   - name: "1"
   - name: "2"
 ```
-
-> ℹ **Note**:
->
-> File name can be either absolute (like `/usr/conf/1.5/Make.yml`) or relative (like `../../cfg/img.yml`).
 
 ### Wildcards
 
@@ -115,36 +119,12 @@ files:
   - name: "2"
 ```
 
-> ℹ **Note**:
->
-> - For `Python>=3.5`, if `recursive` argument of `!inc` [YAML] tag is `true`, the pattern `“**”` will match any files and zero or more directories and subdirectories.
-> - Using the `“**”` pattern in large directory trees may consume an inordinate amount of time because of recursive search.
+## fsspec
 
-In order to enable `recursive` argument, we shall set it in `Mapping` or `Sequence` arguments mode:
+From `v2.0`, yamlinclude use [fsspec][] to open including files.
 
-- Arguments in `Sequence` mode:
-
-  ```yaml
-  !inc [tests/data/include.d/**/*.yml, true]
-  ```
-
-- Arguments in `Mapping` mode:
-
-  ```yaml
-  !inc {pathname: tests/data/include.d/**/*.yml, recursive: true}
-  ```
-
-### Non YAML files
-
-This extending constructor can now load data from non YAML files, supported file types are:
-
-- `json`
-- `toml` (only available when [toml](https://pypi.org/project/toml/) installed)
-- `ini`
-
-The constructor read non YAML files by different readers according to a pattern table defined in `src/yamlinclude/readers.py`.
-
-Default reader table can be replaced by a custom `reader_map` when call `add_to_loader_class`.
+[fsspec][] makes it possible to include file from many different sources, as local file system, S3, HTTP, SFTP, etc ...
 
 [YAML]: http://yaml.org/
 [PyYaml]: https://pypi.org/project/PyYAML/
+[fsspec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."
