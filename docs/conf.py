@@ -79,7 +79,9 @@ myst_enable_extensions = [
     "deflist",
     "dollarmath",
     "fieldlist",
+    "html_admonition",
     "html_image",
+    "linkify",
     "replacements",
     "smartquotes",
     "strikethrough",
@@ -92,7 +94,7 @@ myst_enable_extensions = [
 # configuration for intersphinx: refer to the Python standard and/or 3rd libraries.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
-    "fsspec": ("https://filesystem-spec.readthedocs.io/", None),
+    "fsspec": ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
 # -- Options for Napoleon settings ---------------------------------------

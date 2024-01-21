@@ -12,6 +12,8 @@ import yaml
 
 from ._version import __version__, __version_tuple__, version, version_tuple
 
+__all__ = ["YamlInclude", "version", "version_tuple"]
+
 
 class YamlInclude:
     """The `include constructor` for PyYAML Loaders
@@ -42,14 +44,15 @@ class YamlInclude:
 
     def __init__(
         self,
-        fs=None,
+        fs: Optional[fsspec.AbstractFileSystem] = None,
         base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None,
     ):
         """
         Args:
-            base_dir: Base directory where search including YAML files
-
-                :default: ``""``:  include YAML files from current working directory.
+            fs:
+                :mod:`fsspec` File-system object to parse path/url and open including files
+            base_dir:
+                Base directory to which search including YAML files in relative mode
         """
         self._fs = fsspec.filesystem("file") if fs is None else fs
         self._base_dir = base_dir

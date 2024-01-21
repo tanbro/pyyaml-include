@@ -3,7 +3,8 @@
 ## 2.0 (developing)
 
 - New Features:
-  - [fssppec][] based file opener, now it can include files from local filesystem, s3, http, sftp ...
+  - Introduce [fssppec][] to open including files. Now we can include files from local filesystem, s3, http, sftp ...
+  - New parameters for the tag in YAML
 
 - Incompatible Changes:
   - Drop python support blow 3.8
