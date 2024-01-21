@@ -138,7 +138,7 @@ For example, we can include files in a website in YAML:
 conf: !inc http://domain/conf/*.yml
 ```
 
-When creating a `yamlinclude` constructor, a [fsspec][] filesystem parameter cat be set on `fs` argument to load including files. If the argument is omitted or `None`, a `"file"`/`"local"` [fsspec][] filesystem object will be used.
+When creating a `yamlinclude` constructor, a [fsspec][] filesystem parameter can be set on `fs` argument to open including files. If the argument is omitted or `None`, a `"file"`/`"local"` [fsspec][] filesystem object will be used.
 
 For example, when we want to include files from a website, we shall:
 
@@ -158,7 +158,7 @@ For example, when we want to include files from a website, we shall:
    yaml.add_constructor("!inc", ctor, yaml.Loader)
    ```
 
-1. then, write a YAML document to include files from `http://${HOST}:${PORT}`:
+1. then, write a [YAML][] document to include files from `http://${HOST}:${PORT}`:
 
    ```yaml
    doc1: !inc doc1.yml    # relative path to "base_dir"
@@ -173,7 +173,7 @@ For example, when we want to include files from a website, we shall:
    yaml.load(content, yaml.Loader)
    ```
 
-Above YAML snippet will be loaded as:
+Above [YAML][] snippet will be loaded as:
 
 - `http://${HOST}:${PORT}/foo/baz/doc1.yml` for the key `doc1`
 - `http://${HOST}:${PORT}/foo/baz/doc2.yml` for the key `doc2`
@@ -186,8 +186,8 @@ Above YAML snippet will be loaded as:
 
 ### The base_dir argument
 
-- If `base_dir` is omitted or `None`, the actually including file path is the path in defined in YAML without a change, and different [fsspec][] filesystem will treat them differently.
+- If `base_dir` is omitted or `None`, the actually including file path is the path in defined in [YAML][] without a change, and different [fsspec][] filesystem will treat them differently. For a local filesystem, it will be `CWD`.
 
-[YAML]: http://yaml.org/
-[PyYaml]: https://pypi.org/project/PyYAML/
+[YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
+[PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."
 [fsspec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."
