@@ -1,5 +1,6 @@
 from warnings import warn
 
+import yaml
 from yaml import BaseLoader, FullLoader, Loader, SafeLoader, UnsafeLoader
 
 YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
@@ -10,6 +11,9 @@ except ImportError as err:
 else:
     YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]
 
-YAML1 = {"name": "1"}
-YAML2 = {"name": "2"}
-YAML_ZH_CN = {"name": "中文"}
+with open("tests/data/include.d/1.yaml") as f:
+    YAML1 = yaml.safe_load(f)
+with open("tests/data/include.d/2.yaml") as f:
+    YAML2 = yaml.safe_load(f)
+with open("tests/data/zh_cn.yaml") as f:
+    YAML_ZH_CN = yaml.safe_load(f)

@@ -16,30 +16,49 @@ __all__ = ["YamlInclude", "version", "version_tuple"]
 
 
 class YamlInclude:
-    """The `include constructor` for PyYAML Loaders
+    """The include constructor for PyYAML Loaders
 
-    Use :func:`yaml.add_constructor` to add it into loader.
+    Use :func:`yaml.add_constructor` to add it to PyYAML's Loaders.
 
     Example:
 
-        ::
+        #. In Python source code, add it to a Loader class::
 
             import yaml
+
             from yamlinclude import YamlInclude
 
-            yaml.add_constructor("!inc", YamlInclude)
+            yaml.add_constructor("!inc", YamlInclude, yaml.Loader)
 
-        In YAML files, use ``!inc`` to load other YAML files as below::
+        #. In YAML files, use ``!inc`` to load other YAML files, we can:
 
-            baz: !inc /absolute/dir/of/foo/baz.yml
+            * include file in local file system, by absolute or relative path
 
-        ::
+                .. code:: yaml
 
-            data: !inc {pathname: http://localhost:8080/dir/**/*.yml, maxdepth: 1}
+                    file: !inc /absolute/dir/of/foo/baz.yml
 
-        ::
+                .. code:: yaml
 
-            conf: !inc ./conf/*.yml
+                    file: !inc ../../foo/baz.yml
+
+            * include file from a website, arguments can be set in a mapping form
+
+                .. code:: yaml
+
+                    file: !inc {urlpath: http://localhost:8080/foo/baz.yml, encoding: utf8}
+
+            * include file by wildcards
+
+                .. code:: yaml
+
+                    files: !inc foo/*.yml
+
+        #. load the YAML in python source code::
+
+            data = yaml.load(yaml_string, yaml.Loader)
+
+           The variable ``data`` containers the parsed Python object(s) from including file(s)
     """
 
     def __init__(
@@ -72,17 +91,17 @@ class YamlInclude:
             )
         return self.load(loader, *args, **kwargs)
 
-    def load(self, loader, pathname: str, maxdepth: Optional[int] = None, **kwargs):
-        """Once add the constructor to PyYAML loader class,
-        the loader will invoke this function to include other YAML files when parsing a ``"!include"`` tag.
+    def load(self, loader, urlpath: str, **kwargs):
+        """Once the constructor was added to PyYAML loader class,
+        the loader class will invoke this function to include other YAML files when meet an including tag(eg: ``"!inc"``).
 
         Args:
 
             loader:
                 Instance of PyYAML's loader class
 
-            pathname:
-                pathname can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
+            urlpath:
+                urlpath can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
 
                 We support "**", "?" and "[..]". We do not support "^" for pattern negation.
                 The `maxdepth` option is applied on the first "**" found in the path.
@@ -94,36 +113,37 @@ class YamlInclude:
                 may have additional :mod:`fsspec` backend-specific options
 
         Returns:
-            included YAML file, in Python data type
+            Data of included YAML file, in Python data type
 
         Warning:
-            It's called by :mod:`yaml`. Do NOT call it yourself.
+            It's called by `PyYAML`, and do NOT call it yourself.
         """
-        Loader = type(loader)
+        Loader_class = type(loader)
+
+        if kwargs.get("maxdepth") is not None:
+            kwargs["maxdepth"] = int(kwargs["maxdepth"])
 
         # scheme://path format, relative path and wildcards are not supported!
-        if urlsplit(pathname).scheme:
-            with fsspec.open(pathname) as fp:
-                return yaml.load(fp, Loader)  # type:ignore
+        if urlsplit(urlpath).scheme:
+            with fsspec.open(urlpath, **kwargs) as fp:
+                return yaml.load(fp, Loader_class)  # type:ignore
 
-        if maxdepth is not None:
-            maxdepth = int(maxdepth)
         if self._base_dir is None:
-            pathname = Path(pathname).as_posix()
+            urlpath = Path(urlpath).as_posix()
         else:
             if callable(self._base_dir):
                 base_dir = Path(self._base_dir())
             else:
                 base_dir = Path(self._base_dir)
-            pathname = base_dir.joinpath(pathname).as_posix()
+            urlpath = base_dir.joinpath(urlpath).as_posix()
 
         # wildcards?
-        if any(c in pathname for c in "*?[]"):
+        if any(c in urlpath for c in "*?[]"):
             result = []
-            for file in self._fs.glob(pathname, maxdepth):
+            for file in self._fs.glob(urlpath, **kwargs):
                 with self._fs.open(file) as fp:
-                    result.append(yaml.load(fp, Loader))
+                    result.append(yaml.load(fp, Loader_class))
             return result
-
-        with self._fs.open(pathname) as fp:
-            return yaml.load(fp, Loader)
+        else:
+            with self._fs.open(urlpath, **kwargs) as fp:
+                return yaml.load(fp, Loader_class)

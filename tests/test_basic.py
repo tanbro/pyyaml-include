@@ -1,15 +1,20 @@
-from __future__ import annotations
+import http.server
+import socket
+import sys
+import threading
 import unittest
 from io import StringIO
+from pathlib import Path
 from textwrap import dedent
+from time import sleep
+from warnings import warn
 
 import fsspec
 import yaml
 
 from yamlinclude import YamlInclude
 
-from ._internal import YAML1, YAML2, YAML_LOADERS
-
+from ._internal import YAML1, YAML2, YAML_LOADERS, YAML_ZH_CN
 
 
 class BaseTestCase(unittest.TestCase):
@@ -95,45 +100,160 @@ files: !inc include.d/*.yaml
 """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+            self.assertListEqual(
+                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+            )
 
     def test_include_wildcards_1(self):
         yml = """
-files: !inc [include.d/**/*.yaml, 3]
+files: !inc [include.d/**/*.yaml]
 """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+            self.assertListEqual(
+                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+            )
 
     def test_include_wildcards_2(self):
         yml = """
-files: !inc {pathname: include.d/**/*.yaml, maxdepth: 3}
+files: !inc {urlpath: include.d/**/*.yaml}
 """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+            self.assertListEqual(
+                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+            )
+
+    def test_include_wildcards_3(self):
+        yml = """
+files: !inc {urlpath: include.d/**/*.yaml, maxdepth: 3}
+"""
+        for loader_cls in YAML_LOADERS:
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertListEqual(
+                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+            )
+
+    def test_abs_path(self):
+        yml = dedent(
+            f"""
+            file1: !inc file://{Path().absolute().as_posix()}/tests/data/include.d/1.yaml
+            """
+        )
+        data = yaml.load(yml, yaml.Loader)
+        self.assertDictEqual(data, {"file1": YAML1})
 
 
 class DefaultFsBasicTestCase(BaseTestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        ctor = YamlInclude(base_dir="tests/data")
         for loader_cls in YAML_LOADERS:
-            ctor = YamlInclude(base_dir="tests/data")
             yaml.add_constructor("!inc", ctor, loader_cls)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors["!inc"]
 
 
 class FileFsBasicTestCase(BaseTestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        ctor = YamlInclude(fs=fsspec.filesystem("file"), base_dir="tests/data")
         for loader_cls in YAML_LOADERS:
-            ctor = YamlInclude(fs=fsspec.filesystem("file"), base_dir="tests/data")
             yaml.add_constructor("!inc", ctor, loader_cls)
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors["!inc"]
+
+
+def _get_best_family(*address):
+    infos = socket.getaddrinfo(
+        *address,
+        type=socket.SOCK_STREAM,
+        flags=socket.AI_PASSIVE,
+    )
+    family, type, proto, canonname, sockaddr = next(iter(infos))
+    return family, sockaddr
+
+
+httpd: http.server.HTTPServer
+
+
+class CustomHttpServer(http.server.ThreadingHTTPServer):
+    def finish_request(self, request, client_address):
+        self.RequestHandlerClass(request, client_address, self)
+
+
+def serve_http(
+    HandlerClass=http.server.SimpleHTTPRequestHandler,
+    ServerClass=CustomHttpServer,
+    protocol="HTTP/1.1",
+    port=0,
+    bind="127.0.0.1",
+):
+    """Test the HTTP request handler class.
+
+    This runs an HTTP server on port 8000 (or the port argument).
+    """
+    global httpd
+    ServerClass.address_family, addr = _get_best_family(bind, port)
+    HandlerClass.protocol_version = protocol
+    httpd = ServerClass(addr, HandlerClass)  # type: ignore
+    host, port = httpd.socket.getsockname()[:2]
+    url_host = f"[{host}]" if ":" in host else host
+    print(f"Serving HTTP on {host} port {port} " f"(http://{url_host}:{port}/) ...")
+    try:
+        httpd.serve_forever()
+    except OSError as err:
+        if sys.platform.startswith("win") and err.errno == 10038:
+            warn(f"{err}")
+        else:
+            raise
+    finally:
+        httpd.shutdown()
+
+
+class SimpleHttpBasicTestCase(BaseTestCase):
+    server_thread: threading.Thread
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server_thread = threading.Thread(target=serve_http)
+        cls.server_thread.start()
+        sleep(1)
+        host, port = httpd.socket.getsockname()[:2]
+        ctor = YamlInclude(
+            fs=fsspec.filesystem(
+                "http", client_kwargs=dict(base_url=f"http://{host}:{port}")
+            ),
+            base_dir="/tests/data",
+        )
+        yaml.add_constructor("!inc", ctor, yaml.Loader)
+        for loader_cls in YAML_LOADERS:
+            yaml.add_constructor("!inc", ctor, loader_cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        httpd.server_close()
+        cls.server_thread.join()
+        for loader_class in YAML_LOADERS:
+            del loader_class.yaml_constructors["!inc"]
+
+    def test_independent_http_url_and_zh_cn(self):
+        host, port = httpd.socket.getsockname()[:2]
+        yml = dedent(
+            f"""
+            file1: !inc http://{host}:{port}/tests/data/zh_cn.yaml
+            """
+        )
+        data = yaml.load(yml, yaml.Loader)
+        self.assertDictEqual(data, {"file1": YAML_ZH_CN})
 
 
 if __name__ == "__main__":
