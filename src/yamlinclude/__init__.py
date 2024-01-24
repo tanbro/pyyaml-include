@@ -77,19 +77,19 @@ class YamlInclude:
         self._base_dir = base_dir
 
     def __call__(self, loader, node):
-        args = []
-        kwargs = {}
         if isinstance(node, yaml.nodes.ScalarNode):
-            args = [loader.construct_scalar(node)]
+            arg = loader.construct_scalar(node)
+            return self.load(loader, arg)
         elif isinstance(node, yaml.nodes.SequenceNode):
             args = loader.construct_sequence(node)
+            return self.load(loader, *args)
         elif isinstance(node, yaml.nodes.MappingNode):
             kwargs = loader.construct_mapping(node)
+            return self.load(loader, **kwargs)
         else:  # pragma: no cover
             raise ValueError(
                 f"PyYAML node type {node!r} is not supported by {type(self)}"
             )
-        return self.load(loader, *args, **kwargs)
 
     def load(self, loader, urlpath: str, **kwargs):
         """Once the constructor was added to PyYAML loader class,

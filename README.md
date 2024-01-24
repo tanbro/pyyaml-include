@@ -14,7 +14,7 @@ An extending constructor of [PyYAML][]: include other [YAML][] files into [YAML]
 pip install "pyyaml-include>=2.0"
 ```
 
-## Basic Usages
+## Basic usages
 
 Consider we have such [YAML] files:
 
@@ -37,29 +37,55 @@ Consider we have such [YAML] files:
   name: "2"
   ```
 
-To include `1.yml`, `2.yml` in `0.yml`, we shall add `YamlInclude` to [PyYAML]'s loader, then add an `!inc` tag in `0.yaml`:
+To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
-```python
-import yaml
-from yamlinclude import YamlInclude
+1. add `YamlInclude` to [PyYAML]'s loader, then write an `!inc` tag in `0.yaml`:
 
-# add the tag
-yaml.add_constructor(
-    tag="!inc",
-    constructor=YamlInclude(base_dir='/your/conf/dir'),
-    Loader=yaml.Loader
-)
+   ```python
+   import yaml
+   from yamlinclude import YamlInclude
 
-with open('0.yml') as f:
-    data = yaml.load(f, Loader=yaml.Loader)
+   # add the tag
+   yaml.add_constructor(
+      tag="!inc",
+      constructor=YamlInclude(base_dir='/your/conf/dir'),
+      Loader=yaml.Loader
+   )
+   ```
 
-print(data)
+1. write `!inc` tags in `0.yaml`:
 
-# remove the tag
-del yaml.Loader.yaml_constructors["!inc"]
-```
+   ```yaml
+   file1: !inc include.d/1.yml
+   file2: !inc include.d/1.yml
+   ```
 
-### Include in a Mapping
+1. load it
+
+   ```python
+   with open('0.yml') as f:
+      data = yaml.load(f, Loader=yaml.Loader)
+   print(data)
+   ```
+
+   we'll get:
+
+   ```json
+   "file1":  {
+       "name": "1"
+   },
+   "file2":  {
+       "name": "2"
+   },
+   ```
+
+1. the constructor can be removed:
+
+   ```yml
+   del yaml.Loader.yaml_constructors["!inc"]
+   ```
+
+### In Mapping
 
 If `0.yml` was:
 
@@ -77,7 +103,7 @@ file2:
   name: "2"
 ```
 
-### Include in a Sequence
+### In Sequence
 
 If `0.yml` was:
 
@@ -94,6 +120,8 @@ files:
   - name: "1"
   - name: "2"
 ```
+
+## Advanced usages
 
 ### Wildcards
 
@@ -126,21 +154,20 @@ files:
   - name: "2"
 ```
 
-## Advance usages
-
 ### Work with fsspec
 
 In `v2.0`, we use [fsspec][] to open including files, which makes it possible to include file from many different sources, such as local file system, S3, HTTP, SFTP ...
 
-For example, we can include files in a website in YAML:
+For example, we can include a file from a website in YAML:
 
 ```yaml
-conf: !inc http://domain/conf/*.yml
+conf:
+  logging: !inc http://domain/etc/app/conf.d/logging.yml
 ```
 
-When creating a `yamlinclude` constructor, a [fsspec][] filesystem parameter can be set on `fs` argument to open including files. If the argument is omitted or `None`, a `"file"`/`"local"` [fsspec][] filesystem object will be used.
+In such situations, when creating a `yamlinclude` constructor, a [fsspec][] filesystem object shall be set to `fs` argument.
 
-For example, when we want to include files from a website, we shall:
+For example, if want to include files from a website, we shall:
 
 1. create a YAML-Include tag constructor, with a [fsspec][] HTTP filesystem object as it's `fs`:
 
@@ -149,40 +176,65 @@ For example, when we want to include files from a website, we shall:
    import fsspec
    from yamlinclude import YamlInclude
 
-   ctor = YamlInclude(
-       fs=fsspec.filesystem(
-           "http", client_kwargs=dict(base_url=f"http://{HOST}:{PORT}")
-       ),
-       base_dir="/foo/baz",
+   http_fs = fsspec.filesystem(
+      "http", client_kwargs=dict(base_url=f"http://{HOST}:{PORT}")
    )
+
+   ctor = YamlInclude(http_fs, base_dir="/foo/baz")
    yaml.add_constructor("!inc", ctor, yaml.Loader)
    ```
 
 1. then, write a [YAML][] document to include files from `http://${HOST}:${PORT}`:
 
    ```yaml
-   doc1: !inc doc1.yml    # relative path to "base_dir"
-   doc2: !inc ./doc2.yml  # relative path to "base_dir" also
-   doc3: !inc /doc3.yml   # absolute path, "base_dir" is not effected
-   doc3: !inc ../doc4.yml # relative path one level upper to "base_dir"
+   key1: !inc doc1.yml    # relative path to "base_dir"
+   key2: !inc ./doc2.yml  # relative path to "base_dir" also
+   key3: !inc /doc3.yml   # absolute path, "base_dir" does not affect
+   key3: !inc ../doc4.yml # relative path one level upper to "base_dir"
    ```
 
 1. load it with `PyYAML`:
 
    ```python
-   yaml.load(content, yaml.Loader)
+   yaml.load(yaml_string, yaml.Loader)
    ```
 
 Above [YAML][] snippet will be loaded as:
 
-- `http://${HOST}:${PORT}/foo/baz/doc1.yml` for the key `doc1`
-- `http://${HOST}:${PORT}/foo/baz/doc2.yml` for the key `doc2`
-- `http://${HOST}:${PORT}/doc3.yml` for the key `doc3`
-- `http://${HOST}:${PORT}/foo/doc4.yml` for the key `doc4`
+- `key1`: pared YAML of `http://${HOST}:${PORT}/foo/baz/doc1.yml`
+- `key2`: pared YAML of `http://${HOST}:${PORT}/foo/baz/doc2.yml`
+- `key3`: pared YAML of `http://${HOST}:${PORT}/doc3.yml`
+- `key4`: pared YAML of `http://${HOST}:${PORT}/foo/doc4.yml`
 
 > 💡 **Tips**
 >
 > Check [fsspec][]'s documentation for more
+
+> 💡 **Note**
+>
+> If `fs` argument is omitted or `None`, a `"file"`/`"local"` [fsspec][] filesystem object will be used. That is to say:
+>
+> ```yaml
+> data: !inc: foo/baz.yaml
+> ```
+>
+> is equivalent to (if no `base_dir` was set in `YamlInclude()`):
+>
+> ```yaml
+> data: !inc: file://foo/baz.yaml
+> ```
+>
+> and
+>
+> ```python
+> yaml.add_constructor("!inc", YamlInclude())
+> ```
+>
+> is equivalent to:
+>
+> ```python
+> yaml.add_constructor("!inc", YamlInclude(fs=fsspec.filesystem("file")))
+> ```
 
 ### The base_dir argument
 
