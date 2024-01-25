@@ -4,7 +4,7 @@ Include YAML files within YAML
 
 from os import PathLike
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, Type, Union
 from urllib.parse import urlsplit
 
 import fsspec
@@ -76,29 +76,27 @@ class YamlInclude:
         self._fs = fsspec.filesystem("file") if fs is None else fs
         self._base_dir = base_dir
 
-    def __call__(self, loader, node):
+    def __call__(self, loader, node: yaml.nodes.Node):
         if isinstance(node, yaml.nodes.ScalarNode):
-            arg = loader.construct_scalar(node)
-            return self.load(loader, arg)
+            value = loader.construct_scalar(node)
+            return self.load(type(loader), value)
         elif isinstance(node, yaml.nodes.SequenceNode):
-            args = loader.construct_sequence(node)
-            return self.load(loader, *args)
+            value = loader.construct_sequence(node)
+            return self.load(type(loader), *value)
         elif isinstance(node, yaml.nodes.MappingNode):
-            kwargs = loader.construct_mapping(node)
-            return self.load(loader, **kwargs)
+            value = loader.construct_mapping(node)
+            return self.load(type(loader), **value)
         else:  # pragma: no cover
-            raise ValueError(
-                f"PyYAML node type {node!r} is not supported by {type(self)}"
-            )
+            raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")
 
-    def load(self, loader, urlpath: str, **kwargs):
+    def load(self, loader_type: Type, urlpath: str, *args, **kwargs):
         """Once the constructor was added to PyYAML loader class,
         the loader class will invoke this function to include other YAML files when meet an including tag(eg: ``"!inc"``).
 
         Args:
 
-            loader:
-                Instance of PyYAML's loader class
+            loader_type:
+                Type of PyYAML's loader class
 
             urlpath:
                 urlpath can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
@@ -113,20 +111,15 @@ class YamlInclude:
                 may have additional :mod:`fsspec` backend-specific options
 
         Returns:
-            Data of included YAML file, in Python data type
+            Data of included YAML file, pared to python object
 
         Warning:
             It's called by `PyYAML`, and do NOT call it yourself.
         """
-        Loader_class = type(loader)
-
-        if kwargs.get("maxdepth") is not None:
-            kwargs["maxdepth"] = int(kwargs["maxdepth"])
-
         # scheme://path format, relative path and wildcards are not supported!
         if urlsplit(urlpath).scheme:
-            with fsspec.open(urlpath, **kwargs) as fp:
-                return yaml.load(fp, Loader_class)  # type:ignore
+            with fsspec.open(urlpath, *args, **kwargs) as fp:
+                return yaml.load(fp, loader_type)  # type:ignore
 
         if self._base_dir is None:
             urlpath = Path(urlpath).as_posix()
@@ -140,10 +133,35 @@ class YamlInclude:
         # wildcards?
         if any(c in urlpath for c in "*?[]"):
             result = []
-            for file in self._fs.glob(urlpath, **kwargs):
-                with self._fs.open(file) as fp:
-                    result.append(yaml.load(fp, Loader_class))
+            glob_params = open_params = {}
+            if args:
+                if len(args) == 1:
+                    glob_params = args[0]
+                elif len(args) == 2:
+                    glob_params, open_params = args
+                else:
+                    raise ValueError(f"Count of positional arguments pass to {type(self)} for wildcards should be 1 or 2")
+            if kwargs:
+                glob_params = kwargs.get("glob", dict())
+                open_params = kwargs.get("open", dict())
+
+            if isinstance(glob_params, dict):
+                glob_func = lambda: self._fs.glob(urlpath, **glob_params)  # noqa: E731
+            elif isinstance(glob_params, list):
+                glob_func = lambda: self._fs.glob(urlpath, *glob_params)  # noqa: E731
+            else:
+                raise ValueError(f"Type of parameter pass to {type(self)}'s glob function for wildcards should be Dict or List")
+            if isinstance(open_params, dict):
+                open_func = lambda x: self._fs.open(x, **open_params)  # noqa: E731
+            elif isinstance(open_params, list):
+                open_func = lambda x: self._fs.open(x, *open_params)  # noqa: E731
+            else:
+                raise ValueError(f"Type of parameter pass to {type(self)}'s open function for wildcards should be Dict or List")
+
+            for file in glob_func():
+                with open_func(file) as fp:
+                    result.append(yaml.load(fp, loader_type))
             return result
         else:
-            with self._fs.open(urlpath, **kwargs) as fp:
-                return yaml.load(fp, Loader_class)
+            with self._fs.open(urlpath, *args, **kwargs) as fp:
+                return yaml.load(fp, loader_type)

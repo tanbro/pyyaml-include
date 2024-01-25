@@ -1,13 +1,11 @@
 import http.server
 import socket
-import sys
 import threading
 import unittest
 from io import StringIO
 from pathlib import Path
 from textwrap import dedent
 from time import sleep
-from warnings import warn
 
 import fsspec
 import yaml
@@ -106,9 +104,13 @@ files: !inc include.d/*.yaml
 
     def test_include_wildcards_1(self):
         yml = """
-files: !inc [include.d/**/*.yaml]
+files: !inc [include.d/**/*.yaml, [!!int 1]]
 """
         for loader_cls in YAML_LOADERS:
+            if any(
+                name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")
+            ):
+                continue  # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(
                 sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
@@ -116,9 +118,11 @@ files: !inc [include.d/**/*.yaml]
 
     def test_include_wildcards_2(self):
         yml = """
-files: !inc {urlpath: include.d/**/*.yaml}
+files: !inc [include.d/**/*.yaml, {maxdepth: 1}]
 """
         for loader_cls in YAML_LOADERS:
+            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
+            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(
                 sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
@@ -126,9 +130,11 @@ files: !inc {urlpath: include.d/**/*.yaml}
 
     def test_include_wildcards_3(self):
         yml = """
-files: !inc {urlpath: include.d/**/*.yaml, maxdepth: 3}
+files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: {encoding: utf-8}}
 """
         for loader_cls in YAML_LOADERS:
+            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
+            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(
                 sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
@@ -208,15 +214,7 @@ def serve_http(
     host, port = httpd.socket.getsockname()[:2]
     url_host = f"[{host}]" if ":" in host else host
     print(f"Serving HTTP on {host} port {port} " f"(http://{url_host}:{port}/) ...")
-    try:
-        httpd.serve_forever()
-    except OSError as err:
-        if sys.platform.startswith("win") and err.errno == 10038:
-            warn(f"{err}")
-        else:
-            raise
-    finally:
-        httpd.shutdown()
+    httpd.serve_forever()
 
 
 class SimpleHttpBasicTestCase(BaseTestCase):
@@ -240,10 +238,13 @@ class SimpleHttpBasicTestCase(BaseTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        httpd.server_close()
+        httpd.shutdown()
         cls.server_thread.join()
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors["!inc"]
+
+    def setUp(self) -> None:
+        self.assertTrue(self.server_thread.is_alive())
 
     def test_independent_http_url_and_zh_cn(self):
         host, port = httpd.socket.getsockname()[:2]
