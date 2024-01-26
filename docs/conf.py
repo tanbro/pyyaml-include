@@ -94,7 +94,7 @@ myst_enable_extensions = [
 # configuration for intersphinx: refer to the Python standard and/or 3rd libraries.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
-    "fsspec": ("https://filesystem-spec.readthedocs.io/en/stable/", None),
+    "fsspec": ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
 
 # -- Options for Napoleon settings ---------------------------------------

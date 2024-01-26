@@ -18,21 +18,21 @@ __all__ = ["YamlInclude", "version", "version_tuple"]
 class YamlInclude:
     """The include constructor for PyYAML Loaders
 
-    Use :func:`yaml.add_constructor` to add it to PyYAML's Loaders.
+    Use :func:`yaml.add_constructor` to register it on PyYAML's Loaders.
 
     Example:
 
-        #. In Python source code, add it to a Loader class::
+        #. In Python source code, register it to a Loader class::
 
             import yaml
 
             from yamlinclude import YamlInclude
 
-            yaml.add_constructor("!inc", YamlInclude, yaml.Loader)
+            yaml.add_constructor("!inc", YamlInclude(), yaml.Loader)
 
-        #. In YAML files, use ``!inc`` to load other YAML files, we can:
+        #. In a YAML file, write ``!inc`` tags to include other YAML files. We can:
 
-            * include file in local file system, by absolute or relative path
+            * include file in local file system, absolute or relative
 
                 .. code:: yaml
 
@@ -42,19 +42,19 @@ class YamlInclude:
 
                     file: !inc ../../foo/baz.yml
 
-            * include file from a website, arguments can be set in a mapping form
+            * include file from a website
 
                 .. code:: yaml
 
-                    file: !inc {urlpath: http://localhost:8080/foo/baz.yml, encoding: utf8}
+                    file: !inc http://localhost:8080/foo/baz.yml
 
             * include file by wildcards
 
                 .. code:: yaml
 
-                    files: !inc foo/*.yml
+                    files: !inc foo/**/*.yml
 
-        #. load the YAML in python source code::
+        #. load the YAML in python::
 
             data = yaml.load(yaml_string, yaml.Loader)
 

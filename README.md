@@ -261,13 +261,13 @@ However, there are more parameters.
 
 - in a mapping way, parameters will be passed to python as positional arguments, like `*args` in python function. eg:
 
-  ```yml
+  ```yaml
   files: !inc [include.d/**/*.yaml, {maxdepth: 1}, {encoding: utf16}]
   ```
 
 - in a sequence way, parameters will be passed to python as named arguments, like `**kwargs` in python function. eg:
 
-  ```yml
+  ```yaml
   files: !inc {urlpath: /foo/baz.yaml, encoding: utf16}
   ```
 
@@ -281,7 +281,7 @@ But the format of parameters has multiple cases, and differs variably in differe
 
   - the [YAML][] snippet
 
-    ```yml
+    ```yaml
     files: !inc [file:///foo/baz.yaml, r]
     ```
 
@@ -294,7 +294,7 @@ But the format of parameters has multiple cases, and differs variably in differe
 
   - and the [YAML][] snippet
 
-    ```yml
+    ```yaml
     files: !inc {urlpath: file:///foo/baz.yaml, encoding: utf16}
     ```
 
@@ -321,7 +321,7 @@ But the format of parameters has multiple cases, and differs variably in differe
 
   - If we want to include every `.yml` file in directory `etc/app` recursively with max depth at 2, and open them in utf-16 codec, we shall write the [YAML][] as below:
 
-    ```yml
+    ```yaml
     files: !inc ["etc/app/**/*.yml", {maxdepth: !!int "2"}, {encoding: utf16}]
     ```
 
@@ -335,7 +335,7 @@ But the format of parameters has multiple cases, and differs variably in differe
 
   - Since `maxdepth` is following `path` in `glob` method, we can write the [YAML][] like this:
 
-    ```yml
+    ```yaml
     files: !inc ["etc/app/**/*.yml", [!!int "2"]]
     ```
 
@@ -343,7 +343,7 @@ But the format of parameters has multiple cases, and differs variably in differe
 
   - Also we can set the two parameters in a mapping form, and name of the keys are `"glob"` and `"open"`. for example:
 
-    ```yml
+    ```yaml
     files: !inc {urlpath: "etc/app/**/*.yml", glob: [!!int "2"], open: {encoding: utf16}}
     ```
 
@@ -355,13 +355,13 @@ But the format of parameters has multiple cases, and differs variably in differe
   >
   > For example, following [YAML][] snippet may cause an error:
   >
-  > ```yml
+  > ```yaml
   > files: !inc ["etc/app/**/*.yml", open: {intParam: 1}]
   > ```
   >
   > Because [PyYAML][] treats `{"intParam": 1}` as `{"intParam": "1"}`, which makes python code like `fs.open(path, intParam="1")`. To prevent this, we shall write the [YAML][] like:
   >
-  > ```yml
+  > ```yaml
   > files: !inc ["etc/app/**/*.yml", open: {intParam: !!int 1}]
   > ```
   >
@@ -409,7 +409,7 @@ then, load following [YAML][]:
 xyz: !http-include xyz.yml
 ```
 
-the actual URL accessed is `http://{HOST}:{PORT}/sub_1/sub_1_1/xyz.yml`
+the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."

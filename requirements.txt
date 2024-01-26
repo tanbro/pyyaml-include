@@ -8,3 +8,4 @@ build
 setuptools_scm
 pre-commit
 ruff
+coverage
