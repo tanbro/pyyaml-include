@@ -98,8 +98,6 @@ files: !inc include.d/*.yaml
 """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            print(data)
-            break
             self.assertListEqual(
                 sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
             )
@@ -142,6 +140,30 @@ files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: {}}
                 sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
             )
 
+    def test_include_wildcards_4(self):
+        yml = """
+files: !inc [include.d/**/*.yaml, {maxdepth: 1}, []]
+"""
+        for loader_cls in YAML_LOADERS:
+            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
+            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertListEqual(
+                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+            )
+
+    def test_include_wildcards_5(self):
+        yml = """
+files: !inc [include.d/**/*.yaml, 1]
+"""
+        for loader_cls in YAML_LOADERS:
+            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
+            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertListEqual(
+                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+            )
+
     def test_abs_path(self):
         yml = dedent(
             f"""
@@ -170,7 +192,7 @@ class FileFsBasicTestCase(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ctor = YamlInclude(fs=fsspec.filesystem("file"), base_dir="tests/data")
+        ctor = YamlInclude(fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data")
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 
@@ -267,6 +289,29 @@ class SimpleHttpBasicTestCase(BaseTestCase):
         )
         data = yaml.load(yml, yaml.Loader)
         self.assertDictEqual(data, {"file1": YAML_ZH_CN})
+
+
+class DefaultFsNoBaseDirBasicTestCase(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        ctor = YamlInclude()
+        for loader_cls in YAML_LOADERS:
+            yaml.add_constructor("!inc", ctor, loader_cls)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for loader_class in YAML_LOADERS:
+            del loader_class.yaml_constructors["!inc"]
+
+    def test_yaml2(self):
+        yml = dedent(
+            """
+            file1: !inc tests/data/include.d/2.yaml
+            """
+        )
+        data = yaml.load(yml, yaml.Loader)
+        self.assertDictEqual(data, {"file1": YAML2})
 
 
 if __name__ == "__main__":

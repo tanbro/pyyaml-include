@@ -157,6 +157,8 @@ class YamlInclude:
                     glob_params[0] = int(glob_params[0])
                 fn_glob = lambda: self._fs.glob(urlpath, *glob_params)  # noqa: E731
             else:
+                # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
+                glob_params = int(glob_params)
                 fn_glob = lambda: self._fs.glob(urlpath, glob_params)  # noqa: E731
 
             if open_params is None:
