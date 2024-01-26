@@ -59,7 +59,7 @@ Consider we have such [YAML][] files:
 
 To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
-1. add a `YamlInclude` to [PyYAML][]'s loader class, with `!inc` as it's tag:
+1. Register a `YamlInclude` to [PyYAML][]'s loader class, with `!inc` as it's tag:
 
    ```python
    import yaml
@@ -73,14 +73,14 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
    )
    ```
 
-1. write `!inc` tags in `0.yaml`:
+1. Write `!inc` tags in `0.yaml`:
 
    ```yaml
    file1: !inc include.d/1.yml
    file2: !inc include.d/1.yml
    ```
 
-1. load it
+1. Load it
 
    ```python
    with open('0.yml') as f:
@@ -94,7 +94,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
    {'file1':{'name':'1'},'file2':{'name':'2'}}
    ```
 
-1. (optional) the constructor can be removed:
+1. (optional) the constructor can be unregistered:
 
    ```python
    del yaml.Loader.yaml_constructors["!inc"]
@@ -153,7 +153,8 @@ The `maxdepth` option is applied on the first `**` found in the path.
 
 > ℹ️ **Note**
 >
-> Using the `**` pattern in large directory trees or remote file system (S3, HTTP ...) may consume an inordinate amount of time.
+> - Using the `**` pattern in large directory trees or remote file system (S3, HTTP ...) may consume an inordinate amount of time.
+> - All data of found files returned to the YAML doc-tree are fully read into memory, it may need large amount of memory if there were many or big files.
 
 If `0.yml` was:
 
@@ -261,7 +262,7 @@ However, there are more parameters.
 - in a mapping way, parameters will be passed to python as positional arguments, like `*args` in python function. eg:
 
   ```yml
-  files: !inc [include.d/**/*.yaml, {maxdepth: !!int '2'}, {encoding: utf16}]
+  files: !inc [include.d/**/*.yaml, {maxdepth: 1}, {encoding: utf16}]
   ```
 
 - in a sequence way, parameters will be passed to python as named arguments, like `**kwargs` in python function. eg:
@@ -350,34 +351,65 @@ But the format of parameters has multiple cases, and differs variably in differe
 
   > ⁉️ **Attention**
   >
-  > [PyYAML][] takes any scalar parameter of custom constructor as string, if it is defined in a sequence. So we must use ‘Standard YAML tag’ to ensure non-string data type in the situation.
+  > [PyYAML][] sometimes takes scalar parameter of custom constructor as string, we can use a ‘Standard YAML tag’ to ensure non-string data type in the situation.
   >
-  >
-  > For example, follow [YAML][] snippet will cause an error:
-  >
-  > ```yml
-  > files: !inc ["etc/app/**/*.yml", [1]]
-  > ```
-  >
-  > because [PyYAML][] takes the `[1]` as `["1"]`, which makes  python code like `glob(path, maxdepth="1")`. To solve the problem, we shall write the [YAML][] like:
+  > For example, following [YAML][] snippet may cause an error:
   >
   > ```yml
-  > files: !inc ["etc/app/**/*.yml", [!!int 1]]
+  > files: !inc ["etc/app/**/*.yml", open: {intParam: 1}]
   > ```
   >
-  > where `!!int` is the ‘Standard YAML tag’ to force integer type of `maxdepth` argument.
+  > Because [PyYAML][] treats `{"intParam": 1}` as `{"intParam": "1"}`, which makes python code like `fs.open(path, intParam="1")`. To prevent this, we shall write the [YAML][] like:
+  >
+  > ```yml
+  > files: !inc ["etc/app/**/*.yml", open: {intParam: !!int 1}]
+  > ```
+  >
+  > where `!!int` is a ‘Standard YAML tag’ to force integer type of `maxdepth` argument.
   >
   > > ⚠️ **Warning**
   > >
   > > `BaseLoader`, `SafeLoader`, `CBaseLoader`, `CSafeLoader` do **NOT** support ‘Standard YAML tag’.
+  >
+  > > ℹ️ **Note**
+  > >
+  > > `maxdepth` argument of [fsspec][] `glob` method is already force converted by `YamlInclude`, no need to write a `!!int` tag on it.
 
 - Else, `YamlInclude` will invoke corresponding [fsspec][] implementation backend's [`open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.open) method to open the file, parameters beside `urlpath` will be passed to the method.
 
 ### Absolute and Relative URL/Path
 
-### Base Dir
+When the path after include tag (eg: `!inc`) is not a full protocol/scheme URL and not starts with `"/"`, `YamlInclude` tries to join the path with `base_dir`, which is a argument of `YamlInclude.__init__()`, and defaults to `None`.
 
-- If `base_dir` is omitted or `None`, the actually including file path is the path in defined in [YAML][] without a change, and different [fsspec][] filesystem will treat them differently. For a local filesystem, it will be `$CWD`.
+If `base_dir` is omitted or `None`, the actually including file path is the path in defined in [YAML][] without a change, and different [fsspec][] filesystem will treat them differently. For a local filesystem, it will be `$CWD`.
+
+For remote filesystem, `HTTP` for example, the `base_dir` can not be `None` and usually can be set to `"/"`.
+
+Relative path does not support full protocol/scheme URL format, `base_dir` does not effect for that.
+
+For example, if we register such a `YamlInclude` to [PyYAML][]:
+
+```python
+import yaml
+import fsspec
+from yamlinclude import YamlInclude
+
+yaml.add_constructor(
+    "!http-include",
+    YamlInclude(
+        fsspec.filesystem("http", client_kwargs={"base_url": f"http://{HOST}:{PORT}"}),
+        base_dir="/sub_1/sub_1_1"
+    )
+)
+```
+
+then, load following [YAML][]:
+
+```yaml
+xyz: !http-include xyz.yml
+```
+
+the actual URL accessed is `http://{HOST}:{PORT}/sub_1/sub_1_1/xyz.yml`
 
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."
