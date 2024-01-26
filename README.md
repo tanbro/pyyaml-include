@@ -171,20 +171,20 @@ files:
 
 ### Work with fsspec
 
-In `v2.0`, we use [fsspec][] to open including files, which makes it possible to include file from many different sources, such as local file system, S3, HTTP, SFTP ...
+In `v2.0`, we use [fsspec][] to open including files, which makes it possible to include files from many different sources, such as local file system, S3, HTTP, SFTP ...
 
-For example, we can include a file from a website in YAML:
+For example, we can include a file from website in YAML:
 
 ```yaml
 conf:
   logging: !inc http://domain/etc/app/conf.d/logging.yml
 ```
 
-In such situations, when creating a `yamlinclude` constructor, a [fsspec][] filesystem object shall be set to `fs` argument.
+In such situations, when creating a `YamlInclude` constructor, a [fsspec][] filesystem object shall be set to `fs` argument.
 
-For example, if want to include files from a website, we shall:
+For example, if want to include files from website, we shall:
 
-1. create a YAML-Include tag constructor, with a [fsspec][] HTTP filesystem object as it's `fs`:
+1. create a YamlInclude constructor, with a [fsspec][] HTTP filesystem object as it's `fs`:
 
    ```python
    import yaml

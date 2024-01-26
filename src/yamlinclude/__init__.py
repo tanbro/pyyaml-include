@@ -116,8 +116,9 @@ class YamlInclude:
         Warning:
             It's called by `PyYAML`, and do NOT call it yourself.
         """
-        # scheme://path format, relative path and wildcards are not supported!
+        # full protocol and path
         if urlsplit(urlpath).scheme:
+            # scheme://path format, relative path and wildcards are not supported!
             with fsspec.open(urlpath, *args, **kwargs) as fp:
                 return yaml.load(fp, loader_type)  # type:ignore
 
@@ -130,38 +131,49 @@ class YamlInclude:
                 base_dir = Path(self._base_dir)
             urlpath = base_dir.joinpath(urlpath).as_posix()
 
-        # wildcards?
+        # wildcards
         if any(c in urlpath for c in "*?[]"):
-            result = []
-            glob_params = open_params = {}
+            glob_params = open_params = None
             if args:
-                if len(args) == 1:
+                if len(args) > 1:
+                    glob_params, open_params = args[:2]
+                elif len(args) == 1:
                     glob_params = args[0]
-                elif len(args) == 2:
-                    glob_params, open_params = args
-                else:
-                    raise ValueError(f"Count of positional arguments pass to {type(self)} for wildcards should be 1 or 2")
             if kwargs:
-                glob_params = kwargs.get("glob", dict())
-                open_params = kwargs.get("open", dict())
+                glob_params = kwargs.get("glob")
+                open_params = kwargs.get("open")
 
-            if isinstance(glob_params, dict):
-                glob_func = lambda: self._fs.glob(urlpath, **glob_params)  # noqa: E731
-            elif isinstance(glob_params, list):
-                glob_func = lambda: self._fs.glob(urlpath, *glob_params)  # noqa: E731
+            if glob_params is None:
+                fn_glob = lambda: self._fs.glob(urlpath)  # noqa: E731
+            elif isinstance(glob_params, dict):
+                # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
+                if glob_params.get("maxdepth") is not None:
+                    glob_params["maxdepth"] = int(glob_params["maxdepth"])
+                fn_glob = lambda: self._fs.glob(urlpath, **glob_params)  # noqa: E731
+            elif isinstance(glob_params, (list, set)):
+                # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
+                if len(glob_params) > 0:
+                    glob_params = list(glob_params)
+                    glob_params[0] = int(glob_params[0])
+                fn_glob = lambda: self._fs.glob(urlpath, *glob_params)  # noqa: E731
             else:
-                raise ValueError(f"Type of parameter pass to {type(self)}'s glob function for wildcards should be Dict or List")
-            if isinstance(open_params, dict):
-                open_func = lambda x: self._fs.open(x, **open_params)  # noqa: E731
-            elif isinstance(open_params, list):
-                open_func = lambda x: self._fs.open(x, *open_params)  # noqa: E731
-            else:
-                raise ValueError(f"Type of parameter pass to {type(self)}'s open function for wildcards should be Dict or List")
+                fn_glob = lambda: self._fs.glob(urlpath, glob_params)  # noqa: E731
 
-            for file in glob_func():
-                with open_func(file) as fp:
+            if open_params is None:
+                fn_open = lambda x: self._fs.open(x)  # noqa: E731
+            elif isinstance(open_params, dict):
+                fn_open = lambda x: self._fs.open(x, **open_params)  # noqa: E731
+            elif isinstance(open_params, (list, set)):
+                fn_open = lambda x: self._fs.open(x, *open_params)  # noqa: E731
+            else:
+                fn_open = lambda x: self._fs.open(x, open_params)  # noqa: E731
+
+            result = []
+            for pth in fn_glob():
+                with fn_open(pth) as fp:
                     result.append(yaml.load(fp, loader_type))
             return result
-        else:
-            with self._fs.open(urlpath, *args, **kwargs) as fp:
-                return yaml.load(fp, loader_type)
+
+        # no wildcards
+        with self._fs.open(urlpath, *args, **kwargs) as fp:
+            return yaml.load(fp, loader_type)
