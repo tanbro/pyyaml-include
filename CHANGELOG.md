@@ -1,6 +1,8 @@
 # Changelog
 
-## 2.0 (developing)
+## 2.0.a1
+
+> 📅 **Date** 2024-1-27
 
 - 🆕 New Features:
   - Introduce [fsspec][] to open including files. Now we can include files from local filesystem, s3, http, sftp ...
