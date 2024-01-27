@@ -34,6 +34,7 @@ extensions = [
     "sphinx_tippy",
     "sphinx_inline_tabs",
     "sphinx_copybutton",
+    "versionwarning.extension",
 ]
 source_suffix = {
     ".rst": "restructuredtext",
@@ -48,10 +49,10 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # Automatically extract typehints when specified and place them in
 # descriptions of the relevant function/method.
-autodoc_typehints = "both"
+autodoc_typehints = "description"
 
 # Don't show class signature with the class' name.
-autodoc_class_signature = "separated"
+# autodoc_class_signature = "separated"
 
 autoclass_content = "both"
 autodoc_member_order = "bysource"
@@ -69,9 +70,34 @@ html_theme_options = {
     "top_of_page_button": "edit",
 }
 
+# -- Options for myst_parser extension ---------------------------------------
+
+myst_enable_extensions = [
+    "amsmath",
+    "attrs_inline",
+    "colon_fence",
+    "deflist",
+    "dollarmath",
+    "fieldlist",
+    "html_admonition",
+    "html_image",
+    "linkify",
+    "replacements",
+    "smartquotes",
+    "strikethrough",
+    "substitution",
+    "tasklist",
+]
+
 # -- Options for intersphinx extension ---------------------------------------
 
-# Example configuration for intersphinx: refer to the Python standard library.
+# configuration for intersphinx: refer to the Python standard and/or 3rd libraries.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/", None),
+    "fsspec": ("https://filesystem-spec.readthedocs.io/en/latest/", None),
 }
+
+# -- Options for Napoleon settings ---------------------------------------
+napoleon_use_admonition_for_examples = True
+napoleon_use_admonition_for_notes = True
+napoleon_use_admonition_for_references = True

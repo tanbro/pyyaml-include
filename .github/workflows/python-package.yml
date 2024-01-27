@@ -43,8 +43,8 @@ jobs:
           cache: pip
       - name: Install project and dependent tools
         run: |
-          pip install -e .[toml] coverage ruff
-      - name: Lint with ruff
+          pip install -e . -r tests/requirements.txt coverage ruff
+      - name: Check with ruff
         run: |
           ruff check .
       - name: Test with coverage

@@ -1,9 +1,13 @@
 importlib_metadata;python_version<"3.8"
+
 Sphinx>=7.0.1
 myst-parser
+
 furo
+
 linkify-it-py
 sphinx-autodoc2
 sphinx-copybutton
 sphinx-inline-tabs
 sphinx_tippy
+sphinx-version-warning

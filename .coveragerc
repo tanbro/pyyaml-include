@@ -1,3 +1,5 @@
 [run]
 source = src
 relative_files = True
+omit =
+    _version.py
