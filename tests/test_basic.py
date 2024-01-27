@@ -10,7 +10,7 @@ from time import sleep
 import fsspec
 import yaml
 
-from yamlinclude import YamlInclude
+from yamlinclude import YamlIncludeCtor
 
 from ._internal import YAML1, YAML2, YAML_LOADERS, YAML_ZH_CN
 
@@ -178,7 +178,7 @@ class DefaultFsBasicTestCase(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ctor = YamlInclude(base_dir="tests/data")
+        ctor = YamlIncludeCtor(base_dir="tests/data")
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 
@@ -192,7 +192,7 @@ class FileFsBasicTestCase(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ctor = YamlInclude(fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data")
+        ctor = YamlIncludeCtor(fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data")
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 
@@ -250,7 +250,7 @@ class SimpleHttpBasicTestCase(BaseTestCase):
         cls.server_thread.start()
         sleep(1)
         host, port = httpd.socket.getsockname()[:2]
-        ctor = YamlInclude(
+        ctor = YamlIncludeCtor(
             fs=fsspec.filesystem(
                 "http", client_kwargs=dict(base_url=f"http://{host}:{port}")
             ),
@@ -295,7 +295,7 @@ class DefaultFsNoBaseDirBasicTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ctor = YamlInclude()
+        ctor = YamlIncludeCtor()
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 

@@ -3,7 +3,7 @@ from textwrap import dedent
 
 import yaml
 
-from yamlinclude import YamlInclude
+from yamlinclude import YamlIncludeCtor
 
 from ._internal import YAML1, YAML2, YAML_LOADERS
 
@@ -12,7 +12,7 @@ class MultiLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ctor = YamlInclude(base_dir="tests/data")
+        ctor = YamlIncludeCtor(base_dir="tests/data")
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 

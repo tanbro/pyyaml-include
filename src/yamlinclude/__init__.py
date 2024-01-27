@@ -12,10 +12,10 @@ import yaml
 
 from ._version import __version__, __version_tuple__, version, version_tuple
 
-__all__ = ["YamlInclude", "version", "version_tuple"]
+__all__ = ["YamlIncludeCtor", "version", "version_tuple"]
 
 
-class YamlInclude:
+class YamlIncludeCtor:
     """The include constructor for PyYAML Loaders
 
     Use :func:`yaml.add_constructor` to register it on PyYAML's Loaders.

@@ -2,15 +2,15 @@
 
 ## 2.0 (developing)
 
-- New Features:
-  - Introduce [fssppec][] to open including files. Now we can include files from local filesystem, s3, http, sftp ...
+- 🆕 New Features:
+  - Introduce [fsspec][] to open including files. Now we can include files from local filesystem, s3, http, sftp ...
   - New parameters for the tag in YAML
 
-- Incompatible Changes:
+- ❎ Incompatible Changes:
   - Drop python support blow 3.8
-  - The tag constructor class `YamlIncludeConstructor` renamed to `YamlInclude`
+  - The tag constructor class `YamlIncludeConstructor` renamed to `YamlIncludeCtor`
 
-- Removed:
+- ❌ Removed:
   - Readers for JSON, TOML, INI ... YAML only now
   - The argument `relative` and `encoding`  was removed from the tag class's `load` method.
   - Anchor (Maybe recovered in future)
@@ -140,4 +140,4 @@ Date: 2018-07-03
 
 Date: 2018-06-08
 
-[fssppec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."
+[fsspec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."
