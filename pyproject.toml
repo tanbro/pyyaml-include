@@ -18,7 +18,8 @@ license = { text = "GPLv3+" }
 
 classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-  "Development Status :: 5 - Production/Stable",
+  "Development Status :: 3 - Alpha",
+  # "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
@@ -26,7 +27,6 @@ classifiers = [
   "Topic :: Text Processing :: Markup",
 ]
 
-# version = "2.0dev1"
 dynamic = ["version"]
 
 [project.urls]
