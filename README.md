@@ -256,13 +256,13 @@ Normally, we put it as a string after the tag(eg: `!inc`), just like examples ab
 
 However, there are more parameters.
 
-- in a mapping way, parameters will be passed to python as positional arguments, like `*args` in python function. eg:
+- in a sequence way, parameters will be passed to python as positional arguments, like `*args` in python function. eg:
 
   ```yaml
   files: !inc [include.d/**/*.yaml, {maxdepth: 1}, {encoding: utf16}]
   ```
 
-- in a sequence way, parameters will be passed to python as named arguments, like `**kwargs` in python function. eg:
+- in a mapping way, parameters will be passed to python as named arguments, like `**kwargs` in python function. eg:
 
   ```yaml
   files: !inc {urlpath: /foo/baz.yaml, encoding: utf16}

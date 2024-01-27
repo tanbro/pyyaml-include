@@ -26,9 +26,9 @@ class YamlIncludeCtor:
 
             import yaml
 
-            from yamlinclude import YamlInclude
+            from yamlinclude import YamlIncludeCtor
 
-            yaml.add_constructor("!inc", YamlInclude(), yaml.Loader)
+            yaml.add_constructor("!inc", YamlIncludeCtor(), yaml.Loader)
 
         #. In a YAML file, write ``!inc`` tags to include other YAML files. We can:
 
