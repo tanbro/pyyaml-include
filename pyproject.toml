@@ -13,7 +13,6 @@ requires-python = ">=3.8"
 dependencies = [
   "PyYAML>=6.0,<7.0",
   "fsspec>=2021.04.0",
-  "typing_extensions; python_version<'3.10'",
 ]
 
 keywords = ["yaml", "PyYAML", "include"]

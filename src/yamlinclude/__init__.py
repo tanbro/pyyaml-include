@@ -6,12 +6,7 @@ import sys
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import Any, Callable, Optional, Type, Union
-
-if sys.version_info >= (3, 10):
-    from typing import Concatenate
-else:
-    from typing_extensions import Concatenate
+from typing import Callable, Optional, Type, Union
 
 from urllib.parse import urlsplit, urlunsplit
 
@@ -75,12 +70,7 @@ class YamlIncludeCtor:
         self,
         fs: Optional[fsspec.AbstractFileSystem] = None,
         base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None,
-        custom_loader: Optional[
-            Callable[
-                Concatenate[str, Any, Type, ...],
-                Any,
-            ]
-        ] = None,
+        custom_loader: Optional[Callable] = None,
     ):
         """
         Args:
@@ -117,10 +107,10 @@ class YamlIncludeCtor:
 
                         Type of the parameter is usually one of:
 
-                        * :class:`io.IOBase`,
-                        * :class:`fsspec.spec.AbstractBufferedFile`
+                        * Subclass of :class:`io.IOBase`
+                        * Subclass of :class:`fsspec.spec.AbstractBufferedFile`
 
-                        It's type hint is :data:`Any` however, because different :mod:`fsspec` implementations ``open`` methods have variable return types.
+                        The type is **NOT** certain however, because different :mod:`fsspec` implementations ``open`` methods have variable return types.
 
                     arg3:
                         `Loader` - :mod:`yaml`'s Loader class
