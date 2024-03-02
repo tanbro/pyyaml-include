@@ -12,7 +12,7 @@ import yaml
 
 from yamlinclude import YamlIncludeCtor
 
-from ._internal import YAML1, YAML2, YAML_LOADERS, YAML_ZH_CN
+from ._internal import YAML1, YAML2, YAML_LOADERS
 
 
 class BaseTestCase(unittest.TestCase):
@@ -164,15 +164,6 @@ files: !inc [include.d/**/*.yaml, 1]
                 sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
             )
 
-    def test_abs_path(self):
-        yml = dedent(
-            f"""
-            file1: !inc file://{Path().absolute().as_posix()}/tests/data/include.d/1.yaml
-            """
-        )
-        data = yaml.load(yml, yaml.Loader)
-        self.assertDictEqual(data, {"file1": YAML1})
-
 
 class DefaultFsBasicTestCase(BaseTestCase):
     @classmethod
@@ -186,6 +177,16 @@ class DefaultFsBasicTestCase(BaseTestCase):
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors["!inc"]
+
+    def test_abs(self):
+        yml = dedent(
+            f"""
+            file1: !inc {Path().absolute().as_posix()}/tests/data/include.d/1.yaml
+            """
+        )
+        for loader_cls in YAML_LOADERS:
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertDictEqual(data, {"file1": YAML1})
 
 
 class FileFsBasicTestCase(BaseTestCase):
@@ -202,6 +203,15 @@ class FileFsBasicTestCase(BaseTestCase):
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors["!inc"]
+
+    def test_scheme_abs(self):
+        yml = dedent(
+            f"""
+            file1: !inc file://{Path().absolute().as_posix()}/tests/data/include.d/1.yaml
+            """
+        )
+        data = yaml.load(yml, yaml.Loader)
+        self.assertDictEqual(data, {"file1": YAML1})
 
 
 def _get_best_family(*address):
@@ -272,7 +282,7 @@ class SimpleHttpBasicTestCase(BaseTestCase):
     def setUp(self) -> None:
         self.assertTrue(self.server_thread.is_alive())
 
-    def test_yaml1(self):
+    def test_full_url(self):
         host, port = httpd.socket.getsockname()[:2]
         yml = dedent(
             f"""
@@ -282,15 +292,17 @@ class SimpleHttpBasicTestCase(BaseTestCase):
         data = yaml.load(yml, yaml.Loader)
         self.assertDictEqual(data, {"file1": YAML1})
 
-    def test_independent_http_url_and_zh_cn(self):
+    def test_wildcards_full_url(self):
         host, port = httpd.socket.getsockname()[:2]
         yml = dedent(
             f"""
-            file1: !inc http://{host}:{port}/tests/data/zh_cn.yaml
+            files: !inc http://{host}:{port}/tests/data/include.d/*.yaml
             """
         )
         data = yaml.load(yml, yaml.Loader)
-        self.assertDictEqual(data, {"file1": YAML_ZH_CN})
+        self.assertListEqual(
+            sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
+        )
 
 
 class DefaultFsNoBaseDirBasicTestCase(unittest.TestCase):

@@ -3,10 +3,14 @@ extend-exclude = ["docs"]
 # Always generate Python 3.8-compatible code.
 target-version = "py38"
 line-length = 128
+
+[lint]
 ignore-init-module-imports = true
-[mccabe]
+
+[lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
+
 # Ignore `F401`(imported but unused), `F403`(import *` used), `E402`(import violations) in all `__init__.py` files
-[per-file-ignores]
+[lint.per-file-ignores]
 "__init__.py" = ["E402", "F401", "F403"]
