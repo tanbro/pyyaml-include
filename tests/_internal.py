@@ -6,8 +6,7 @@ from yaml import BaseLoader, FullLoader, Loader, SafeLoader, UnsafeLoader
 YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
 
 try:
-    from yaml import (CBaseLoader, CFullLoader, CLoader, CSafeLoader,
-                      CUnsafeLoader)
+    from yaml import CBaseLoader, CFullLoader, CLoader, CSafeLoader, CUnsafeLoader
 except ImportError as err:
     warn(f"PyYAML was not build with libyaml: {err}")
 else:
