@@ -37,7 +37,7 @@ Since we are using [fsspec][] to open including files from v2.0, an installation
 
 Consider we have such [YAML][] files:
 
-```text
+```
 ├── 0.yml
 └── include.d
     ├── 1.yml
@@ -171,7 +171,7 @@ The `maxdepth` option is applied on the first `**` found in the path.
 
 ### Work with fsspec
 
-In `v2.0`, we use [fsspec][] to open including files, which makes it possible to include files from many different sources, such as local file system, S3, HTTP, SFTP ...
+In `v2.0`, we use [fsspec][] to open including files, thus we can include files from many different sources, such as local file system, S3, HTTP, SFTP ...
 
 For example, we can include a file from website in YAML:
 
@@ -221,6 +221,8 @@ Above [YAML][] snippet will be loaded like:
 
 > 🔖 **Tip** \
 > Check [fsspec][]'s documentation for more
+
+---
 
 > ℹ️ **Note** \
 > If `fs` argument is omitted or `None`, a `"file"`/`"local"` [fsspec][] filesystem object will be used automatically. That is to say:

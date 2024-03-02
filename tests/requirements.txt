@@ -1,1 +1,2 @@
+-e ..
 fsspec[http]
