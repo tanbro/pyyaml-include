@@ -72,8 +72,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
 
     @classmethod
     def my_loader(cls, path, file, loader_type, *args, **kwargs):
-        if not path:
-            path = file.path
+        path = file.path
 
         if Path(path).suffix == ".json":
             return json.load(file)

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.0.a2
+
+> 📅 **Date** 2024-3-3
+
+- 🆕 New Features:
+  - Custom loader
+
 ## 2.0.a1
 
 > 📅 **Date** 2024-1-27
