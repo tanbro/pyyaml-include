@@ -2,7 +2,6 @@
 Include other YAML files in YAML
 """
 
-import sys
 from itertools import chain
 from os import PathLike
 from pathlib import Path
@@ -91,18 +90,18 @@ class YamlIncludeCtor:
 
                 Args:
 
-                    arg1 (str):
-                        ``urlpath`` - url / path of the file.
+                    arg1(str): ``urlpath`` - url / path of the file.
 
                         Pass-in value of the parameter is:
 
                         * original url/path defined in YAML, if no wildcard in the including express.
                         * file name returned by :meth:`fsspec.spec.AbstractFileSystem.glob`, if wildcard in the including express.
 
-                        Warning:
-                            If YAML include express has both scheme and wildcard (eg: ``http://host/foo/*.yml``), pass-in value of the argument will be an empty string.
+                        Tip:
+                            * If YAML include express has both scheme and wildcard (eg: ``http://host/foo/*.yml``), pass-in value of the argument will NOT be the url/path of matched file, it will be the original ``urlpath`` string defined in YAML instead.
+                            * But if we didn't write scheme in YAML include express, and assigned a :mod:`fsspec` File-system object to ``fs`` argument correctly, it will be the name of matched file.
 
-                    arg2 (Any):
+                    arg2(Any):
                         ``file`` - What returned by :func:`fsspec.open` or the list member of :func:`fsspec.open_files`'s return value will be passed to the argument.
 
                         Type of the parameter is usually one of:
@@ -110,16 +109,12 @@ class YamlIncludeCtor:
                         * Subclass of :class:`io.IOBase`
                         * Subclass of :class:`fsspec.spec.AbstractBufferedFile`
 
-                        The type is **NOT** certain however, because different :mod:`fsspec` implementations ``open`` methods have variable return types.
+                        Tip:
+                            The type is **NOT** certain however, because different :mod:`fsspec` implementations ``open`` methods have variable return types.
 
-                    arg3:
-                        `Loader` - :mod:`yaml`'s Loader class
+                    arg3 (Type): `Loader` - :mod:`yaml`'s Loader class.
 
-                    ...:
-                        Other positional or named parameters in YAML including express
-
-                Returns:
-                    Any: What parsed
+                Returns: What parsed
         """
         self._fs: fsspec.AbstractFileSystem = (
             fsspec.filesystem("file") if fs is None else fs
@@ -144,10 +139,10 @@ class YamlIncludeCtor:
     def _has_wildcards(s, wildcards="*?[]"):
         return any(c in s for c in wildcards)
 
-    def _load_from_open_file(self, file, loader_type, path, *args, **kwargs):
+    def _load_from_open_file(self, file, loader_type, path):
         if self._custom_loader is None:
             return yaml.load(file, loader_type)
-        return self._custom_loader(path, file, loader_type, *args, **kwargs)
+        return self._custom_loader(path, file, loader_type)
 
     def load(self, loader_type: Type, urlpath: str, *args, **kwargs):
         """Once the constructor was added to PyYAML loader class,
@@ -155,29 +150,105 @@ class YamlIncludeCtor:
 
         Args:
 
-            loader_type:
-                Type of PyYAML's loader class
+            loader_type: Type of PyYAML's loader class
 
             urlpath:
-                urlpath can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards
+                urlpath can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards.
 
-                We support "**", "?" and "[..]". We do not support "^" for pattern negation.
-                The `maxdepth` option is applied on the first "**" found in the path.
-
-                Note:
-                    If
+                We support ``"**"``, ``"?"`` and ``"[..]"``. We do not support ``"^"`` for pattern negation.
+                The ``maxdepth`` option is applied on the first ``"**"`` found in the path.
 
                 Warning:
                     Using the ``"**"`` pattern in large directory trees or remote files may consume an inordinate amount of time.
 
-            kwargs:
-                may have additional :mod:`fsspec` backend-specific options
-
         Returns:
             Data of included YAML file, pared to python object
 
-        Warning:
-            It's called by `PyYAML`, and do NOT call it yourself.
+        Danger:
+            It's called by `PyYAML`, and it's **NOT advised to call it yourself**.
+
+        Note:
+            Additional positional or named parameters in YAML including express are passed to ``*args`` and ``**kwargs``.
+            The class will pass them to :mod:`fsspec`'s :mod:`fsspec` File-system as implementation specific options.
+
+            To use positional in YAML including express is discouraged.
+
+            * If there is a protocol/scheme, and no wildcard defined in YAML including,
+              ``*args`` and ``**kwargs`` will be passed to :func:`fsspec.open`.
+
+              Example:
+
+                The YAML
+
+                .. code:: yaml
+
+                    key: !inc {urlpath: s3://my-bucket/my-file.yml.gz, compression: gzip}
+
+                means::
+
+                    with fsspec.open("s3://my-bucket/my-file.yml.gz", compression="gzip") as f:
+                        yaml.load(f, Loader)
+
+
+            * If there is a protocol/scheme, and also wildcard defined in YAML including,
+              ``*args`` and ``**kwargs`` will be passed to :func:`fsspec.open_files`
+
+              Example:
+
+                The YAML
+
+                .. code:: yaml
+
+                    key: !inc {urlpath: s3://my-bucket/*.yml.gz, compression: gzip}
+
+                means::
+
+                    with fsspec.open_files("s3://my-bucket/*.yml.gz", compression="gzip") as files:
+                        for file in files:
+                            yaml.load(file, Loader)
+
+            * If there is no protocol/scheme, and no wildcard defined in YAML including,
+              ``*args`` and ``**kwargs`` will be passed to :mod:`fsspec` file-system implementation's ``open`` function (derive from :meth:`fsspec.spec.AbstractFileSystem.open`)
+
+            * If there is no protocol/scheme, and also wildcard defined in YAML including, the situation is complex:
+
+                * If the including express is in a positional-parameter form:
+                    * If count of argument is one,
+                      it will be passed to of :meth:`fsspec.spec.AbstractFileSystem.glob`'s  ``maxdepth`` argument;
+                    * If count of argument is more than one:
+                        # First of them will be passed to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
+                        # Second of them will be passed to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
+                        # Others will be ignored
+
+                * If the including express is in a named-parameter form, the class will:
+                    * Find a key named `glob`, then pass the corresponding data to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
+                    * Find a key named `open`, then pass the corresponding data to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
+
+                Example:
+
+                    * The YAML
+
+                        .. code:: yaml
+
+                            key: !inc [foo/**/*.yml, 2]
+
+                        means::
+
+                            for file in fs.glob("foo/**/*.yml.gz", maxdepth=2):
+                                with fs.open(file) as fp:
+                                    yaml.load(fp, Loader)
+
+                    * The YAML
+
+                        .. code:: yaml
+
+                            key: !inc {urlpath: foo/**/*.yml.gz, glob: {maxdepth: 2}, open: {compression: gzip}}
+
+                        means::
+
+                            for file in fs.glob("foo/**/*.yml.gz", maxdepth=2):
+                                with fs.open(file, compression=gzip) as fp:
+                                    yaml.load(fp, Loader)
         """
 
         url_sr = urlsplit(urlpath)
@@ -204,17 +275,13 @@ class YamlIncludeCtor:
                 result = []
                 with fsspec.open_files(urlpath, *args, **kwargs) as ofs:
                     for of_ in ofs:
-                        data = self._load_from_open_file(
-                            of_, loader_type, "", *args, **kwargs
-                        )
+                        data = self._load_from_open_file(of_, loader_type, urlpath)
                         result.append(data)
                 return result
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *args, **kwargs) as of_:
                 assert not isinstance(of_, list)
-                result = self._load_from_open_file(
-                    of_, loader_type, "", *args, **kwargs
-                )
+                result = self._load_from_open_file(of_, loader_type, urlpath)
                 return result
 
         # if no protocol / scheme in path, we shall use the `fs` object
@@ -261,15 +328,11 @@ class YamlIncludeCtor:
             result = []
             for file in glob_fn():
                 with open_fn(file) as of_:
-                    data = self._load_from_open_file(
-                        of_, loader_type, file, *args, **kwargs
-                    )
+                    data = self._load_from_open_file(of_, loader_type, file)
                     result.append(data)
             return result
 
         # else if no wildcards, return a single object
         with self._fs.open(urlpath, *args, **kwargs) as of_:
-            result = self._load_from_open_file(
-                of_, loader_type, urlpath, *args, **kwargs
-            )
+            result = self._load_from_open_file(of_, loader_type, urlpath)
             return result
