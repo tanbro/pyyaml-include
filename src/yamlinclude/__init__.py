@@ -116,9 +116,7 @@ class YamlIncludeCtor:
 
                 Returns: What parsed
         """
-        self._fs: fsspec.AbstractFileSystem = (
-            fsspec.filesystem("file") if fs is None else fs
-        )
+        self._fs: fsspec.AbstractFileSystem = fsspec.filesystem("file") if fs is None else fs
         self._base_dir = base_dir
         self._custom_loader = custom_loader
 

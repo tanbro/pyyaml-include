@@ -14,8 +14,8 @@ x-test-common: &test-common
     - -c
     - |
       set -e
-      python -m pip install --user --disable-pip-version-check --find-links dist -r tests/requirements.txt
-      python -B -m unittest -v
+      python -m pip install --user --pre --disable-pip-version-check --find-links dist -r tests/requirements.txt pyyaml-include
+      python -B -m unittest -fv
 
 services:
   python3.8:

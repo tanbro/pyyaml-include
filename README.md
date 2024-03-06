@@ -371,7 +371,7 @@ But the format of parameters has multiple cases, and differs variably in differe
   >
   > > ℹ️ **Note** \
   > > `BaseLoader`, `SafeLoader`, `CBaseLoader`, `CSafeLoader` do **NOT** support ‘Standard YAML tag’.
-  >
+  > ---
   > > 🔖 **Tip** \
   > > `maxdepth` argument of [fsspec][] `glob` method is already force converted by `YamlIncludeCtor`, no need to write a `!!int` tag on it.
 
