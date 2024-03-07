@@ -416,54 +416,55 @@ the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
 We can include files in different format other than [YAML][], like [JSON][] or [TOML][] -- ``custom_loader`` is for that.
 
-For example:
+> 📑 **Example** \
+> For example:
+>
+> ```python
+> import json
+> from pathlib import PurePath
+> import yaml
+> import fsspec
+> from yamlinclude import YamlIncludeCtor
+>
+> try:
+>     import tomllib as toml
+> except ImportError:
+>     try:
+>         import tomli as toml
+>     except ImportError as err:
+>         print(err)
+>         print()
+>         print("You shall: ‘pip install install tomli’")
+>         exit()
+>
+> # Define loader function
+> def my_loader(urlpath, file, Loader):
+>     p = PurePath(file.path)
+>     if p.suffix.lower() == ".json":
+>         return json.load(file)
+>     if p.suffix.lower() == ".toml":
+>         return toml.load(file)
+>     if p.suffix.lower() in (".yaml", "yml"):
+>         return yaml.load(file, Loader)
+>     raise NotImplementedError(file.path)
+>
+> # Create the include constructor, with the custom loader
+> ctor = YamlIncludeCtor(custom_loader=my_loader)
+>
+> # Add the constructor to YAML Loader
+> yaml.add_constructor("!inc", ctor, yaml.Loader)
+>
+> # Then, json files will can be loaded by stdlib's json module, and the same to toml files.
+> s = """
+> json: !inc "*.json"
+> toml: !inc "*.toml"
+> yaml: !inc "*.yaml"
+> """
+>
+> yaml.load(s, yaml.Loader)
+> ```
 
-```python
-import json
-from pathlib import PurePath
-import yaml
-import fsspec
-from yamlinclude import YamlIncludeCtor
-
-try:
-    import tomllib as toml
-except ImportError:
-    try:
-        import tomli as toml
-    except ImportError as err:
-        print(err)
-        print()
-        print("You shall: ‘pip install install tomli’")
-        exit()
-
-# Define loader function
-def my_loader(urlpath, file, Loader):
-    p = PurePath(file.path)
-    if p.suffix.lower() == ".json":
-        return json.load(file)
-    if p.suffix.lower() == ".toml":
-        return toml.load(file)
-    if p.suffix.lower() in (".yaml", "yml"):
-        return yaml.load(file, Loader)
-    raise NotImplementedError(file.path)
-
-# Create the include constructor, with the custom loader
-ctor = YamlIncludeCtor(custom_loader=my_loader)
-
-# Add the constructor to YAML Loader
-yaml.add_constructor("!inc", ctor, yaml.Loader)
-
-# Then, json files will can be loaded by stdlib's json module, and the same to toml files.
-s = """
-json: !inc "*.json"
-toml: !inc "*.toml"
-yaml: !inc "*.yaml"
-"""
-
-yaml.load(s, yaml.Loader)
-```
-
-## develop
+## Develop
 
 1. clone the repo:
 
@@ -498,7 +499,7 @@ Now you can work on it.
 
 ## Test
 
-see: [tests/README.md](tests/README.md)
+see: `tests/README.md`
 
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."
