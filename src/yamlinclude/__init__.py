@@ -92,7 +92,11 @@ class YamlIncludeCtor:
                 Else if not ``None``, it shall be a callable object like::
 
                     def my_loader(urlpath, file, Loader):
-                        ...
+                        if file.path.endswith(".json):
+                            return json.load(file)
+                        if file.path.endswith(".toml):
+                            return toml.load(file)
+                        return yaml.load(file, Loader)
 
                 Args:
 

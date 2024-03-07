@@ -47,7 +47,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for autodoc ----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 
-autodoc_mock_imports = ["json", "io"]
+autodoc_mock_imports = ["io"]
 
 # Automatically extract typehints when specified and place them in
 # descriptions of the relevant function/method.
@@ -66,8 +66,8 @@ autodoc_member_order = "bysource"
 html_theme = "furo"
 html_static_path = ["_static"]
 html_theme_options = {
-    "source_repository": "https://github.com/tanbro/pyyamlinclude",
-    "source_branch": "master",
+    "source_repository": "https://github.com/tanbro/pyyaml-include",
+    "source_branch": "main",
     "source_directory": "docs/",
     "top_of_page_button": "edit",
 }
