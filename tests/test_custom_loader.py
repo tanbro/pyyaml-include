@@ -76,10 +76,9 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
 
         if Path(path).suffix == ".json":
             return json.load(file)
-        elif Path(path).suffix in (".yaml", "yml"):
+        if Path(path).suffix in (".yaml", "yml"):
             return yaml.load(file, loader_type)
-        else:
-            return RuntimeError(f"not supported file ‘{path}’ ({file})")
+        return RuntimeError(f"not supported file ‘{path}’ ({file})")
 
     def test_json_wildcards(self):
         with open("tests/data/include.d/1.json") as fp:

@@ -6,7 +6,9 @@
 [![PyPI](https://img.shields.io/pypi/v/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tanbro_pyyaml-include&metric=alert_status)](https://sonarcloud.io/dashboard?id=tanbro_pyyaml-include)
 
-An extending constructor of [PyYAML][]: include other [YAML][] files into [YAML][] document.
+An extending constructor of [PyYAML][]: include other [YAML][] files into current [YAML][] document.
+
+With [fsspec][], we can even include files by HTTP, SFTP, S3 ...
 
 ## Install
 
@@ -410,6 +412,96 @@ xyz: !http-include xyz.yml
 
 the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
+### Include JSON or TOML
+
+We can include files in different format other than [YAML][], like [JSON][] or [TOML][] -- ``custom_loader`` is for that.
+
+For example:
+
+```python
+import json
+from pathlib import PurePath
+import yaml
+import fsspec
+from yamlinclude import YamlIncludeCtor
+
+try:
+    import tomllib as toml
+except ImportError:
+    try:
+        import tomli as toml
+    except ImportError as err:
+        print(err)
+        print()
+        print("You shall: ‘pip install install tomli’")
+        exit()
+
+# Define loader function
+def my_loader(urlpath, file, Loader):
+    p = PurePath(file.path)
+    if p.suffix.lower() == ".json":
+        return json.load(file)
+    if p.suffix.lower() == ".toml":
+        return toml.load(file)
+    if p.suffix.lower() in (".yaml", "yml"):
+        return yaml.load(file, Loader)
+    raise NotImplementedError(file.path)
+
+# Create the include constructor, with the custom loader
+ctor = YamlIncludeCtor(custom_loader=my_loader)
+
+# Add the constructor to YAML Loader
+yaml.add_constructor("!inc", ctor, yaml.Loader)
+
+# Then, json files will can be loaded by stdlib's json module, and the same to toml files.
+s = """
+json: !inc "*.json"
+toml: !inc "*.toml"
+yaml: !inc "*.yaml"
+"""
+
+yaml.load(s, yaml.Loader)
+```
+
+## develop
+
+1. clone the repo:
+
+   ```bash
+   git clone https://github.com/tanbro/pyyaml-include.git
+   cd pyyaml-include
+   ```
+
+1. create then activate a python virtual-env:
+
+   - POSIX:
+
+     ```bash
+     python3 -m venv .venv
+     .venv/bin/activate
+     ```
+
+   - Windows(PowerShell):
+
+     ```powershell
+     python3 -m venv .venv
+     &.venv\Scripts\Activate.ps1
+     ```
+
+1. install development-required packages and the project itself in editable mode:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+Now you can work on it.
+
+## Test
+
+see: [tests/README.md](tests/README.md)
+
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."
 [fsspec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."
+[JSON]: https://json.io/ "JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write"
+[TOML]: https://toml.io/ "TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics."

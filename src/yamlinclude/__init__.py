@@ -76,16 +76,22 @@ class YamlIncludeCtor:
             fs:
                 :mod:`fsspec` File-system object to parse path/url and open including files. `LocalFileSystem` by default.
             base_dir:
-                Base directory to which search including YAML files in relative mode
+                Base directory to which search including YAML files in relative mode.
+
+                * If is's ``None``, the actual base directory was decided by the :mod:`fsspec` file-system implementation in use.
+
+                  For example, the ``base_dir`` will default be `CWD` for ``LocalFileSystem``, and be the value of `client_kwargs.base_url` parameter for ``HTTPFileSystem``
+
+                * If it's callable, the return value will be taken as the base directory.
 
             custom_loader:
                 Custom loader/parser function called when a including file to be parsed.
 
-                :Default: ``None`` - parse the file as ordinary YAML.
+                If ``None``, parse the file as ordinary YAML with current `Loader` class.
 
-                If not ``None``, it shall be defined like::
+                Else if not ``None``, it shall be a callable object like::
 
-                    def my_loader(urlpath, file, Loader, *args, **kwargs):
+                    def my_loader(urlpath, file, Loader):
                         ...
 
                 Args:
@@ -102,7 +108,7 @@ class YamlIncludeCtor:
                             * But if we didn't write scheme in YAML include express, and assigned a :mod:`fsspec` File-system object to ``fs`` argument correctly, it will be the name of matched file.
 
                     arg2(Any):
-                        ``file`` - What returned by :func:`fsspec.open` or the list member of :func:`fsspec.open_files`'s return value will be passed to the argument.
+                        ``file`` - What returned by :func:`fsspec.open`, or the list member of :func:`fsspec.open_files`'s return value, will be passed to the argument.
 
                         Type of the parameter is usually one of:
 
@@ -110,11 +116,11 @@ class YamlIncludeCtor:
                         * Subclass of :class:`fsspec.spec.AbstractBufferedFile`
 
                         Tip:
-                            The type is **NOT** certain however, because different :mod:`fsspec` implementations ``open`` methods have variable return types.
+                            **The type is NOT certain** however, because ``open`` methods of different :mod:`fsspec` file-system implementations are variable.
 
                     arg3 (Type): `Loader` - :mod:`yaml`'s Loader class.
 
-                Returns: What parsed
+                Returns: Parsed result
         """
         self._fs: fsspec.AbstractFileSystem = fsspec.filesystem("file") if fs is None else fs
         self._base_dir = base_dir
