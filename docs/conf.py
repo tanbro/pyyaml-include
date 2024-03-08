@@ -51,7 +51,7 @@ autodoc_mock_imports = ["io"]
 
 # Automatically extract typehints when specified and place them in
 # descriptions of the relevant function/method.
-autodoc_typehints = "both"
+# autodoc_typehints = "both"
 
 # Don't show class signature with the class' name.
 # autodoc_class_signature = "separated"

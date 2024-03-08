@@ -2,11 +2,11 @@
 Include other YAML files in YAML
 """
 
+import re
 from itertools import chain
 from os import PathLike
 from pathlib import Path
 from typing import Callable, Optional, Type, Union
-
 from urllib.parse import urlsplit, urlunsplit
 
 import fsspec
@@ -134,18 +134,17 @@ class YamlIncludeCtor:
         if isinstance(node, yaml.nodes.ScalarNode):
             value = loader.construct_scalar(node)
             return self.load(type(loader), value)
-        elif isinstance(node, yaml.nodes.SequenceNode):
+        if isinstance(node, yaml.nodes.SequenceNode):
             value = loader.construct_sequence(node)
             return self.load(type(loader), *value)
-        elif isinstance(node, yaml.nodes.MappingNode):
+        if isinstance(node, yaml.nodes.MappingNode):
             value = loader.construct_mapping(node)
             return self.load(type(loader), **value)
-        else:  # pragma: no cover
-            raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")
+        raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")  # pragma: no cover
 
-    @staticmethod
-    def _has_wildcards(s, wildcards="*?[]"):
-        return any(c in s for c in wildcards)
+    _wildcards_re_pat = re.compile(
+        r"^(.*)([\*\?\[\]]+)(.*)$"
+    )  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
 
     def _load_from_open_file(self, file, loader_type, path):
         if self._custom_loader is None:
@@ -278,7 +277,7 @@ class YamlIncludeCtor:
 
         # If protocol/scheme in path, we shall open it directly with fs's default open method
         if url_sr.scheme:
-            if self._has_wildcards(urlpath):
+            if self._wildcards_re_pat.match(urlpath):
                 # if wildcards in path, return a Sequence/List
                 result = []
                 with fsspec.open_files(urlpath, *args, **kwargs) as ofs:
@@ -293,7 +292,7 @@ class YamlIncludeCtor:
                 return result
 
         # if no protocol / scheme in path, we shall use the `fs` object
-        if self._has_wildcards(urlpath):
+        if self._wildcards_re_pat.match(urlpath):
             urlpath = Path(urlpath).as_posix()
             # if wildcard in path, returns a List
             glob_params = open_params = None
