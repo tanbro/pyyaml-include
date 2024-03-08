@@ -47,11 +47,11 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 # -- Options for autodoc ----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 
-autodoc_mock_imports = ["io"]
+autodoc_mock_imports = ["io", "fsspec.core", "fsspec.spec"]
 
 # Automatically extract typehints when specified and place them in
 # descriptions of the relevant function/method.
-# autodoc_typehints = "both"
+autodoc_typehints = "both"
 
 # Don't show class signature with the class' name.
 # autodoc_class_signature = "separated"
