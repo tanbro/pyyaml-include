@@ -3,8 +3,9 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# -- Project information -----------------------------------------------------
+import sys
 
+# -- Project information -----------------------------------------------------
 try:
     import importlib.metadata as importlib_metadata  # type: ignore
 except ImportError:
@@ -42,12 +43,14 @@ source_suffix = {
 }
 
 templates_path = ["_templates"]
+
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
 
 # -- Options for autodoc ----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#configuration
 
-autodoc_mock_imports = ["io", "fsspec.core", "fsspec.spec"]
+autodoc_mock_imports = ["io", "typing", "fsspec.core", "fsspec.spec"]
 
 # Automatically extract typehints when specified and place them in
 # descriptions of the relevant function/method.

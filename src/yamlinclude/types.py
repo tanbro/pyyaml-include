@@ -2,6 +2,7 @@ from typing import Type
 
 import yaml
 
+
 if yaml.__with_libyaml__:
     type TYamlLoaders = (  # type: ignore
         yaml.BaseLoader
@@ -15,7 +16,9 @@ if yaml.__with_libyaml__:
         | yaml.CSafeLoader
         | yaml.CUnsafeLoader
     )
-    type TYamlDumpers = yaml.BaseDumper | yaml.Dumper | yaml.SafeDumper | yaml.CBaseDumper | yaml.CDumper | yaml.CSafeDumper  # type: ignore
+    type TYamlDumpers = ( # type: ignore
+        yaml.BaseDumper | yaml.Dumper | yaml.SafeDumper | yaml.CBaseDumper | yaml.CDumper | yaml.CSafeDumper
+    )
     type TYamlLoaderTypes = (  # type: ignore
         Type[yaml.BaseLoader]
         | Type[yaml.FullLoader]

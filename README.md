@@ -67,11 +67,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
    from yamlinclude import YamlIncludeCtor
 
    # add the tag
-   yaml.add_constructor(
-      tag="!inc",
-      constructor=YamlIncludeCtor(base_dir='/your/conf/dir'),
-      Loader=yaml.Loader
-   )
+   yaml.add_constructor("!inc", YamlIncludeCtor(base_dir='/your/conf/dir'))
    ```
 
 1. Write `!inc` tags in `0.yaml`:
@@ -85,7 +81,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
    ```python
    with open('0.yml') as f:
-      data = yaml.load(f, Loader=yaml.Loader)
+      data = yaml.full_load(f)
    print(data)
    ```
 

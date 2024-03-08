@@ -1,0 +1,6 @@
+list:
+    - !inc include.d/1.yaml
+    - !inc include.d/2.yaml
+dict:
+    yaml1: !inc include.d/1.yaml
+    yaml2: !inc include.d/2.yaml
