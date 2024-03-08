@@ -126,7 +126,9 @@ class YamlIncludeCtor:
 
                 Returns: Parsed result
         """
-        self._fs: fsspec.AbstractFileSystem = fsspec.filesystem("file") if fs is None else fs
+        self._fs: fsspec.AbstractFileSystem = (
+            fsspec.filesystem("file") if fs is None else fs
+        )
         self._base_dir = base_dir
         self._custom_loader = custom_loader
 
@@ -140,7 +142,9 @@ class YamlIncludeCtor:
         if isinstance(node, yaml.nodes.MappingNode):
             value = loader.construct_mapping(node)
             return self.load(type(loader), **value)
-        raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")  # pragma: no cover
+        raise ValueError(
+            f"PyYAML node {node!r} is not supported by {type(self)}"
+        )  # pragma: no cover
 
     _wildcards_re_pat = re.compile(
         r"^(.*)([\*\?\[\]]+)(.*)$"
@@ -257,7 +261,6 @@ class YamlIncludeCtor:
                                 with fs.open(file, compression=gzip) as fp:
                                     yaml.load(fp, Loader)
         """
-
         url_sr = urlsplit(urlpath)
         if self._base_dir is not None:
             if callable(self._base_dir):
