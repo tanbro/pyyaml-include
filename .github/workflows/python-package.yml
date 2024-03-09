@@ -35,12 +35,12 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-          cache: pip
+          cache: pip # caching pip dependencies
       - name: Install project and dependent tools
         run: |
           pip install -e . -r tests/requirements.txt coverage ruff
@@ -64,17 +64,17 @@ jobs:
     if: needs.get-version-pep440.outputs.version != ''
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          cache: "pip"
+          cache: "pip" # caching pip dependencies
       - name: Install builder
         run: pip install build
       - name: Build Python distribution
         run: pyproject-build
       - name: Upload dist to artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pyyaml_include-dist-${{ needs.get-version-pep440.outputs.version }}
           path: dist
@@ -87,7 +87,7 @@ jobs:
     if: needs.get-version-pep440.outputs.version != ''
     steps:
       - name: Download dist from artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pyyaml_include-dist-${{needs.get-version-pep440.outputs.version}}
           path: dist

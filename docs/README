@@ -1,0 +1,13 @@
+# build docs
+
+To auto-gernerate API docs RST, run below command in project dir:
+
+```bash
+sphinx-apidoc -o docs/apidoc -MfT src/yamlinclude src/**/yamltype*.py
+```
+
+Then:
+
+```bash
+docs/make html
+```

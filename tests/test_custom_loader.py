@@ -76,10 +76,9 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
 
         if Path(path).suffix == ".json":
             return json.load(file)
-        elif Path(path).suffix in (".yaml", "yml"):
+        if Path(path).suffix in (".yaml", "yml"):
             return yaml.load(file, loader_type)
-        else:
-            return RuntimeError(f"not supported file ‘{path}’ ({file})")
+        return RuntimeError(f"not supported file ‘{path}’ ({file})")
 
     def test_json_wildcards(self):
         with open("tests/data/include.d/1.json") as fp:
@@ -93,9 +92,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
         )
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
-            self.assertListEqual(
-                sorted(data["content"], key=lambda m: m["name"]), [d1, d2]
-            )
+            self.assertListEqual(sorted(data["content"], key=lambda m: m["name"]), [d1, d2])
 
     def test_yaml_wildcards(self):
         with open("tests/data/include.d/1.yaml") as fp:
@@ -109,9 +106,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
         )
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
-            self.assertListEqual(
-                sorted(data["content"], key=lambda m: m["name"]), [d1, d2]
-            )
+            self.assertListEqual(sorted(data["content"], key=lambda m: m["name"]), [d1, d2])
 
     def test_json_yaml(self):
         with open("tests/data/include.d/1.json") as fp:
@@ -159,9 +154,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
         )
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
-            self.assertListEqual(
-                sorted(data, key=lambda m: m["name"]), [json1, yaml1, json2, yaml2]
-            )
+            self.assertListEqual(sorted(data, key=lambda m: m["name"]), [json1, yaml1, json2, yaml2])
 
 
 if __name__ == "__main__":

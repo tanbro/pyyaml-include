@@ -98,9 +98,7 @@ files: !inc include.d/*.yaml
 """
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
     def test_include_wildcards_1(self):
         yml = """
@@ -112,9 +110,7 @@ files: !inc [include.d/**/*.yaml, [1]]
             # ):
             #     continue  # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
     def test_include_wildcards_2(self):
         yml = """
@@ -124,9 +120,7 @@ files: !inc [include.d/**/*.yaml, {maxdepth: 1}]
             # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
             #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
     def test_include_wildcards_3(self):
         yml = """
@@ -136,9 +130,7 @@ files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: {}}
             # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
             #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
     def test_include_wildcards_4(self):
         yml = """
@@ -148,9 +140,7 @@ files: !inc [include.d/**/*.yaml, {maxdepth: 1}, []]
             # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
             #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
     def test_include_wildcards_5(self):
         yml = """
@@ -160,9 +150,7 @@ files: !inc [include.d/**/*.yaml, 1]
             # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
             #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
             data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(
-                sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-            )
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
 
 class DefaultFsBasicTestCase(BaseTestCase):
@@ -193,9 +181,7 @@ class FileFsBasicTestCase(BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        ctor = YamlIncludeCtor(
-            fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data"
-        )
+        ctor = YamlIncludeCtor(fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data")
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 
@@ -263,9 +249,7 @@ class SimpleHttpBasicTestCase(BaseTestCase):
         sleep(1)
         host, port = httpd.socket.getsockname()[:2]
         ctor = YamlIncludeCtor(
-            fs=fsspec.filesystem(
-                "http", client_kwargs=dict(base_url=f"http://{host}:{port}")
-            ),
+            fs=fsspec.filesystem("http", client_kwargs=dict(base_url=f"http://{host}:{port}")),
             base_dir="/tests/data",
         )
         yaml.add_constructor("!inc", ctor, yaml.Loader)
@@ -300,9 +284,7 @@ class SimpleHttpBasicTestCase(BaseTestCase):
             """
         )
         data = yaml.load(yml, yaml.Loader)
-        self.assertListEqual(
-            sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2]
-        )
+        self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
 
 class DefaultFsNoBaseDirBasicTestCase(unittest.TestCase):

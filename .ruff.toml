@@ -1,7 +1,5 @@
 src = ["src"]
 extend-exclude = ["docs"]
-# Always generate Python 3.8-compatible code.
-target-version = "py38"
 line-length = 128
 
 [lint]
@@ -14,3 +12,6 @@ max-complexity = 10
 # Ignore `F401`(imported but unused), `F403`(import *` used), `E402`(import violations) in all `__init__.py` files
 [lint.per-file-ignores]
 "__init__.py" = ["E402", "F401", "F403"]
+
+[format]
+docstring-code-format = true

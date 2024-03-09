@@ -6,7 +6,9 @@
 [![PyPI](https://img.shields.io/pypi/v/pyyaml-include.svg)](https://pypi.org/project/pyyaml-include/)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=tanbro_pyyaml-include&metric=alert_status)](https://sonarcloud.io/dashboard?id=tanbro_pyyaml-include)
 
-An extending constructor of [PyYAML][]: include other [YAML][] files into [YAML][] document.
+An extending constructor of [PyYAML][]: include other [YAML][] files into current [YAML][] document.
+
+With [fsspec][], we can even include files by HTTP, SFTP, S3 ...
 
 ## Install
 
@@ -65,11 +67,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
    from yamlinclude import YamlIncludeCtor
 
    # add the tag
-   yaml.add_constructor(
-      tag="!inc",
-      constructor=YamlIncludeCtor(base_dir='/your/conf/dir'),
-      Loader=yaml.Loader
-   )
+   yaml.add_constructor("!inc", YamlIncludeCtor(base_dir='/your/conf/dir'))
    ```
 
 1. Write `!inc` tags in `0.yaml`:
@@ -83,7 +81,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
    ```python
    with open('0.yml') as f:
-      data = yaml.load(f, Loader=yaml.Loader)
+      data = yaml.full_load(f)
    print(data)
    ```
 
@@ -371,7 +369,7 @@ But the format of parameters has multiple cases, and differs variably in differe
   >
   > > ℹ️ **Note** \
   > > `BaseLoader`, `SafeLoader`, `CBaseLoader`, `CSafeLoader` do **NOT** support ‘Standard YAML tag’.
-  >
+  > ---
   > > 🔖 **Tip** \
   > > `maxdepth` argument of [fsspec][] `glob` method is already force converted by `YamlIncludeCtor`, no need to write a `!!int` tag on it.
 
@@ -410,6 +408,150 @@ xyz: !http-include xyz.yml
 
 the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
+## Serialization
+
+When load [YAML][] string with include statement, the including files are default parsed into python objects. Thant is, if we call `yaml.dump()` on the object, what dumped is the parsed python object, and can not serialize the include statement itself.
+
+To serialize the statement, we shall first create an `YamlIncludeCtor` object whose `auto_load` is `False`:
+
+```python
+import yaml
+
+ctor = YamlIncludeCtor(auto_load=False)
+```
+
+then add both Constructor for Loader and Representer for Dumper:
+
+```python
+from yamlinclude import YamlIncludeCtor, YamlIncludeData, YamlIncludeRepr
+
+yaml.add_constructor("!inc", ctor)
+
+repr_ = YamlIncludeRepr("inc")
+yaml.add_representer(YamlIncludeData, cls.repr)
+```
+
+Now, the including files will not be loaded when call `yaml.load()`, and `YamlIncludeData` objects will be placed at the positions where include statements are.
+
+continue above code:
+
+```python
+yaml_str = """
+- !inc include.d/1.yaml
+- !inc include.d/2.yaml
+"""
+
+d = yaml.load(yaml_str, yaml.Loader)
+# Here, "include.d/1.yaml" and "include.d/2.yaml" not be opened or loaded.
+# d is like:
+# [YamlIncludeData(urlpath="include.d/1.yaml"), YamlIncludeData(urlpath="include.d/2.yaml")]
+
+# So, d is ready to be serialized:
+
+s = yaml.dump(d)
+
+# ‘s’ will be:
+# - !inc 'include.d/1.yaml'
+# - !inc 'include.d/2.yaml'
+
+# also we can perform a de-serialization
+ctor.auto_load = True # re-open auto load
+# then load
+d1 = yaml.load(s, yaml.Loader)
+# Here, "include.d/1.yaml" and "include.d/2.yaml" be opened and loaded.
+```
+
+### Include JSON or TOML
+
+We can include files in different format other than [YAML][], like [JSON][] or [TOML][] -- ``custom_loader`` is for that.
+
+> 📑 **Example** \
+> For example:
+>
+> ```python
+> import json
+> from pathlib import PurePath
+> import yaml
+> import fsspec
+> from yamlinclude import YamlIncludeCtor
+>
+> try:
+>     import tomllib as toml
+> except ImportError:
+>     try:
+>         import tomli as toml
+>     except ImportError as err:
+>         print(err)
+>         print()
+>         print("You shall: ‘pip install install tomli’")
+>         exit()
+>
+> # Define loader function
+> def my_loader(urlpath, file, Loader):
+>     p = PurePath(file.path)
+>     if p.suffix.lower() == ".json":
+>         return json.load(file)
+>     if p.suffix.lower() == ".toml":
+>         return toml.load(file)
+>     if p.suffix.lower() in (".yaml", "yml"):
+>         return yaml.load(file, Loader)
+>     raise NotImplementedError(file.path)
+>
+> # Create the include constructor, with the custom loader
+> ctor = YamlIncludeCtor(custom_loader=my_loader)
+>
+> # Add the constructor to YAML Loader
+> yaml.add_constructor("!inc", ctor, yaml.Loader)
+>
+> # Then, json files will can be loaded by stdlib's json module, and the same to toml files.
+> s = """
+> json: !inc "*.json"
+> toml: !inc "*.toml"
+> yaml: !inc "*.yaml"
+> """
+>
+> yaml.load(s, yaml.Loader)
+> ```
+
+## Develop
+
+1. clone the repo:
+
+   ```bash
+   git clone https://github.com/tanbro/pyyaml-include.git
+   cd pyyaml-include
+   ```
+
+1. create then activate a python virtual-env:
+
+   - POSIX:
+
+     ```bash
+     python3 -m venv .venv
+     .venv/bin/activate
+     ```
+
+   - Windows(PowerShell):
+
+     ```powershell
+     python3 -m venv .venv
+     &.venv\Scripts\Activate.ps1
+     ```
+
+1. install development-required packages and the project itself in editable mode:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+Now you can work on it.
+
+## Test
+
+see: `tests/README.md`
+
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."
 [fsspec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."
+[JSON]: https://json.io/ "JSON (JavaScript Object Notation) is a lightweight data-interchange format. It is easy for humans to read and write"
+[TOML]: https://toml.io/ "TOML aims to be a minimal configuration file format that's easy to read due to obvious semantics."
