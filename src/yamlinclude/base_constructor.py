@@ -5,7 +5,7 @@ from typing import Callable, Optional, Union
 import fsspec
 
 
-@dataclass(frozen=True)
+@dataclass
 class BaseYamlIncludeCtor:
     fs: fsspec.AbstractFileSystem = field(
         default_factory=lambda: fsspec.filesystem("file"),

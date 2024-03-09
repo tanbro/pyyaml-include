@@ -408,6 +408,59 @@ xyz: !http-include xyz.yml
 
 the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
+## Serialization
+
+When load [YAML][] string with include statement, the including files are default parsed into python objects. Thant is, if we call `yaml.dump()` on the object, what dumped is the parsed python object, and can not serialize the include statement itself.
+
+To serialize the statement, we shall first create an `YamlIncludeCtor` object whose `auto_load` is `False`:
+
+```python
+import yaml
+
+ctor = YamlIncludeCtor(auto_load=False)
+```
+
+then add both Constructor for Loader and Representer for Dumper:
+
+```python
+from yamlinclude import YamlIncludeCtor, YamlIncludeData, YamlIncludeRepr
+
+yaml.add_constructor("!inc", ctor)
+
+repr_ = YamlIncludeRepr("inc")
+yaml.add_representer(YamlIncludeData, cls.repr)
+```
+
+Now, the including files will not be loaded when call `yaml.load()`, and `YamlIncludeData` objects will be placed at the positions where include statements are.
+
+continue above code:
+
+```python
+yaml_str = """
+- !inc include.d/1.yaml
+- !inc include.d/2.yaml
+"""
+
+d = yaml.load(yaml_str, yaml.Loader)
+# Here, "include.d/1.yaml" and "include.d/2.yaml" not be opened or loaded.
+# d is like:
+# [YamlIncludeData(urlpath="include.d/1.yaml"), YamlIncludeData(urlpath="include.d/2.yaml")]
+
+# So, d is ready to be serialized:
+
+s = yaml.dump(d)
+
+# ‘s’ will be:
+# - !inc 'include.d/1.yaml'
+# - !inc 'include.d/2.yaml'
+
+# also we can perform a de-serialization
+ctor.auto_load = True # re-open auto load
+# then load
+d1 = yaml.load(s, yaml.Loader)
+# Here, "include.d/1.yaml" and "include.d/2.yaml" be opened and loaded.
+```
+
 ### Include JSON or TOML
 
 We can include files in different format other than [YAML][], like [JSON][] or [TOML][] -- ``custom_loader`` is for that.

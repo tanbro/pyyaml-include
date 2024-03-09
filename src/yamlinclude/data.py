@@ -4,7 +4,7 @@ from typing import Any, Mapping, Sequence
 __all__ = ["YamlIncludeData"]
 
 
-@dataclass
+@dataclass(frozen=True)
 class YamlIncludeData:
     """A ``dataclass`` store YAML including statement"""
 

@@ -16,7 +16,7 @@ if yaml.__with_libyaml__:
         | yaml.CSafeLoader
         | yaml.CUnsafeLoader
     )
-    type TYamlDumpers = ( # type: ignore
+    type TYamlDumpers = (  # type: ignore
         yaml.BaseDumper | yaml.Dumper | yaml.SafeDumper | yaml.CBaseDumper | yaml.CDumper | yaml.CSafeDumper
     )
     type TYamlLoaderTypes = (  # type: ignore

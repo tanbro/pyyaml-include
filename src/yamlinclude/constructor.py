@@ -13,7 +13,7 @@ from .utils import load
 __all__ = ["YamlIncludeCtor"]
 
 
-@dataclass(frozen=True)
+@dataclass
 class YamlIncludeCtor(BaseYamlIncludeCtor):
     """The include constructor for PyYAML Loaders
 
