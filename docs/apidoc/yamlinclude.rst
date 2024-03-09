@@ -1,6 +1,11 @@
 yamlinclude package
 ===================
 
+.. automodule:: yamlinclude
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Submodules
 ----------
 
@@ -44,34 +49,10 @@ yamlinclude.representer module
    :undoc-members:
    :show-inheritance:
 
-yamlinclude.types module
-------------------------
-
-.. automodule:: yamlinclude.types
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-yamlinclude.types\_backward module
-----------------------------------
-
-.. automodule:: yamlinclude.types_backward
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 yamlinclude.utils module
 ------------------------
 
 .. automodule:: yamlinclude.utils
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: yamlinclude
    :members:
    :undoc-members:
    :show-inheritance:

@@ -9,6 +9,7 @@ x-test-common: &test-common
     - .env
   environment:
     - PIP_ROOT_USER_ACTION=ignore
+    - PIP_NO_WARN_SCRIPT_LOCATION=1
   command:
     - /bin/bash
     - -c
@@ -16,6 +17,8 @@ x-test-common: &test-common
       set -e
       python -m pip install --user --pre --disable-pip-version-check --find-links dist -r tests/requirements.txt pyyaml-include
       python -B -m unittest -fv
+
+name: pyyamlinclude-tests
 
 services:
   python3.8:

@@ -9,9 +9,9 @@ import fsspec
 import yaml
 
 if sys.version_info < (3, 12):
-    from .types_backward import TYamlLoaderTypes
+    from .yamltypes_backward import TYamlLoaderTypes
 else:
-    from .types import TYamlLoaderTypes
+    from .yamltypes import TYamlLoaderTypes
 
 from .base_constructor import BaseYamlIncludeCtor
 from .data import YamlIncludeData

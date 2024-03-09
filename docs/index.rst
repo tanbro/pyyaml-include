@@ -52,7 +52,7 @@ Contents
    :caption: API References
    :titlesonly:
 
-   apidoc/modules
+   apidoc/yamlinclude
 
 ------------------
 Indices and tables

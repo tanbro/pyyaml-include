@@ -36,5 +36,5 @@ with open("tests/data/include.d/1.yaml") as f:
     YAML1 = yaml.full_load(f)
 with open("tests/data/include.d/2.yaml") as f:
     YAML2 = yaml.full_load(f)
-with open("tests/data/zh_cn.yaml") as f:
+with open("tests/data/zh_cn.yaml", encoding="utf8") as f:
     YAML_ZH_CN = yaml.full_load(f)
