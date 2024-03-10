@@ -1,4 +1,8 @@
 import sys
+
+if not sys.version_info < (3, 12):
+    raise ImportError("Python greater than or equal to 3.12 should “import yamltypes”")
+
 from typing import Type, Union
 
 if sys.version_info < (3, 10):
@@ -57,7 +61,9 @@ else:
         yaml.SafeLoader,
         yaml.UnsafeLoader,
     ]
-    TYamlDumpers: TypeAlias = Union[yaml.BaseDumper, yaml.Dumper, yaml.SafeDumper]  # type: ignore
+    TYamlDumpers: TypeAlias = Union[  # type: ignore
+        yaml.BaseDumper, yaml.Dumper, yaml.SafeDumper
+    ]
     TYamlLoaderTypes: TypeAlias = Union[  # type: ignore
         Type[yaml.BaseLoader],
         Type[yaml.FullLoader],
@@ -65,4 +71,6 @@ else:
         Type[yaml.SafeLoader],
         Type[yaml.UnsafeLoader],
     ]
-    TYamlDumperTypes: TypeAlias = Union[Type[yaml.BaseDumper], Type[yaml.Dumper], Type[yaml.SafeDumper]]  # type: ignore
+    TYamlDumperTypes: TypeAlias = Union[  # type: ignore
+        Type[yaml.BaseDumper], Type[yaml.Dumper], Type[yaml.SafeDumper]
+    ]
