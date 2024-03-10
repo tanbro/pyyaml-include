@@ -9,34 +9,10 @@ yamlinclude package
 Submodules
 ----------
 
-yamlinclude.constructor module
-------------------------------
+.. toctree::
+   :maxdepth: 4
 
-.. automodule:: yamlinclude.constructor
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-yamlinclude.data module
------------------------
-
-.. automodule:: yamlinclude.data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-yamlinclude.funcs module
-------------------------
-
-.. automodule:: yamlinclude.funcs
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-yamlinclude.representer module
-------------------------------
-
-.. automodule:: yamlinclude.representer
-   :members:
-   :undoc-members:
-   :show-inheritance:
+   yamlinclude.constructor
+   yamlinclude.data
+   yamlinclude.funcs
+   yamlinclude.representer

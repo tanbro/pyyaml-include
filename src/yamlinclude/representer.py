@@ -1,9 +1,9 @@
-__all__ = ["YamlIncludeRepr"]
-
 from dataclasses import dataclass
 
+__all__ = ["YamlIncludeRepr"]
 
-@dataclass(frozen=True)
+
+@dataclass
 class YamlIncludeRepr:
     """Representer for :class:`yamlinclude.data.Data`
 
@@ -11,17 +11,17 @@ class YamlIncludeRepr:
 
     Add the representer to `PyYAML Dumper` as below::
 
-        rpt = YamlIncludeRepr("inc")  # No "!" here !!!
-        yaml.add_representer(yaml.Node, rpt, Dumper)
+        rpr = YamlIncludeRepr("inc")  # No "!" here !!!
+        yaml.add_representer(yaml.Node, rpr, Dumper)
     """
 
     tag: str
     """YAML tag name for include statement
 
     Attention:
-        Custom YAML tags start with ``"!"``,
-        but we **MUST NOT** put a ``"!"`` at the beginning of ``tag`` here
-        -- :func:`yaml.add_representer` will add the symbol itself.
+        Custom YAML tag's name starts with ``"!"``.
+        But we **MUST NOT** put a ``"!"`` at the beginning of here,
+        because :func:`yaml.add_representer` will add the symbol itself.
     """
 
     def __call__(self, dumper, data):

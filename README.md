@@ -223,7 +223,7 @@ Above [YAML][] snippet will be loaded like:
 ---
 
 > ℹ️ **Note** \
-> If `fs` argument is omitted or `None`, a `"file"`/`"local"` [fsspec][] filesystem object will be used automatically. That is to say:
+> If `fs` argument is omitted, a `"file"`/`"local"` [fsspec][] filesystem object will be used automatically. That is to say:
 >
 > ```yaml
 > data: !inc: foo/baz.yaml

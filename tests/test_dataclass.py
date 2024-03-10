@@ -28,6 +28,8 @@ class DataClassTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             with self.ctor.managed_autoload(False):
+                self.assertFalse(self.ctor.autoload)
                 d = yaml.load(yaml_string, loader_cls)
                 self.assertIsInstance(d["yaml1"], YamlIncludeData)
                 self.assertEqual(d["yaml1"].urlpath, "include.d/1.yaml")
+            self.assertTrue(self.ctor.autoload)
