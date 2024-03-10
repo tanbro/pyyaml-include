@@ -4,15 +4,15 @@ from textwrap import dedent
 import yaml
 from yamlinclude import (
     YamlIncludeCtor,
-    load_yaml_include,
-    iload_yaml_include,
+    yamlinclude_load,
+    yamlinclude_lazy_load,
 )
 
 from ._internal import YAML_LOADERS, YAML1, YAML2
 
 
 class LoadFuncTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data", auto_load=False)
+    ctor = YamlIncludeCtor(base_dir="tests/data", autoload=False)
 
     @classmethod
     def setUpClass(cls):
@@ -37,7 +37,7 @@ class LoadFuncTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             d0 = yaml.load(yaml_string, loader_cls)
-            d1 = load_yaml_include(d0, loader_cls, self.ctor)
+            d1 = yamlinclude_load(d0, loader_cls, self.ctor)
             self.assertDictEqual(YAML1, d1["list"][0])
             self.assertDictEqual(YAML2, d1["list"][1])
             self.assertDictEqual(YAML1, d1["dict"]["yaml1"])
@@ -56,7 +56,7 @@ class LoadFuncTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             d0 = yaml.load(yaml_string, loader_cls)
-            load_yaml_include(d0, loader_cls, self.ctor, inplace=True)
+            yamlinclude_load(d0, loader_cls, self.ctor, inplace=True)
             self.assertDictEqual(YAML1, d0["list"][0])
             self.assertDictEqual(YAML2, d0["list"][1])
             self.assertDictEqual(YAML1, d0["dict"]["yaml1"])
@@ -70,7 +70,7 @@ class LoadFuncTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             d0 = yaml.load(yaml_string, loader_cls)
-            d1 = load_yaml_include(d0, loader_cls, self.ctor, nested=True)
+            d1 = yamlinclude_load(d0, loader_cls, self.ctor, nested=True)
             self.assertDictEqual(YAML1, d1["nested"]["list"][0])
             self.assertDictEqual(YAML2, d1["nested"]["list"][1])
             self.assertDictEqual(YAML1, d1["nested"]["dict"]["yaml1"])
@@ -84,7 +84,7 @@ class LoadFuncTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             d0 = yaml.load(yaml_string, loader_cls)
-            load_yaml_include(d0, loader_cls, self.ctor, inplace=True, nested=True)
+            yamlinclude_load(d0, loader_cls, self.ctor, inplace=True, nested=True)
             self.assertDictEqual(YAML1, d0["nested"]["list"][0])
             self.assertDictEqual(YAML2, d0["nested"]["list"][1])
             self.assertDictEqual(YAML1, d0["nested"]["dict"]["yaml1"])
@@ -92,7 +92,7 @@ class LoadFuncTestCase(unittest.TestCase):
 
 
 class IterableLoadFuncTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data", auto_load=False)
+    ctor = YamlIncludeCtor(base_dir="tests/data", autoload=False)
 
     @classmethod
     def setUpClass(cls):
@@ -117,7 +117,7 @@ class IterableLoadFuncTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             d0 = yaml.load(yaml_string, loader_cls)
-            for _ in iload_yaml_include(d0, loader_cls, self.ctor):
+            for _ in yamlinclude_lazy_load(d0, loader_cls, self.ctor):
                 pass
             self.assertDictEqual(YAML1, d0["list"][0])
             self.assertDictEqual(YAML2, d0["list"][1])
@@ -132,7 +132,7 @@ class IterableLoadFuncTestCase(unittest.TestCase):
         ).strip()
         for loader_cls in YAML_LOADERS:
             d0 = yaml.load(yaml_string, loader_cls)
-            for _ in iload_yaml_include(d0, loader_cls, self.ctor, nested=True):
+            for _ in yamlinclude_lazy_load(d0, loader_cls, self.ctor, nested=True):
                 pass
             self.assertDictEqual(YAML1, d0["nested"]["list"][0])
             self.assertDictEqual(YAML2, d0["nested"]["list"][1])

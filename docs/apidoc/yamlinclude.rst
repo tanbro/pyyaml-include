@@ -9,14 +9,6 @@ yamlinclude package
 Submodules
 ----------
 
-yamlinclude.base\_constructor module
-------------------------------------
-
-.. automodule:: yamlinclude.base_constructor
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 yamlinclude.constructor module
 ------------------------------
 
@@ -45,14 +37,6 @@ yamlinclude.representer module
 ------------------------------
 
 .. automodule:: yamlinclude.representer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-yamlinclude.utils module
-------------------------
-
-.. automodule:: yamlinclude.utils
    :members:
    :undoc-members:
    :show-inheritance:
