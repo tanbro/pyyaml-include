@@ -34,14 +34,22 @@ def load_yaml_include(
             for k, v in obj.items():
                 obj[k] = load_yaml_include(v, loader_type, constructor, inplace, nested)
         else:
-            return {k: load_yaml_include(v, loader_type, constructor, inplace, nested) for k, v in obj.items()}
-    elif isinstance(obj, Sequence) and not isinstance(obj, (bytearray, bytes, memoryview, str)):
+            return {
+                k: load_yaml_include(v, loader_type, constructor, inplace, nested)
+                for k, v in obj.items()
+            }
+    elif isinstance(obj, Sequence) and not isinstance(
+        obj, (bytearray, bytes, memoryview, str)
+    ):
         if inplace:
             assert isinstance(obj, MutableSequence)
             for i, v in enumerate(obj):
                 obj[i] = load_yaml_include(v, loader_type, constructor, inplace, nested)
         else:
-            return [load_yaml_include(m, loader_type, constructor, inplace, nested) for m in obj]
+            return [
+                load_yaml_include(m, loader_type, constructor, inplace, nested)
+                for m in obj
+            ]
     return obj
 
 

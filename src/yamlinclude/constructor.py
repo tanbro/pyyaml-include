@@ -2,6 +2,7 @@
 Include other YAML files in YAML
 """
 
+from contextlib import contextmanager
 from dataclasses import dataclass
 
 import yaml
@@ -60,7 +61,16 @@ class YamlIncludeCtor(BaseYamlIncludeCtor):
            The variable ``data`` containers the parsed Python object(s) from including file(s)
     """
 
-    auto_load: bool = True
+    autoload: bool = True
+
+    @contextmanager
+    def managed_autoload(self, autoload: bool = True):
+        saved = self.autoload
+        self.autoload = bool(autoload)
+        try:
+            yield self
+        finally:
+            self.autoload = saved
 
     def __call__(self, loader, node: yaml.nodes.Node):
         if isinstance(node, yaml.nodes.ScalarNode):
@@ -77,7 +87,7 @@ class YamlIncludeCtor(BaseYamlIncludeCtor):
             )
         else:  # pragma: no cover
             raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")
-        if self.auto_load:
+        if self.autoload:
             return load(type(loader), self, data)
         else:
             return data

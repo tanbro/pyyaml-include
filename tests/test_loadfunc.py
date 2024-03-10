@@ -12,7 +12,7 @@ from ._internal import YAML_LOADERS, YAML1, YAML2
 
 
 class LoadFuncTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data", auto_load=False)
+    ctor = YamlIncludeCtor(base_dir="tests/data", autoload=False)
 
     @classmethod
     def setUpClass(cls):
@@ -92,7 +92,7 @@ class LoadFuncTestCase(unittest.TestCase):
 
 
 class IterableLoadFuncTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data", auto_load=False)
+    ctor = YamlIncludeCtor(base_dir="tests/data", autoload=False)
 
     @classmethod
     def setUpClass(cls):

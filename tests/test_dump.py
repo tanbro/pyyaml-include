@@ -14,7 +14,7 @@ from ._internal import YAML_DUMPERS, YAML_LOADERS, YAML1, YAML2
 
 
 class DumpTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data", auto_load=False)
+    ctor = YamlIncludeCtor(base_dir="tests/data", autoload=False)
     repr = YamlIncludeRepr("inc")
 
     @classmethod
