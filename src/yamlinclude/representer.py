@@ -12,7 +12,7 @@ class YamlIncludeRepr:
     Add the representer to `PyYAML Dumper` as below::
 
         rpr = YamlIncludeRepr("inc")  # No "!" here !!!
-        yaml.add_representer(yaml.Node, rpr, Dumper)
+        yaml.add_representer(YamlIncludeData, rpr)
     """
 
     tag: str
