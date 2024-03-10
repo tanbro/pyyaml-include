@@ -1,17 +1,19 @@
 from dataclasses import dataclass
 
+from .data import YamlIncludeData  # noqa: F401
+
 __all__ = ["YamlIncludeRepr"]
 
 
 @dataclass
 class YamlIncludeRepr:
-    """Representer for :class:`yamlinclude.data.Data`
+    """Representer for :class:`.YamlIncludeData`
 
-    When dumping an object into YAML string, it deserializes :class:`yamlinclude.data.Data`
+    When dumping an object into YAML string, it deserializes :class:`.YamlIncludeData` instance(s) in it.
 
-    Add the representer to `PyYAML Dumper` as below::
+    Add the representer to ``PyYAML`` ``Dumper`` class as below::
 
-        rpr = YamlIncludeRepr("inc")  # No "!" here !!!
+        rpr = YamlIncludeRepr("inc")  # ATTENTION: No "!" here !!!
         yaml.add_representer(YamlIncludeData, rpr)
     """
 
@@ -20,7 +22,7 @@ class YamlIncludeRepr:
 
     Attention:
         Custom YAML tag's name starts with ``"!"``.
-        But we **MUST NOT** put a ``"!"`` at the beginning of here,
+        But we **MUST NOT** put a ``"!"`` at the beginning here,
         because :func:`yaml.add_representer` will add the symbol itself.
     """
 
