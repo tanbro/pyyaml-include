@@ -6,7 +6,7 @@ __all__ = ["YamlIncludeData"]
 
 @dataclass(frozen=True)
 class YamlIncludeData:
-    """A ``dataclass`` store YAML including statement"""
+    """A :func:`dataclasses.dataclass` store YAML include statement"""
 
     urlpath: str
     """url/path of the YAML including statement
@@ -20,14 +20,10 @@ class YamlIncludeData:
         Using the ``"**"`` pattern in large directory trees or remote files may consume an inordinate amount of time.
     """
 
-    sequence_param: Sequence[Any] = field(default_factory=list)
+    sequence_params: Sequence[Any] = field(default_factory=list)
     """sequence parameters of the YAML including statement.
-
-    default: an empty list
     """
 
-    mapping_param: Mapping[str, Any] = field(default_factory=dict)
+    mapping_params: Mapping[str, Any] = field(default_factory=dict)
     """mapping parameters of the YAML including statement
-
-    default: an empty dictionary
     """

@@ -428,7 +428,7 @@ from yamlinclude import YamlIncludeCtor, YamlIncludeData, YamlIncludeRepr
 yaml.add_constructor("!inc", ctor)
 
 repr_ = YamlIncludeRepr("inc")
-yaml.add_representer(YamlIncludeData, cls.repr)
+yaml.add_representer(YamlIncludeData, repr_)
 ```
 
 Now, the including files will not be loaded when call `yaml.load()`, and `YamlIncludeData` objects will be placed at the positions where include statements are.
@@ -441,24 +441,28 @@ yaml_str = """
 - !inc include.d/2.yaml
 """
 
-d = yaml.load(yaml_str, yaml.Loader)
+d0 = yaml.load(yaml_str, yaml.Loader)
 # Here, "include.d/1.yaml" and "include.d/2.yaml" not be opened or loaded.
-# d is like:
+# d0 is like:
 # [YamlIncludeData(urlpath="include.d/1.yaml"), YamlIncludeData(urlpath="include.d/2.yaml")]
 
-# So, d is ready to be serialized:
-
-s = yaml.dump(d)
-
+# serialize d0
+s = yaml.dump(d0)
 # ‘s’ will be:
 # - !inc 'include.d/1.yaml'
 # - !inc 'include.d/2.yaml'
+print(s)
 
 # also we can perform a de-serialization
 ctor.autoload = True # re-open auto load
-# then load
+# then load, the file "include.d/1.yaml" and "include.d/2.yaml" will be opened and loaded.
 d1 = yaml.load(s, yaml.Loader)
-# Here, "include.d/1.yaml" and "include.d/2.yaml" be opened and loaded.
+
+# Or perform a recursive opening / parsing on the object:
+from yamlinclude import yamlinclude_load
+
+# d2 is equal to d1
+d2 = yamlinclude_load(d0)
 ```
 
 ### Include JSON or TOML
