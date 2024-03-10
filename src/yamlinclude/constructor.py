@@ -179,14 +179,14 @@ class YamlIncludeCtor:
         finally:
             self.autoload = saved
 
-    def __call__(self, loader, node: yaml.nodes.Node):
-        if isinstance(node, yaml.nodes.ScalarNode):
+    def __call__(self, loader, node):
+        if isinstance(node, yaml.ScalarNode):
             params = loader.construct_scalar(node)
             data = YamlIncludeData(urlpath=params)
-        elif isinstance(node, yaml.nodes.SequenceNode):
+        elif isinstance(node, yaml.SequenceNode):
             params = loader.construct_sequence(node)
             data = YamlIncludeData(urlpath=params[0], sequence_params=params[1:])
-        elif isinstance(node, yaml.nodes.MappingNode):
+        elif isinstance(node, yaml.MappingNode):
             params = loader.construct_mapping(node)
             data = YamlIncludeData(
                 urlpath=params["urlpath"],
@@ -199,11 +199,7 @@ class YamlIncludeCtor:
         else:
             return data
 
-    def load(
-        self,
-        loader_type: TYamlLoaderTypes,
-        data: YamlIncludeData,
-    ) -> Any:
+    def load(self, loader_type: TYamlLoaderTypes, data: YamlIncludeData) -> Any:
         """The method will be invoked once the PyYAML's Loader class call the constructor.
         It happens when an include state tag(eg: ``"!inc"``) is met.
 
