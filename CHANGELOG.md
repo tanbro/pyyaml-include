@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.0.a3
+
+> 📅 **Date** 2024-3-11
+
+- ❎ Breaking Changes:
+  - namespace changed to `yaml_include`
+
+- 🆕 New Features:
+  - `Data` class for include statement.
+  - `autoload` attribute for `Constructor` class, controlling if open and parse including files, or return a `Data` object.
+  - `Representer` class for YAML dumping.
+  - `load` and `lazy_load` function - recursive open and parse for `Data` object.
+
 ## 2.0.a2
 
 > 📅 **Date** 2024-3-3
