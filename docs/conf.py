@@ -3,8 +3,6 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-import sys
-
 # -- Project information -----------------------------------------------------
 try:
     import importlib.metadata as importlib_metadata  # type: ignore

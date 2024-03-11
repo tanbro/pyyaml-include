@@ -3,3 +3,5 @@ source = src
 relative_files = True
 omit =
     _version.py
+    yaml_types.py
+    yaml_types_backward.py
