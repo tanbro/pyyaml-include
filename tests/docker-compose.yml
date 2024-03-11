@@ -15,7 +15,7 @@ x-test-common: &test-common
     - -c
     - |
       set -e
-      python -m pip install --user --pre --disable-pip-version-check --find-links dist -r tests/requirements.txt pyyaml-include
+      python -m pip install --user -U --pre --disable-pip-version-check --find-links dist -r tests/requirements.txt pyyaml-include
       python -B -m unittest -fv
 
 name: pyyamlinclude-tests

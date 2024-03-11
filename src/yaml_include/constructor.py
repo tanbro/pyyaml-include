@@ -26,7 +26,7 @@ from .data import Data
 if sys.version_info < (3, 12):
     from .yaml_types_backward import TYamlLoaderTypes
 else:
-    from .yamltypes import TYamlLoaderTypes
+    from .yaml_types import TYamlLoaderTypes
 
 __all__ = ["Constructor"]
 
