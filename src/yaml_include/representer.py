@@ -14,6 +14,7 @@ class Representer:
     Add the representer to ``PyYAML`` ``Dumper`` class as below::
 
         import yaml_include
+
         rpr = yaml_include.Representer("inc")  # ATTENTION: No "!" here !!!
         yaml.add_representer(Data, rpr)
     """
