@@ -272,7 +272,7 @@ However, there are more parameters.
 
 But the format of parameters has multiple cases, and differs variably in different [fsspec][] implementation backends.
 
-- If a scheme/protocol(“`http://`”, “`sftp://`”, “`file://`”, etc.) is defined in `urlpath`, `Constructor` will invoke [`fsspece.open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open) directly to open it. Which means `Constructor`'s `fs` will be ignored, and a new standalone `fs` will be created implicitly.
+- If a scheme/protocol(“`http://`”, “`sftp://`”, “`file://`”, etc.) is defined, and there is no wildcard in `urlpath`, `Constructor` will invoke [`fsspece.open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open) directly to open it. Which means `Constructor`'s `fs` will be ignored, and a new standalone `fs` will be created implicitly.
 
   In this situation, `urlpath` will be passed to `fsspece.open`'s first argument, and all other parameters will also be passed to the function.
 
@@ -304,13 +304,14 @@ But the format of parameters has multiple cases, and differs variably in differe
         yaml.load(f, Loader)
     ```
 
-  > 🔖 **Tip** \
-  > `urlpath` with scheme/protocol **SHOULD NOT** include wildcards character(s), `urlpath` like `"file:///etc/foo/*.yml"` is illegal.
+- If `urlpath` has wildcard, and also scheme in it, `Constructor` will:
 
-- If `urlpath` has wildcards in it, `Constructor` will:
+  Invoke [fsspec][]'s [`open_files`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open_files) function to search, open and load files, and return the results in a list. [YAML][] include statement's parameters are passed to `open_files` function.
+
+- If `urlpath` has wildcard, and no scheme in it, `Constructor` will:
 
   1. invoke corresponding [fsspec][] implementation backend's [`glob`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.glob) method to search files,
-  1. then call [`open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.open) method to open the found file(s).
+  1. then call [`open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.open) method to open each found file(s).
 
   `urlpath` will be passed as the first argument to both `glob` and `open` method of the corresponding [fsspec][] implementation backend, and other parameters will also be passed to `glob` and `open` method as their following arguments.
 
