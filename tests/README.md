@@ -1,10 +1,10 @@
 # How to run unit-tests
 
-1. install the project in editable mode, and also install it's development dependencies:
+1. install the project in editable mode, and also install it's tests dependencies:
 
    ```bash
    cd ${workspaceFolder}
-   python -m pip install -r requirements.txt
+   python -m pip install -e . -r tests/requirements.txt
    ```
 
 1. To run test cases, we can either:
@@ -16,19 +16,9 @@
      python -m unittest
      ```
 
-   or:
-
-   * Run multiple python version test in docker:
-
-     1. Build the project's package:
+   * Run multiple python versions tests with docker compose
 
         ```bash
-        python -m build
-        ```
-
-     1. Run multiple python versions tests with docker compose
-
-        ```bash
-        cd tests
+        cd ${workspaceFolder}/tests
         docker compose up
         ```

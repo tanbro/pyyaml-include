@@ -8,6 +8,7 @@ x-test-common: &test-common
   env_file:
     - .env
   environment:
+    - SETUPTOOLS_SCM_PRETEND_VERSION=0
     - PIP_ROOT_USER_ACTION=ignore
     - PIP_NO_WARN_SCRIPT_LOCATION=1
   command:
@@ -15,7 +16,7 @@ x-test-common: &test-common
     - -c
     - |
       set -e
-      python -m pip install --user -U --pre --disable-pip-version-check --find-links dist -r tests/requirements.txt pyyaml-include
+      python -m pip install --user -U -e ./ -r tests/requirements.txt
       python -B -m unittest -fv
 
 name: pyyam-linclude-tests
