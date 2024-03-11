@@ -2,34 +2,34 @@ import unittest
 from textwrap import dedent
 
 import yaml
-from yamlinclude import (
-    YamlIncludeData,
-    YamlIncludeCtor,
-    YamlIncludeRepr,
-    yamlinclude_load,
-    yamlinclude_lazy_load,
+from yaml_include import (
+    Data,
+    Constructor,
+    Representer,
+    load,
+    lazy_load,
 )
 
 from ._internal import YAML_DUMPERS, YAML_LOADERS, YAML1, YAML2
 
 
 class DumpTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data", autoload=False)
-    repr = YamlIncludeRepr("inc")
+    ctor = Constructor(base_dir="tests/data", autoload=False)
+    repr = Representer("inc")
 
     @classmethod
     def setUpClass(cls):
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", cls.ctor, loader_cls)
         for dumper_cls in YAML_DUMPERS:
-            yaml.add_representer(YamlIncludeData, cls.repr, dumper_cls)
+            yaml.add_representer(Data, cls.repr, dumper_cls)
 
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
             del loader_class.yaml_constructors["!inc"]
         for dumper_cls in YAML_DUMPERS:
-            del dumper_cls.yaml_representers[YamlIncludeData]
+            del dumper_cls.yaml_representers[Data]
 
     def test_extract(self):
         yaml_string = dedent(
@@ -47,7 +47,7 @@ class DumpTestCase(unittest.TestCase):
             for dumper_cls in YAML_DUMPERS:
                 s = yaml.dump(d, None, dumper_cls)
                 d1 = yaml.load(s, loader_cls)
-                d2 = yamlinclude_load(d1, loader_cls, self.ctor)
+                d2 = load(d1, loader_cls, self.ctor)
                 self.assertDictEqual(YAML1, d2["list"][0])
                 self.assertDictEqual(YAML2, d2["list"][1])
                 self.assertDictEqual(YAML1, d2["dict"]["yaml1"])
@@ -69,7 +69,7 @@ class DumpTestCase(unittest.TestCase):
             for dumper_cls in YAML_DUMPERS:
                 s = yaml.dump(d, None, dumper_cls)
                 d1 = yaml.load(s, loader_cls)
-                yamlinclude_load(d1, loader_cls, self.ctor, inplace=True)
+                load(d1, loader_cls, self.ctor, inplace=True)
                 self.assertDictEqual(YAML1, d1["list"][0])
                 self.assertDictEqual(YAML2, d1["list"][1])
                 self.assertDictEqual(YAML1, d1["dict"]["yaml1"])
@@ -92,7 +92,7 @@ class DumpTestCase(unittest.TestCase):
                 s = yaml.dump(d, None, dumper_cls)
                 d1 = yaml.load(s, loader_cls)
 
-                for _ in yamlinclude_lazy_load(d1, loader_cls, self.ctor):
+                for _ in lazy_load(d1, loader_cls, self.ctor):
                     pass
                 self.assertDictEqual(YAML1, d1["list"][0])
                 self.assertDictEqual(YAML2, d1["list"][1])

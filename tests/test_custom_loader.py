@@ -4,7 +4,7 @@ import json
 from textwrap import dedent
 import yaml
 
-from yamlinclude import YamlIncludeCtor
+from yaml_include import Constructor
 
 
 from ._internal import YAML_LOADERS
@@ -13,7 +13,7 @@ from ._internal import YAML_LOADERS
 class DummyLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ctor = YamlIncludeCtor(base_dir="tests/data", custom_loader=cls.my_loader)
+        ctor = Constructor(base_dir="tests/data", custom_loader=cls.my_loader)
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 
@@ -35,7 +35,7 @@ class DummyLoaderTestCase(unittest.TestCase):
 class JsonLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ctor = YamlIncludeCtor(
+        ctor = Constructor(
             base_dir="tests/data",
             custom_loader=lambda path, file, *args, **kwargs: cls.json_loader(file),
         )
@@ -63,7 +63,7 @@ class JsonLoaderTestCase(unittest.TestCase):
 class JsonYamlLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ctor = YamlIncludeCtor(
+        ctor = Constructor(
             base_dir="tests/data",
             custom_loader=cls.my_loader,
         )

@@ -2,13 +2,13 @@ import unittest
 from textwrap import dedent
 
 import yaml
-from yamlinclude import YamlIncludeCtor, YamlIncludeData
+from yaml_include import Constructor, Data
 
 from ._internal import YAML_LOADERS
 
 
 class DataClassTestCase(unittest.TestCase):
-    ctor = YamlIncludeCtor(base_dir="tests/data")
+    ctor = Constructor(base_dir="tests/data")
 
     @classmethod
     def setUpClass(cls):
@@ -30,6 +30,6 @@ class DataClassTestCase(unittest.TestCase):
             with self.ctor.managed_autoload(False):
                 self.assertFalse(self.ctor.autoload)
                 d = yaml.load(yaml_string, loader_cls)
-                self.assertIsInstance(d["yaml1"], YamlIncludeData)
+                self.assertIsInstance(d["yaml1"], Data)
                 self.assertEqual(d["yaml1"].urlpath, "include.d/1.yaml")
             self.assertTrue(self.ctor.autoload)

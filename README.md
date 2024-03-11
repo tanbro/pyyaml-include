@@ -60,14 +60,14 @@ Consider we have such [YAML][] files:
 
 To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
-1. Register a `YamlIncludeCtor` to [PyYAML][]'s loader class, with `!inc` as it's tag:
+1. Register a `yaml_include.Constructor` to [PyYAML][]'s loader class, with `!inc` as it's tag:
 
    ```python
    import yaml
-   from yamlinclude import YamlIncludeCtor
+   import yaml_include
 
    # add the tag
-   yaml.add_constructor("!inc", YamlIncludeCtor(base_dir='/your/conf/dir'))
+   yaml.add_constructor("!inc", yaml_include.Constructor(base_dir='/your/conf/dir'))
    ```
 
 1. Write `!inc` tags in `0.yaml`:
@@ -95,6 +95,8 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
    ```python
    del yaml.Loader.yaml_constructors["!inc"]
+   del yaml.UnSafeLoader.yaml_constructors["!inc"]
+   del yaml.FullLoader.yaml_constructors["!inc"]
    ```
 
 ### Include in Mapping
@@ -178,20 +180,20 @@ conf:
   logging: !inc http://domain/etc/app/conf.d/logging.yml
 ```
 
-In such situations, when creating a `YamlIncludeCtor` constructor, a [fsspec][] filesystem object shall be set to `fs` argument.
+In such situations, when creating a `Constructor` constructor, a [fsspec][] filesystem object shall be set to `fs` argument.
 
 For example, if want to include files from website, we shall:
 
-1. create a `YamlIncludeCtor` with a [fsspec][] HTTP filesystem object as it's `fs`:
+1. create a `Constructor` with a [fsspec][] HTTP filesystem object as it's `fs`:
 
    ```python
    import yaml
    import fsspec
-   from yamlinclude import YamlIncludeCtor
+   import yaml_include
 
    http_fs = fsspec.filesystem("http", client_kwargs={"base_url": f"http://{HOST}:{PORT}"})
 
-   ctor = YamlIncludeCtor(http_fs, base_dir="/foo/baz")
+   ctor = yaml_include.Constructor(http_fs, base_dir="/foo/baz")
    yaml.add_constructor("!inc", ctor, yaml.Loader)
    ```
 
@@ -229,7 +231,7 @@ Above [YAML][] snippet will be loaded like:
 > data: !inc: foo/baz.yaml
 > ```
 >
-> is equivalent to (if no `base_dir` was set in `YamlIncludeCtor()`):
+> is equivalent to (if no `base_dir` was set in `Constructor()`):
 >
 > ```yaml
 > data: !inc: file://foo/baz.yaml
@@ -238,18 +240,18 @@ Above [YAML][] snippet will be loaded like:
 > and
 >
 > ```python
-> yaml.add_constructor("!inc", YamlIncludeCtor())
+> yaml.add_constructor("!inc", Constructor())
 > ```
 >
 > is equivalent to:
 >
 > ```python
-> yaml.add_constructor("!inc", YamlIncludeCtor(fs=fsspec.filesystem("file")))
+> yaml.add_constructor("!inc", Constructor(fs=fsspec.filesystem("file")))
 > ```
 
 ### Parameters in YAML
 
-As a callable object, `YamlIncludeCtor` passes YAML tag parameters to [fsspec][] for more detailed operations.
+As a callable object, `Constructor` passes YAML tag parameters to [fsspec][] for more detailed operations.
 
 The first argument is `urlpath`, it's fixed and must-required, either positional or named.
 Normally, we put it as a string after the tag(eg: `!inc`), just like examples above.
@@ -270,7 +272,7 @@ However, there are more parameters.
 
 But the format of parameters has multiple cases, and differs variably in different [fsspec][] implementation backends.
 
-- If a scheme/protocol(“`http://`”, “`sftp://`”, “`file://`”, etc.) is defined in `urlpath`, `YamlIncludeCtor` will invoke [`fsspece.open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open) directly to open it. Which means `YamlIncludeCtor`'s `fs` will be ignored, and a new standalone `fs` will be created implicitly.
+- If a scheme/protocol(“`http://`”, “`sftp://`”, “`file://`”, etc.) is defined in `urlpath`, `Constructor` will invoke [`fsspece.open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open) directly to open it. Which means `Constructor`'s `fs` will be ignored, and a new standalone `fs` will be created implicitly.
 
   In this situation, `urlpath` will be passed to `fsspece.open`'s first argument, and all other parameters will also be passed to the function.
 
@@ -305,7 +307,7 @@ But the format of parameters has multiple cases, and differs variably in differe
   > 🔖 **Tip** \
   > `urlpath` with scheme/protocol **SHOULD NOT** include wildcards character(s), `urlpath` like `"file:///etc/foo/*.yml"` is illegal.
 
-- If `urlpath` has wildcards in it, `YamlIncludeCtor` will:
+- If `urlpath` has wildcards in it, `Constructor` will:
 
   1. invoke corresponding [fsspec][] implementation backend's [`glob`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.glob) method to search files,
   1. then call [`open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.open) method to open the found file(s).
@@ -371,29 +373,29 @@ But the format of parameters has multiple cases, and differs variably in differe
   > > `BaseLoader`, `SafeLoader`, `CBaseLoader`, `CSafeLoader` do **NOT** support ‘Standard YAML tag’.
   > ---
   > > 🔖 **Tip** \
-  > > `maxdepth` argument of [fsspec][] `glob` method is already force converted by `YamlIncludeCtor`, no need to write a `!!int` tag on it.
+  > > `maxdepth` argument of [fsspec][] `glob` method is already force converted by `Constructor`, no need to write a `!!int` tag on it.
 
-- Else, `YamlIncludeCtor` will invoke corresponding [fsspec][] implementation backend's [`open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.open) method to open the file, parameters beside `urlpath` will be passed to the method.
+- Else, `Constructor` will invoke corresponding [fsspec][] implementation backend's [`open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.spec.AbstractFileSystem.open) method to open the file, parameters beside `urlpath` will be passed to the method.
 
 ### Absolute and Relative URL/Path
 
-When the path after include tag (eg: `!inc`) is not a full protocol/scheme URL and not starts with `"/"`, `YamlIncludeCtor` tries to join the path with `base_dir`, which is a argument of `YamlIncludeCtor.__init__()`.
+When the path after include tag (eg: `!inc`) is not a full protocol/scheme URL and not starts with `"/"`, `Constructor` tries to join the path with `base_dir`, which is a argument of `Constructor.__init__()`.
 If `base_dir` is omitted or `None`, the actually including file path is the path in defined in [YAML][] without a change, and different [fsspec][] filesystem will treat them differently. In local filesystem, it will be `cwd`.
 
 For remote filesystem, `HTTP` for example, the `base_dir` can not be `None` and usually be set to `"/"`.
 
 Relative path does not support full protocol/scheme URL format, `base_dir` does not effect for that.
 
-For example, if we register such a `YamlIncludeCtor` to [PyYAML][]:
+For example, if we register such a `Constructor` to [PyYAML][]:
 
 ```python
 import yaml
 import fsspec
-from yamlinclude import YamlIncludeCtor
+import yaml_include
 
 yaml.add_constructor(
     "!http-include",
-    YamlIncludeCtor(
+    yaml_include.Constructor(
         fsspec.filesystem("http", client_kwargs={"base_url": f"http://{HOST}:{PORT}"}),
         base_dir="/sub_1/sub_1_1"
     )
@@ -412,26 +414,25 @@ the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
 When load [YAML][] string with include statement, the including files are default parsed into python objects. Thant is, if we call `yaml.dump()` on the object, what dumped is the parsed python object, and can not serialize the include statement itself.
 
-To serialize the statement, we shall first create an `YamlIncludeCtor` object whose `autoload` is `False`:
+To serialize the statement, we shall first create an `yaml_include.Constructor` object whose `autoload` is `False`:
 
 ```python
 import yaml
+import yaml_include
 
-ctor = YamlIncludeCtor(autoload=False)
+ctor = yaml_include.Constructor(autoload=False)
 ```
 
 then add both Constructor for Loader and Representer for Dumper:
 
 ```python
-from yamlinclude import YamlIncludeCtor, YamlIncludeData, YamlIncludeRepr
-
 yaml.add_constructor("!inc", ctor)
 
-repr_ = YamlIncludeRepr("inc")
-yaml.add_representer(YamlIncludeData, repr_)
+repr_ = yaml_include.Representer("inc")
+yaml.add_representer(yaml_include.Data, repr_)
 ```
 
-Now, the including files will not be loaded when call `yaml.load()`, and `YamlIncludeData` objects will be placed at the positions where include statements are.
+Now, the including files will not be loaded when call `yaml.load()`, and `yaml_include.Data` objects will be placed at the positions where include statements are.
 
 continue above code:
 
@@ -444,7 +445,7 @@ yaml_str = """
 d0 = yaml.load(yaml_str, yaml.Loader)
 # Here, "include.d/1.yaml" and "include.d/2.yaml" not be opened or loaded.
 # d0 is like:
-# [YamlIncludeData(urlpath="include.d/1.yaml"), YamlIncludeData(urlpath="include.d/2.yaml")]
+# [Data(urlpath="include.d/1.yaml"), Data(urlpath="include.d/2.yaml")]
 
 # serialize d0
 s = yaml.dump(d0)
@@ -459,10 +460,10 @@ ctor.autoload = True # re-open auto load
 d1 = yaml.load(s, yaml.Loader)
 
 # Or perform a recursive opening / parsing on the object:
-from yamlinclude import yamlinclude_load
+import yaml_include
 
 # d2 is equal to d1
-d2 = yamlinclude_load(d0)
+d2 = yaml_include.load(d0)
 ```
 
 ### Include JSON or TOML
@@ -474,35 +475,21 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 >
 > ```python
 > import json
-> from pathlib import PurePath
+> import tomllib
 > import yaml
 > import fsspec
-> from yamlinclude import YamlIncludeCtor
->
-> try:
->     import tomllib as toml
-> except ImportError:
->     try:
->         import tomli as toml
->     except ImportError as err:
->         print(err)
->         print()
->         print("You shall: ‘pip install install tomli’")
->         exit()
+> import yaml_include
 >
 > # Define loader function
 > def my_loader(urlpath, file, Loader):
->     p = PurePath(file.path)
->     if p.suffix.lower() == ".json":
+>     if urlpath.endswith(".json"):
 >         return json.load(file)
->     if p.suffix.lower() == ".toml":
->         return toml.load(file)
->     if p.suffix.lower() in (".yaml", "yml"):
->         return yaml.load(file, Loader)
->     raise NotImplementedError(file.path)
+>     if urlpath.endswith(".toml"):
+>         return tomllib.load(file)
+>     return yaml.load(file, Loader)
 >
 > # Create the include constructor, with the custom loader
-> ctor = YamlIncludeCtor(custom_loader=my_loader)
+> ctor = yaml_include.Constructor(custom_loader=my_loader)
 >
 > # Add the constructor to YAML Loader
 > yaml.add_constructor("!inc", ctor, yaml.Loader)
@@ -539,10 +526,10 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 
      ```powershell
      python3 -m venv .venv
-     &.venv\Scripts\Activate.ps1
+     .venv\Scripts\Activate.ps1
      ```
 
-1. install development-required packages and the project itself in editable mode:
+1. install development requirements and the project itself in editable mode:
 
    ```bash
    pip install -r requirements.txt
@@ -552,7 +539,7 @@ Now you can work on it.
 
 ## Test
 
-see: `tests/README.md`
+read: `tests/README.md`
 
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."

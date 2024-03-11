@@ -17,7 +17,7 @@
 
 - ❎ Incompatible Changes:
   - Drop python support blow 3.8
-  - The tag constructor class `YamlIncludeConstructor` renamed to `YamlIncludeCtor`
+  - The tag constructor class `YamlIncludeConstructor` renamed to `Constructor`
 
 - ❌ Removed:
   - Readers for JSON, TOML, INI ... YAML only now

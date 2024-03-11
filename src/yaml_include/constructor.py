@@ -21,14 +21,14 @@ from urllib.parse import urlsplit, urlunsplit
 import fsspec
 import yaml
 
-from .data import YamlIncludeData
+from .data import Data
 
 if sys.version_info < (3, 12):
-    from .yamltypes_backward import TYamlLoaderTypes
+    from .yaml_types_backward import TYamlLoaderTypes
 else:
     from .yamltypes import TYamlLoaderTypes
 
-__all__ = ["YamlIncludeCtor"]
+__all__ = ["Constructor"]
 
 WILDCARDS_PATTERN = re.compile(
     r"^(.*)([\*\?\[\]]+)(.*)$"
@@ -47,7 +47,7 @@ def load_open_file(
 
 
 @dataclass
-class YamlIncludeCtor:
+class Constructor:
     """The include constructor for PyYAML Loaders
 
     Use :func:`yaml.add_constructor` to register it on PyYAML's Loaders.
@@ -57,10 +57,9 @@ class YamlIncludeCtor:
         #. In Python source code, register it to a Loader class::
 
             import yaml
+            import yaml_include
 
-            from yamlinclude import YamlIncludeCtor
-
-            yaml.add_constructor("!inc", YamlIncludeCtor(), yaml.Loader)
+            yaml.add_constructor("!inc", yaml_include.Constructor(), yaml.Loader)
 
         #. In a YAML file, write ``!inc`` tags to include other YAML files. We can:
 
@@ -163,7 +162,7 @@ class YamlIncludeCtor:
     * If ``True``:
       open including file(s) then parse its/their content with current PyYAML Loader, and returns the parsed result.
     * If ``False``:
-      will **NOT** open including file(s), the return value is a :class:`.YamlIncludeData` object stores include statement.
+      will **NOT** open including file(s), the return value is a :class:`.Data` object stores include statement.
     """
 
     @contextmanager
@@ -182,13 +181,13 @@ class YamlIncludeCtor:
     def __call__(self, loader, node):
         if isinstance(node, yaml.ScalarNode):
             params = loader.construct_scalar(node)
-            data = YamlIncludeData(urlpath=params)
+            data = Data(urlpath=params)
         elif isinstance(node, yaml.SequenceNode):
             params = loader.construct_sequence(node)
-            data = YamlIncludeData(urlpath=params[0], sequence_params=params[1:])
+            data = Data(urlpath=params[0], sequence_params=params[1:])
         elif isinstance(node, yaml.MappingNode):
             params = loader.construct_mapping(node)
-            data = YamlIncludeData(
+            data = Data(
                 urlpath=params["urlpath"],
                 mapping_params={k: v for k, v in params.items() if k != "urlpath"},
             )
@@ -199,7 +198,7 @@ class YamlIncludeCtor:
         else:
             return data
 
-    def load(self, loader_type: TYamlLoaderTypes, data: YamlIncludeData) -> Any:
+    def load(self, loader_type: TYamlLoaderTypes, data: Data) -> Any:
         """The method will be invoked once the PyYAML's Loader class call the constructor.
         It happens when an include state tag(eg: ``"!inc"``) is met.
 
@@ -214,7 +213,7 @@ class YamlIncludeCtor:
             It's mainly invoked in :func:`yaml.load`, and **NOT advised to call it yourself**.
 
         Note:
-            Additional positional or named parameters in YAML include statement are passed to ``*args`` and ``**kwargs`` in :attr:`.YamlIncludeData.sequence_params` and :attr:`.YamlIncludeData.mapping_params`.
+            Additional positional or named parameters in YAML include statement are passed to ``*args`` and ``**kwargs`` in :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params`.
             The class will pass them to :mod:`fsspec`'s :mod:`fsspec` File-system as implementation specific options.
 
             Note:
@@ -238,7 +237,7 @@ class YamlIncludeCtor:
 
 
             * If there is a protocol/scheme, and also wildcard defined in YAML including,
-              :attr:`.YamlIncludeData.sequence_params` and :attr:`.YamlIncludeData.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as ``*args`` and ``**kwargs``
+              :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as ``*args`` and ``**kwargs``
 
               Example:
 
@@ -255,7 +254,7 @@ class YamlIncludeCtor:
                             yaml.load(file, Loader)
 
             * If there is no protocol/scheme, and no wildcard defined in YAML including,
-              :attr:`.YamlIncludeData.sequence_params` and :attr:`.YamlIncludeData.mapping_params` of ``data`` will be passed to :mod:`fsspec` file-system implementation's ``open`` function (derive from :meth:`fsspec.spec.AbstractFileSystem.open`) as ``*args`` and ``**kwargs``
+              :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :mod:`fsspec` file-system implementation's ``open`` function (derive from :meth:`fsspec.spec.AbstractFileSystem.open`) as ``*args`` and ``**kwargs``
 
             * If there is no protocol/scheme, and also wildcard defined in YAML including, the situation is complex:
                 * If the include statement is in a positional-parameter form:
@@ -320,19 +319,13 @@ class YamlIncludeCtor:
             if WILDCARDS_PATTERN.match(urlpath):
                 # if wildcards in path, return a Sequence/List
                 result = []
-                with fsspec.open_files(
-                    urlpath, *data.sequence_params, **data.mapping_params
-                ) as ofs:
+                with fsspec.open_files(urlpath, *data.sequence_params, **data.mapping_params) as ofs:
                     for of_ in ofs:
-                        data = load_open_file(
-                            of_, loader_type, urlpath, self.custom_loader
-                        )
+                        data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
                         result.append(data)
                 return result
             # else if no wildcard, returns a single object
-            with fsspec.open(
-                urlpath, *data.sequence_params, **data.mapping_params
-            ) as of_:
+            with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
                 assert not isinstance(of_, list)
                 result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
                 return result

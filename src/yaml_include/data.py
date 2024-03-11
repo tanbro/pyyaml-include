@@ -1,11 +1,11 @@
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Sequence
 
-__all__ = ["YamlIncludeData"]
+__all__ = ["Data"]
 
 
 @dataclass(frozen=True)
-class YamlIncludeData:
+class Data:
     """A :func:`dataclasses.dataclass` store YAML include statement"""
 
     urlpath: str

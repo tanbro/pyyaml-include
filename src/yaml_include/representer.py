@@ -1,20 +1,21 @@
 from dataclasses import dataclass
 
-from .data import YamlIncludeData  # noqa: F401
+from .data import Data  # noqa: F401
 
-__all__ = ["YamlIncludeRepr"]
+__all__ = ["Representer"]
 
 
 @dataclass
-class YamlIncludeRepr:
-    """Representer for :class:`.YamlIncludeData`
+class Representer:
+    """Representer for :class:`.Data`
 
-    When dumping an object into YAML string, it deserializes :class:`.YamlIncludeData` instance(s) in it.
+    When dumping an object into YAML string, it deserializes :class:`.Data` instance(s) in it.
 
     Add the representer to ``PyYAML`` ``Dumper`` class as below::
 
-        rpr = YamlIncludeRepr("inc")  # ATTENTION: No "!" here !!!
-        yaml.add_representer(YamlIncludeData, rpr)
+        import yaml_include
+        rpr = yaml_include.Representer("inc")  # ATTENTION: No "!" here !!!
+        yaml.add_representer(Data, rpr)
     """
 
     tag: str

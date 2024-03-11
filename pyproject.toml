@@ -48,4 +48,4 @@ Changelog = "https://github.com/tanbro/pyyaml-include/blob/main/CHANGELOG.md"
 where = ["src"]
 
 [tool.setuptools_scm]
-write_to = "src/yamlinclude/_version.py"
+write_to = "src/yaml_include/_version.py"

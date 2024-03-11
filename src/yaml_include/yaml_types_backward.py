@@ -61,9 +61,7 @@ else:
         yaml.SafeLoader,
         yaml.UnsafeLoader,
     ]
-    TYamlDumpers: TypeAlias = Union[  # type: ignore
-        yaml.BaseDumper, yaml.Dumper, yaml.SafeDumper
-    ]
+    TYamlDumpers: TypeAlias = Union[yaml.BaseDumper, yaml.Dumper, yaml.SafeDumper]  # type: ignore
     TYamlLoaderTypes: TypeAlias = Union[  # type: ignore
         Type[yaml.BaseLoader],
         Type[yaml.FullLoader],
@@ -71,6 +69,4 @@ else:
         Type[yaml.SafeLoader],
         Type[yaml.UnsafeLoader],
     ]
-    TYamlDumperTypes: TypeAlias = Union[  # type: ignore
-        Type[yaml.BaseDumper], Type[yaml.Dumper], Type[yaml.SafeDumper]
-    ]
+    TYamlDumperTypes: TypeAlias = Union[Type[yaml.BaseDumper], Type[yaml.Dumper], Type[yaml.SafeDumper]]  # type: ignore
