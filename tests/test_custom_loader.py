@@ -4,7 +4,7 @@ import json
 from textwrap import dedent
 import yaml
 
-from yamlinclude import YamlIncludeCtor
+from yaml_include import Constructor
 
 
 from ._internal import YAML_LOADERS
@@ -13,7 +13,7 @@ from ._internal import YAML_LOADERS
 class DummyLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ctor = YamlIncludeCtor(base_dir="tests/data", custom_loader=cls.my_loader)
+        ctor = Constructor(base_dir="tests/data", custom_loader=cls.my_loader)
         for loader_cls in YAML_LOADERS:
             yaml.add_constructor("!inc", ctor, loader_cls)
 
@@ -35,7 +35,7 @@ class DummyLoaderTestCase(unittest.TestCase):
 class JsonLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ctor = YamlIncludeCtor(
+        ctor = Constructor(
             base_dir="tests/data",
             custom_loader=lambda path, file, *args, **kwargs: cls.json_loader(file),
         )
@@ -63,7 +63,7 @@ class JsonLoaderTestCase(unittest.TestCase):
 class JsonYamlLoaderTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        ctor = YamlIncludeCtor(
+        ctor = Constructor(
             base_dir="tests/data",
             custom_loader=cls.my_loader,
         )
@@ -76,10 +76,9 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
 
         if Path(path).suffix == ".json":
             return json.load(file)
-        elif Path(path).suffix in (".yaml", "yml"):
+        if Path(path).suffix in (".yaml", "yml"):
             return yaml.load(file, loader_type)
-        else:
-            return RuntimeError(f"not supported file ‘{path}’ ({file})")
+        return RuntimeError(f"not supported file ‘{path}’ ({file})")
 
     def test_json_wildcards(self):
         with open("tests/data/include.d/1.json") as fp:
@@ -93,9 +92,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
         )
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
-            self.assertListEqual(
-                sorted(data["content"], key=lambda m: m["name"]), [d1, d2]
-            )
+            self.assertListEqual(sorted(data["content"], key=lambda m: m["name"]), [d1, d2])
 
     def test_yaml_wildcards(self):
         with open("tests/data/include.d/1.yaml") as fp:
@@ -109,9 +106,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
         )
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
-            self.assertListEqual(
-                sorted(data["content"], key=lambda m: m["name"]), [d1, d2]
-            )
+            self.assertListEqual(sorted(data["content"], key=lambda m: m["name"]), [d1, d2])
 
     def test_json_yaml(self):
         with open("tests/data/include.d/1.json") as fp:
@@ -159,9 +154,7 @@ class JsonYamlLoaderTestCase(unittest.TestCase):
         )
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
-            self.assertListEqual(
-                sorted(data, key=lambda m: m["name"]), [json1, yaml1, json2, yaml2]
-            )
+            self.assertListEqual(sorted(data, key=lambda m: m["name"]), [json1, yaml1, json2, yaml2])
 
 
 if __name__ == "__main__":

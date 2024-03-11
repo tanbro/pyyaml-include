@@ -9,13 +9,16 @@ x-test-common: &test-common
     - .env
   environment:
     - PIP_ROOT_USER_ACTION=ignore
+    - PIP_NO_WARN_SCRIPT_LOCATION=1
   command:
     - /bin/bash
     - -c
     - |
       set -e
-      python -m pip install --user --disable-pip-version-check --find-links dist -r tests/requirements.txt
-      python -B -m unittest -v
+      python -m pip install --user --pre --disable-pip-version-check --find-links dist -r tests/requirements.txt pyyaml-include
+      python -B -m unittest -fv
+
+name: pyyamlinclude-tests
 
 services:
   python3.8:
@@ -36,4 +39,8 @@ services:
 
   python3.12:
     image: python:3.12-slim
+    <<: *test-common
+
+  pypy:
+    image: pypy
     <<: *test-common

@@ -4,7 +4,7 @@ requires = ["setuptools>=64", "setuptools-scm>=8"]
 
 [project]
 authors = [{ name = "liu xue yan", email = "liu_xue_yan@foxmail.com" }]
-description = "Extending PyYAML with a custom constructor for including YAML files within YAML files"
+description = "An extending constructor of PyYAML: include other YAML files into current YAML document"
 name = "pyyaml-include"
 readme = "README.md"
 
@@ -13,18 +13,23 @@ requires-python = ">=3.8"
 dependencies = [
   "PyYAML>=6.0,<7.0",
   "fsspec>=2021.04.0",
+  "typing-extensions; python_version<'3.11'",
 ]
 
-keywords = ["yaml", "PyYAML", "include"]
+keywords = ["yaml", "PyYAML", "include", "yml"]
 
 license = { text = "GPLv3+" }
 
 classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+  # "Development Status :: 1 - Planning",
+  # "Development Status :: 2 - Pre-Alpha",
   "Development Status :: 3 - Alpha",
+  # "Development Status :: 4 - Beta",
   # "Development Status :: 5 - Production/Stable",
+  # "Development Status :: 6 - Mature",
+  # "Development Status :: 7 - Inactive",
   "Intended Audience :: Developers",
-  "Operating System :: OS Independent",
   "Programming Language :: Python :: 3",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Processing :: Markup",
@@ -36,9 +41,11 @@ dynamic = ["version"]
 Homepage = "https://github.com/tanbro/pyyaml-include"
 Repository = "https://github.com/tanbro/pyyaml-include.git"
 Documentation = "https://pyyaml-include.readthedocs.io/en/latest/"
+Issues = "https://github.com/tanbro/pyyaml-include/issues"
+Changelog = "https://github.com/tanbro/pyyaml-include/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools_scm]
-write_to = "src/yamlinclude/_version.py"
+write_to = "src/yaml_include/_version.py"
