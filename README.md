@@ -467,6 +467,18 @@ import yaml_include
 d2 = yaml_include.load(d0)
 ```
 
+`autoload` can be used in a `with` statement:
+
+```python
+ctor = yaml_include.Constructor()
+# autoload is True here
+
+with ctor.managed_autoload(False):
+    # temporary set autoload to False
+    yaml.full_load(YAML_TEXT)
+# autoload restore True automatic
+```
+
 ### Include JSON or TOML
 
 We can include files in different format other than [YAML][], like [JSON][] or [TOML][] -- ``custom_loader`` is for that.
