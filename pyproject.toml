@@ -8,8 +8,6 @@ description = "An extending constructor of PyYAML: include other YAML files into
 name = "pyyaml-include"
 readme = "README.md"
 
-requires-python = ">=3.8"
-
 dependencies = [
   "PyYAML>=6.0,<7.0",
   "fsspec>=2021.04.0",
@@ -30,7 +28,14 @@ classifiers = [
   # "Development Status :: 6 - Mature",
   # "Development Status :: 7 - Inactive",
   "Intended Audience :: Developers",
+  "Programming Language :: Python",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Processing :: Markup",
 ]

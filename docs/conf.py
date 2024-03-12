@@ -3,17 +3,19 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+import sys
+
 # -- Project information -----------------------------------------------------
-try:
-    import importlib.metadata as importlib_metadata  # type: ignore
-except ImportError:
-    import importlib_metadata  # type: ignore
+if sys.version_info < (3, 8):
+    import importlib_metadata
+else:
+    import importlib.metadata as importlib_metadata
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "pyyaml-include"
-copyright = "2023, liu xue yan"
+copyright = "2023-2024, liu xue yan"
 author = "liu xue yan"
 # full version
 version = importlib_metadata.version(project)

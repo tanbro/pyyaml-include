@@ -16,6 +16,9 @@ With [fsspec][], we can even include files by HTTP, SFTP, S3 ...
 pip install --pre "pyyaml-include>=2.0"
 ```
 
+> ℹ️ **Note** \
+> It's advised to use the library on Python version `>=3.8`, early versions are not guaranteed.
+
 Since we are using [fsspec][] to open including files from v2.0, an installation can be performed like below, if want to open remote files:
 
 - for files on website:
@@ -411,7 +414,7 @@ xyz: !http-include xyz.yml
 
 the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
-## Serialization
+### Serialization
 
 When load [YAML][] string with include statement, the including files are default parsed into python objects. Thant is, if we call `yaml.dump()` on the object, what dumped is the parsed python object, and can not serialize the include statement itself.
 
@@ -528,19 +531,10 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 
 1. create then activate a python virtual-env:
 
-   - POSIX:
-
-     ```bash
-     python3 -m venv .venv
-     .venv/bin/activate
-     ```
-
-   - Windows(PowerShell):
-
-     ```powershell
-     python3 -m venv .venv
-     .venv\Scripts\Activate.ps1
-     ```
+   ```bash
+   python -m venv .venv
+   .venv/bin/activate
+   ```
 
 1. install development requirements and the project itself in editable mode:
 
