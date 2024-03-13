@@ -16,9 +16,6 @@ With [fsspec][], we can even include files by HTTP, SFTP, S3 ...
 pip install --pre "pyyaml-include>=2.0"
 ```
 
-> ℹ️ **Note** \
-> It's advised to use the library on Python version `>=3.8`, early versions are not guaranteed.
-
 Since we are using [fsspec][] to open including files from v2.0, an installation can be performed like below, if want to open remote files:
 
 - for files on website:
@@ -36,7 +33,9 @@ Since we are using [fsspec][] to open including files from v2.0, an installation
 - see [fsspec][]'s documentation for more
 
 > 🔖 **Tip** \
-> “pyyaml-include” itself depends on [fsspec][], so it will be installed no matter including local or remote files
+>
+> - “pyyaml-include” depends on [fsspec][], which will be installed no matter including local or remote files.
+> - It's advised to use the library on Python version `>=3.8`, early versions are not guaranteed.
 
 ## Basic usages
 
@@ -275,9 +274,9 @@ However, there are more parameters.
 
 But the format of parameters has multiple cases, and differs variably in different [fsspec][] implementation backends.
 
-- If a scheme/protocol(“`http://`”, “`sftp://`”, “`file://`”, etc.) is defined, and there is no wildcard in `urlpath`, `Constructor` will invoke [`fsspece.open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open) directly to open it. Which means `Constructor`'s `fs` will be ignored, and a new standalone `fs` will be created implicitly.
+- If a scheme/protocol(“`http://`”, “`sftp://`”, “`file://`”, etc.) is defined, and there is no wildcard in `urlpath`, `Constructor` will invoke [`fsspec.open`](https://filesystem-spec.readthedocs.io/en/stable/api.html#fsspec.open) directly to open it. Which means `Constructor`'s `fs` will be ignored, and a new standalone `fs` will be created implicitly.
 
-  In this situation, `urlpath` will be passed to `fsspece.open`'s first argument, and all other parameters will also be passed to the function.
+  In this situation, `urlpath` will be passed to `fsspec.open`'s first argument, and all other parameters will also be passed to the function.
 
   For example,
 
@@ -432,8 +431,8 @@ then add both Constructor for Loader and Representer for Dumper:
 ```python
 yaml.add_constructor("!inc", ctor)
 
-repr_ = yaml_include.Representer("inc")
-yaml.add_representer(yaml_include.Data, repr_)
+rpr = yaml_include.Representer("inc")
+yaml.add_representer(yaml_include.Data, rpr)
 ```
 
 Now, the including files will not be loaded when call `yaml.load()`, and `yaml_include.Data` objects will be placed at the positions where include statements are.
@@ -491,9 +490,8 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 >
 > ```python
 > import json
-> import tomllib
+> import tomllib as toml
 > import yaml
-> import fsspec
 > import yaml_include
 >
 > # Define loader function
@@ -501,7 +499,7 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 >     if urlpath.endswith(".json"):
 >         return json.load(file)
 >     if urlpath.endswith(".toml"):
->         return tomllib.load(file)
+>         return toml.load(file)
 >     return yaml.load(file, Loader)
 >
 > # Create the include constructor, with the custom loader
@@ -510,7 +508,7 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 > # Add the constructor to YAML Loader
 > yaml.add_constructor("!inc", ctor, yaml.Loader)
 >
-> # Then, json files will can be loaded by stdlib's json module, and the same to toml files.
+> # Then, json files will can be loaded by std-lib's json module, and the same to toml files.
 > s = """
 > json: !inc "*.json"
 > toml: !inc "*.toml"
