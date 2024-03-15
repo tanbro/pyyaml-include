@@ -41,7 +41,7 @@ Contents
 --------
 
 .. toctree::
-   :caption: Documentations
+   :caption: Documentation
    :titlesonly:
 
    README
@@ -49,10 +49,10 @@ Contents
    AUTHORS
 
 .. toctree::
-   :caption: API References
+   :caption: API Reference
    :titlesonly:
 
-   apidoc/yaml_include
+   apidocs/yaml_include
 
 ------------------
 Indices and tables

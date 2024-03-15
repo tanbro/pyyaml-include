@@ -6,7 +6,7 @@ myst-parser
 furo
 
 linkify-it-py
-sphinx-autodoc2
+# sphinx-autodoc2
 sphinx-copybutton
 sphinx-inline-tabs
 sphinx_tippy

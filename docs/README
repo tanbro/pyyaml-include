@@ -3,7 +3,7 @@
 To auto-gernerate API docs RST, run below command in project dir:
 
 ```bash
-sphinx-apidoc -o docs/apidoc -eMTf src/yaml_include src/yaml_include/yaml_types.py src/yaml_include/yaml_types_backward.py
+sphinx-apidoc -o docs/apidocs -eMTf src/yaml_include src/yaml_include/yaml_types.py src/yaml_include/yaml_types_backward.py
 ```
 
 Then:
