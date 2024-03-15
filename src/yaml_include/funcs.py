@@ -1,9 +1,9 @@
 import sys
 from typing import Any, Generator, Mapping, MutableMapping, MutableSequence, Sequence
 
-if sys.version_info < (3, 12):
+if sys.version_info < (3, 12):  # pragma: no cover
     from .yaml_types_backward import TYamlLoaderTypes
-else:
+else:  # pragma: no cover
     from .yaml_types import TYamlLoaderTypes
 
 from .constructor import Constructor
@@ -49,8 +49,13 @@ def load(
             for k, v in obj.items():
                 obj[k] = load(v, loader_type, constructor, inplace, nested)
         else:
-            return {k: load(v, loader_type, constructor, inplace, nested) for k, v in obj.items()}
-    elif isinstance(obj, Sequence) and not isinstance(obj, (bytearray, bytes, memoryview, str)):
+            return {
+                k: load(v, loader_type, constructor, inplace, nested)
+                for k, v in obj.items()
+            }
+    elif isinstance(obj, Sequence) and not isinstance(
+        obj, (bytearray, bytes, memoryview, str)
+    ):
         if inplace:
             if not isinstance(obj, MutableSequence):
                 raise ValueError(f"{obj} is not mutable")

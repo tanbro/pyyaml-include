@@ -11,9 +11,9 @@ from os import PathLike
 from pathlib import Path
 from typing import Any, Callable, Generator, Optional, Union
 
-if sys.version_info < (3, 11):
+if sys.version_info < (3, 11):  # pragma: no cover
     from typing_extensions import Self
-else:
+else:  # pragma: no cover
     from typing import Self
 
 from urllib.parse import urlsplit, urlunsplit
@@ -23,9 +23,9 @@ import yaml
 
 from .data import Data
 
-if sys.version_info < (3, 12):
+if sys.version_info < (3, 12):  # pragma: no cover
     from .yaml_types_backward import TYamlLoaderTypes
-else:
+else:  # pragma: no cover
     from .yaml_types import TYamlLoaderTypes
 
 __all__ = ["Constructor"]
@@ -319,13 +319,19 @@ class Constructor:
             if WILDCARDS_PATTERN.match(urlpath):
                 # if wildcards in path, return a Sequence/List
                 result = []
-                with fsspec.open_files(urlpath, *data.sequence_params, **data.mapping_params) as ofs:
+                with fsspec.open_files(
+                    urlpath, *data.sequence_params, **data.mapping_params
+                ) as ofs:
                     for of_ in ofs:
-                        data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                        data = load_open_file(
+                            of_, loader_type, urlpath, self.custom_loader
+                        )
                         result.append(data)
                 return result
             # else if no wildcard, returns a single object
-            with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
+            with fsspec.open(
+                urlpath, *data.sequence_params, **data.mapping_params
+            ) as of_:
                 assert not isinstance(of_, list)
                 result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
                 return result
