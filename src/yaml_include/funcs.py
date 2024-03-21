@@ -49,13 +49,8 @@ def load(
             for k, v in obj.items():
                 obj[k] = load(v, loader_type, constructor, inplace, nested)
         else:
-            return {
-                k: load(v, loader_type, constructor, inplace, nested)
-                for k, v in obj.items()
-            }
-    elif isinstance(obj, Sequence) and not isinstance(
-        obj, (bytearray, bytes, memoryview, str)
-    ):
+            return {k: load(v, loader_type, constructor, inplace, nested) for k, v in obj.items()}
+    elif isinstance(obj, Sequence) and not isinstance(obj, (bytearray, bytes, memoryview, str)):
         if inplace:
             if not isinstance(obj, MutableSequence):
                 raise ValueError(f"{obj} is not mutable")
