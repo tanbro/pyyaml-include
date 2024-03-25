@@ -1,5 +1,4 @@
-"""readers for different type of files
-"""
+"""readers for different type of files"""
 
 import json
 import re

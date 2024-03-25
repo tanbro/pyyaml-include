@@ -86,9 +86,7 @@ file: !include tests/data/0.yaml
         dirpath = os.path.abspath("")
         yml = """
 file: !include {0}/tests/data/include.d/1.yaml
-        """.format(
-            dirpath
-        )
+        """.format(dirpath)
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data["file"], YAML1)
@@ -174,9 +172,7 @@ file: !include tests/data/include.d/x.json
         dirpath = os.path.abspath("")
         yml = """
 file: !include {0}/tests/data/include.d/1.json
-        """.format(
-            dirpath
-        )
+        """.format(dirpath)
         for loader_cls in YAML_LOADERS:
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertDictEqual(data["file"], YAML1)
