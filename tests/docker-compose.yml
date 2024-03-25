@@ -1,39 +1,15 @@
----
-x-test-common: &test-common
-  volumes:
-    - type: bind
-      source: ..
-      target: /work
-  working_dir: /work
-  env_file:
-    - .env
-  environment:
-    - PIP_ROOT_USER_ACTION=ignore
-  command:
-    - /bin/bash
-    - -c
-    - |
-      set -e
-      python -m pip install --disable-pip-version-check --upgrade --pre --find-links dist -r tests/requirements.txt pyyaml-include
-      python -B -m unittest -v
+name: pyyam-linclude-tests
 
 services:
-  python3.7:
-    image: python:3.7-slim
-    <<: *test-common
-
-  python3.8:
-    image: python:3.8-slim
-    <<: *test-common
-
-  python3.9:
-    image: python:3.9-slim
-    <<: *test-common
-
-  python3.10:
-    image: python:3.10-slim
-    <<: *test-common
-
-  python3.11:
-    image: python:3.11-slim
-    <<: *test-common
+  unittest:
+    image: quay.io/pypa/manylinux_2_28_x86_64:latest
+    volumes:
+      - type: bind
+        source: ..
+        target: /work
+    working_dir: /work
+    env_file:
+      - .env
+    command:
+      - /bin/bash
+      - tests/run-compose-test.sh
