@@ -57,7 +57,7 @@ class JsonLoaderTestCase(unittest.TestCase):
         for loader_cls in YAML_LOADERS:
             data = yaml.load(yml, loader_cls)
             d1 = data["content"]
-        self.assertDictEqual(d0, d1)
+            self.assertDictEqual(d0, d1)
 
 
 class JsonYamlLoaderTestCase(unittest.TestCase):
