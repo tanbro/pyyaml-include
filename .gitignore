@@ -1,4 +1,3 @@
-src/**/version.py
 test-reports/
 test-results/
 cc-test-reporter
