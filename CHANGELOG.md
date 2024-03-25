@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0
+
+> 📅 Date 2024-3-11
+
+- 🖊️ Changes:
+  - [issue 43](https://github.com/tanbro/pyyaml-include/issues/43) Re-enable Python 3.6 support. and we removed PEP 518 (`pyproject.toml`) feature for the reason.
+  - Drop `setuptools-scm` requirement.
+  - Optimized docker compose tests.
+
 ## 1.3.2
 
 Date: 2023-12-25 🎅🤶
