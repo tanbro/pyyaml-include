@@ -1,4 +1,4 @@
-name: pyyam-linclude-tests
+name: pyyaml_include-tests
 
 services:
   unittest:

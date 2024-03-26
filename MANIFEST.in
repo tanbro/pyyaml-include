@@ -1,9 +1,8 @@
 exclude .*
-exclude *.requirements.txt
+exclude requirements.txt
 exclude coverage.*
 exclude sonar-project.properties
 
 prune .*
 prune docs
 prune tests
-prune htmlcov
