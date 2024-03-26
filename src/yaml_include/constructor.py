@@ -181,14 +181,14 @@ class Constructor:
     def __call__(self, loader, node):
         if isinstance(node, yaml.ScalarNode):
             params = loader.construct_scalar(node)
-            data = Data(urlpath=params)
+            data = Data(params)
         elif isinstance(node, yaml.SequenceNode):
             params = loader.construct_sequence(node)
-            data = Data(urlpath=params[0], sequence_params=params[1:])
+            data = Data(params[0], sequence_params=params[1:])
         elif isinstance(node, yaml.MappingNode):
             params = loader.construct_mapping(node)
             data = Data(
-                urlpath=params["urlpath"],
+                params["urlpath"],
                 mapping_params={k: v for k, v in params.items() if k != "urlpath"},
             )
         else:  # pragma: no cover

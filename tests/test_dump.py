@@ -7,7 +7,6 @@ from yaml_include import (
     Constructor,
     Representer,
     load,
-    lazy_load,
 )
 
 from ._internal import YAML_DUMPERS, YAML_LOADERS, YAML1, YAML2
@@ -75,15 +74,10 @@ class DumpTestCase(unittest.TestCase):
                 self.assertDictEqual(YAML1, d1["dict"]["yaml1"])
                 self.assertDictEqual(YAML2, d1["dict"]["yaml2"])
 
-    def test_iterable(self):
+    def test_dump_sequence_params(self):
         yaml_string = dedent(
             """
-            list:
-                - !inc include.d/1.yaml
-                - !inc include.d/2.yaml
-            dict:
-                yaml1: !inc include.d/1.yaml
-                yaml2: !inc include.d/2.yaml
+            data: !inc [include.d/1.yaml, r]
             """
         ).strip()
         for loader_cls in YAML_LOADERS:
@@ -91,10 +85,19 @@ class DumpTestCase(unittest.TestCase):
             for dumper_cls in YAML_DUMPERS:
                 s = yaml.dump(d, None, dumper_cls)
                 d1 = yaml.load(s, loader_cls)
+                d2 = load(d1, loader_cls, self.ctor)
+                self.assertDictEqual(YAML1, d2["data"])
 
-                for _ in lazy_load(d1, loader_cls, self.ctor):
-                    pass
-                self.assertDictEqual(YAML1, d1["list"][0])
-                self.assertDictEqual(YAML2, d1["list"][1])
-                self.assertDictEqual(YAML1, d1["dict"]["yaml1"])
-                self.assertDictEqual(YAML2, d1["dict"]["yaml2"])
+    def test_dump_mapping_params(self):
+        yaml_string = dedent(
+            """
+            data: !inc {urlpath: include.d/1.yaml, mode: r}
+            """
+        ).strip()
+        for loader_cls in YAML_LOADERS:
+            d = yaml.load(yaml_string, loader_cls)
+            for dumper_cls in YAML_DUMPERS:
+                s = yaml.dump(d, None, dumper_cls)
+                d1 = yaml.load(s, loader_cls)
+                d2 = load(d1, loader_cls, self.ctor)
+                self.assertDictEqual(YAML1, d2["data"])

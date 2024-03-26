@@ -31,7 +31,7 @@ class Representer:
     def __call__(self, dumper, data):
         if data.mapping_params:
             params = {"urlpath": data.urlpath}
-            params.update({k: v for k, v in data.mapping_params.items()})
+            params.update(data.mapping_params)
             return dumper.represent_mapping(f"!{self.tag}", params)
         if data.sequence_params:
             params = [data.urlpath]
