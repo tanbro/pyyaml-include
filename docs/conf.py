@@ -28,6 +28,7 @@ release = ".".join(version.split(".")[:2])
 extensions = [
     "myst_parser",
     "sphinx.ext.autodoc",
+    "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.napoleon",
     "sphinx.ext.githubpages",

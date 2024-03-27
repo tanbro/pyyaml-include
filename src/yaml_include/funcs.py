@@ -30,10 +30,10 @@ def load(
         obj: object containers :class:`.Data`
         loader_type: use this type of `PyYAML` Loader to parse string in including file(s)
         constructor: use this :class:`.Constructor` to find/open/read including file(s)
-        inplace: whether if make a in-place replacement for :class:`.Constructor` tags of including file(s) into ``obj`` argument
-        nested: whether if parse and load include statement(s) inside including file(s)
+        inplace: whether to make a in-place replacement for every :class:`.Constructor` instance in ``obj``
+        nested: whether to parse and load lower level include statement(s) inside :class:`.Constructor` instance
 
-    Return:
+    Returns:
         Parsed object
     """
     if isinstance(obj, Data):
@@ -71,7 +71,7 @@ def lazy_load(
 
     Almost the same as :func:`.load`, except that:
 
-    * The function returns a generator, it yield at every :class:`.Data` object found.
+    * The function returns a generator, it yields at every :class:`.Data` object found.
     * It only applies an in-place parsing and replacement, and will not return parsed object.
     """
     if isinstance(obj, Data):
