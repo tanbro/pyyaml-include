@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0b2
+
+> 📅 **Date** 2024-3-27
+
+- ❎ Breaking Changes:
+  - data-class attribute order changed in `yaml_include.Constructor`
+- Some optimizations and bugfix
+
 ## 2.0b1
 
 > 📅 **Date** 2024-3-11

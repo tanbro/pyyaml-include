@@ -1,7 +1,7 @@
 import sys
 from warnings import warn
 
-if not sys.version_info < (3, 12):
+if sys.version_info >= (3, 12):
     warn("Python version greater than or equal to 3.12 should “from . import yaml_types”")
 
 from typing import Type, Union
