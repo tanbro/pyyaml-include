@@ -106,6 +106,15 @@ class Constructor:
     * Else it will be used directly as the actual base directory.
     """
 
+    autoload: bool = True
+    """Whether if open and parse including file(s) when called.
+
+    * If ``True``:
+      open including file(s) then parse its/their content with current PyYAML Loader, and returns the parsed result.
+    * If ``False``:
+      will **NOT** open including file(s), the return value is a :class:`.Data` object stores include statement.
+    """
+
     custom_loader: Optional[Callable[[str, Any, TYamlLoaderTypes], Any]] = None
     """Custom loader/parser function called when an including file is about to parse.
 
@@ -154,15 +163,6 @@ class Constructor:
 
     Returns:
         typing.Any: Parsed result
-    """
-
-    autoload: bool = True
-    """Whether if open and parse including file(s) when called.
-
-    * If ``True``:
-      open including file(s) then parse its/their content with current PyYAML Loader, and returns the parsed result.
-    * If ``False``:
-      will **NOT** open including file(s), the return value is a :class:`.Data` object stores include statement.
     """
 
     @contextmanager

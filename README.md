@@ -195,7 +195,7 @@ For example, if want to include files from website, we shall:
 
    http_fs = fsspec.filesystem("http", client_kwargs={"base_url": f"http://{HOST}:{PORT}"})
 
-   ctor = yaml_include.Constructor(http_fs, base_dir="/foo/baz")
+   ctor = yaml_include.Constructor(fs=http_fs, base_dir="/foo/baz")
    yaml.add_constructor("!inc", ctor, yaml.Loader)
    ```
 
@@ -452,21 +452,18 @@ d0 = yaml.load(yaml_str, yaml.Loader)
 
 # serialize d0
 s = yaml.dump(d0)
+print(s)
 # ‘s’ will be:
 # - !inc 'include.d/1.yaml'
 # - !inc 'include.d/2.yaml'
-print(s)
 
-# also we can perform a de-serialization
+# de-serialization
 ctor.autoload = True # re-open auto load
 # then load, the file "include.d/1.yaml" and "include.d/2.yaml" will be opened and loaded.
 d1 = yaml.load(s, yaml.Loader)
 
 # Or perform a recursive opening / parsing on the object:
-import yaml_include
-
-# d2 is equal to d1
-d2 = yaml_include.load(d0)
+d2 = yaml_include.load(d0) # d2 is equal to d1
 ```
 
 `autoload` can be used in a `with` statement:
