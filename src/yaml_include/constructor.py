@@ -21,6 +21,11 @@ from urllib.parse import urlsplit, urlunsplit
 import fsspec
 import yaml
 
+if sys.version_info < (3, 12):  # pragma: no cover
+    pass
+else:  # pragma: no cover
+    from .yaml_types import TYamlLoaderTypes
+
 from .data import Data
 
 if sys.version_info < (3, 12):  # pragma: no cover
@@ -192,7 +197,9 @@ class Constructor:
                 mapping_params={k: v for k, v in params.items() if k != "urlpath"},
             )
         else:  # pragma: no cover
-            raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")
+            raise TypeError(
+                f"Type of node for {type(self)} expects one of {yaml.ScalarNode}, {yaml.SequenceNode} and {yaml.MappingNode}, but actually {type(node)}"
+            )
         if self.autoload:
             return self.load(type(loader), data)
         else:
