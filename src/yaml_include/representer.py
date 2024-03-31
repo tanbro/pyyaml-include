@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .data import Data  # noqa: F401
+from .data import Data
 
 __all__ = ["Representer"]
 
@@ -29,6 +29,9 @@ class Representer:
     """
 
     def __call__(self, dumper, data):
+        if not isinstance(data, Data):  # pragma: no cover
+            raise TypeError(f"Type of data for {type(self)} expects {Data}, but actually {type(data)}")
+
         if data.mapping_params:
             params = {"urlpath": data.urlpath}
             params.update(data.mapping_params)

@@ -21,6 +21,11 @@ from urllib.parse import urlsplit, urlunsplit
 import fsspec
 import yaml
 
+if sys.version_info < (3, 12):  # pragma: no cover
+    pass
+else:  # pragma: no cover
+    from .yaml_types import TYamlLoaderTypes
+
 from .data import Data
 
 if sys.version_info < (3, 12):  # pragma: no cover
@@ -192,7 +197,9 @@ class Constructor:
                 mapping_params={k: v for k, v in params.items() if k != "urlpath"},
             )
         else:  # pragma: no cover
-            raise ValueError(f"PyYAML node {node!r} is not supported by {type(self)}")
+            raise TypeError(
+                f"Type of node for {type(self)} expects one of {yaml.ScalarNode}, {yaml.SequenceNode} and {yaml.MappingNode}, but actually {type(node)}"
+            )
         if self.autoload:
             return self.load(type(loader), data)
         else:
@@ -261,9 +268,9 @@ class Constructor:
                     * If count of argument is one,
                         it will be passed to of :meth:`fsspec.spec.AbstractFileSystem.glob`'s  ``maxdepth`` argument;
                     * If count of argument is more than one:
-                        # First of them will be passed to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
-                        # Second of them will be passed to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
-                        # Others will be ignored
+                        * First of them will be passed to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
+                        * Second of them will be passed to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
+                        * Others will be ignored
                 * If the include statement is in a named-parameter form, the class will:
                     * Find a key named `glob`, then pass the corresponding data to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
                     * Find a key named `open`, then pass the corresponding data to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
@@ -340,7 +347,7 @@ class Constructor:
                     glob_params, open_params = data.sequence_params[:2]
                 elif len(data.sequence_params) == 1:
                     glob_params = data.sequence_params[0]
-            if data.mapping_params:
+            elif data.mapping_params:
                 glob_params = data.mapping_params.get("glob")
                 open_params = data.mapping_params.get("open")
 
