@@ -347,7 +347,7 @@ class Constructor:
                     glob_params, open_params = data.sequence_params[:2]
                 elif len(data.sequence_params) == 1:
                     glob_params = data.sequence_params[0]
-            if data.mapping_params:
+            elif data.mapping_params:
                 glob_params = data.mapping_params.get("glob")
                 open_params = data.mapping_params.get("open")
 
