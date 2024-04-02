@@ -216,7 +216,7 @@ class Constructor:
         Returns:
             Data from the actual included YAML file, which is parsed by a PyYAML's Loader class.
 
-        Danger:
+        Caution:
             It's mainly invoked in :func:`yaml.load`, and **NOT advised to call it yourself**.
 
         Note:

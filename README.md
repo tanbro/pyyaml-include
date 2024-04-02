@@ -33,9 +33,7 @@ Since we are using [fsspec][] to open including files from v2.0, an installation
 - see [fsspec][]'s documentation for more
 
 > 🔖 **Tip** \
->
-> - “pyyaml-include” depends on [fsspec][], which will be installed no matter including local or remote files.
-> - It's advised to use the library on Python version `>=3.8`, early versions are not guaranteed.
+> “pyyaml-include” depends on [fsspec][], it will be installed no matter including local or remote files.
 
 ## Basic usages
 
