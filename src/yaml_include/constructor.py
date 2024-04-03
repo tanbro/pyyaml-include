@@ -4,30 +4,33 @@ Include other YAML files in YAML
 
 import re
 import sys
-from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
 from typing import Any, Optional, Union
-
-if sys.version_info < (3, 11):  # pragma: no cover
-    from typing_extensions import Self
-else:  # pragma: no cover
-    from typing import Self
-
 from urllib.parse import urlsplit, urlunsplit
+
+if sys.version_info >= (3, 9):
+    from collections.abc import Callable, Generator
+else:
+    from typing import Callable, Generator
+
+if sys.version_info >= (3, 11):  # pragma: no cover
+    from typing import Self
+else:  # pragma: no cover
+    from typing_extensions import Self
 
 import fsspec
 import yaml
 
 from .data import Data
 
-if sys.version_info < (3, 12):  # pragma: no cover
-    from ._yaml_types_backward import TYamlLoaderTypes
-else:  # pragma: no cover
+if sys.version_info >= (3, 12):  # pragma: no cover
     from ._yaml_types import TYamlLoaderTypes
+else:  # pragma: no cover
+    from ._yaml_types_backward import TYamlLoaderTypes
 
 __all__ = ["Constructor"]
 

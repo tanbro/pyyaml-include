@@ -1,20 +1,31 @@
 import sys
-from collections.abc import (
-    Generator,
-    Mapping,
-    MutableMapping,
-    MutableSequence,
-    Sequence,
-)
 from typing import Any
 
-if sys.version_info < (3, 12):  # pragma: no cover
-    from ._yaml_types_backward import TYamlLoaderTypes
-else:  # pragma: no cover
-    from ._yaml_types import TYamlLoaderTypes
+if sys.version_info >= (3, 9):  # pragma: no cover
+    from collections.abc import (
+        Generator,
+        Mapping,
+        MutableMapping,
+        MutableSequence,
+        Sequence,
+    )
+else:
+    from typing import (
+        Generator,
+        Mapping,
+        MutableMapping,
+        MutableSequence,
+        Sequence,
+    )
 
 from .constructor import Constructor
 from .data import Data
+
+if sys.version_info >= (3, 12):  # pragma: no cover
+    from ._yaml_types import TYamlLoaderTypes
+else:  # pragma: no cover
+    from ._yaml_types_backward import TYamlLoaderTypes
+
 
 __all__ = ["load", "lazy_load"]
 

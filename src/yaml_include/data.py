@@ -1,6 +1,11 @@
-from collections.abc import Mapping, Sequence
+import sys
 from dataclasses import dataclass, field
 from typing import Any
+
+if sys.version_info >= (3, 9):
+    from collections.abc import Mapping, Sequence
+else:
+    from typing import Mapping, Sequence
 
 __all__ = ["Data"]
 
