@@ -1,6 +1,12 @@
 import sys
-from collections.abc import Generator
-from typing import Any, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import (
+    Generator,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Sequence,
+)
+from typing import Any
 
 if sys.version_info < (3, 12):  # pragma: no cover
     from .yaml_types_backward import TYamlLoaderTypes
