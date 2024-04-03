@@ -22,17 +22,12 @@ from urllib.parse import urlsplit, urlunsplit
 import fsspec
 import yaml
 
-if sys.version_info < (3, 12):  # pragma: no cover
-    pass
-else:  # pragma: no cover
-    from .yaml_types import TYamlLoaderTypes
-
 from .data import Data
 
 if sys.version_info < (3, 12):  # pragma: no cover
-    from .yaml_types_backward import TYamlLoaderTypes
+    from ._yaml_types_backward import TYamlLoaderTypes
 else:  # pragma: no cover
-    from .yaml_types import TYamlLoaderTypes
+    from ._yaml_types import TYamlLoaderTypes
 
 __all__ = ["Constructor"]
 

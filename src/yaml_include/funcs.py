@@ -9,9 +9,9 @@ from collections.abc import (
 from typing import Any
 
 if sys.version_info < (3, 12):  # pragma: no cover
-    from .yaml_types_backward import TYamlLoaderTypes
+    from ._yaml_types_backward import TYamlLoaderTypes
 else:  # pragma: no cover
-    from .yaml_types import TYamlLoaderTypes
+    from ._yaml_types import TYamlLoaderTypes
 
 from .constructor import Constructor
 from .data import Data
