@@ -4,12 +4,13 @@ Include other YAML files in YAML
 
 import re
 import sys
+from collections.abc import Callable, Generator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import Any, Callable, Generator, Optional, Union
+from typing import Any, Optional, Union
 
 if sys.version_info < (3, 11):  # pragma: no cover
     from typing_extensions import Self
@@ -171,7 +172,7 @@ class Constructor:
     """
 
     @contextmanager
-    def managed_autoload(self, autoload: bool) -> Generator[Self, Any, None]:
+    def managed_autoload(self, autoload: bool) -> Generator[Self, None, None]:
         """``with`` statement context manager for :attr:`autoload`
 
         Args:

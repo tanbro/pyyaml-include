@@ -1,5 +1,6 @@
 import sys
-from typing import Any, Generator, Mapping, MutableMapping, MutableSequence, Sequence
+from collections.abc import Generator
+from typing import Any, Mapping, MutableMapping, MutableSequence, Sequence
 
 if sys.version_info < (3, 12):  # pragma: no cover
     from .yaml_types_backward import TYamlLoaderTypes
@@ -8,7 +9,6 @@ else:  # pragma: no cover
 
 from .constructor import Constructor
 from .data import Data
-
 
 __all__ = ["load", "lazy_load"]
 
@@ -66,12 +66,12 @@ def lazy_load(
     loader_type: TYamlLoaderTypes,
     constructor: Constructor,
     nested: bool = False,
-) -> Generator:
+) -> Generator[Any, None, Any]:
     """Recursively load and parse all :class:`.Data` inside ``obj`` in generative mode.
 
     Almost the same as :func:`.load`, except that:
 
-    * The function returns a generator, it yields at every :class:`.Data` object found.
+    * The function returns a :term:`generator`, it yields at every :class:`.Data` instance found in side ``obj``.
     * It only applies an in-place parsing and replacement, and will not return parsed object.
     """
     if isinstance(obj, Data):
