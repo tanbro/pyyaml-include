@@ -8,12 +8,15 @@
 
 An extending constructor of [PyYAML][]: include other [YAML][] files into current [YAML][] document.
 
-With [fsspec][], we can even include files by HTTP, SFTP, S3 ...
+In version `2.0`, [fsspec][] was introduced. With it, we can even include files by HTTP, SFTP, S3 ...
+
+> ⚠️ **Warning** \
+> “pyyaml-include” `2.0` is **NOT compatible** with `1.0`
 
 ## Install
 
 ```bash
-pip install --pre "pyyaml-include>=2.0"
+pip install "pyyaml-include"
 ```
 
 Since we are using [fsspec][] to open including files from v2.0, an installation can be performed like below, if want to open remote files:
@@ -21,13 +24,13 @@ Since we are using [fsspec][] to open including files from v2.0, an installation
 - for files on website:
 
   ```bash
-  pip install --pre "pyyaml-include>=2.0" fsspec[http]
+  pip install "pyyaml-include" fsspec[http]
   ```
 
 - for files on S3:
 
   ```bash
-  pip install --pre "pyyaml-include>=2.0" fsspec[s3]
+  pip install "pyyaml-include" fsspec[s3]
   ```
 
 - see [fsspec][]'s documentation for more
