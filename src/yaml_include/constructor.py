@@ -9,14 +9,13 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Optional, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
 
 if sys.version_info >= (3, 9):
     from collections.abc import Callable, Generator
 else:
     from typing import Callable, Generator
-
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
 else:  # pragma: no cover
@@ -39,14 +38,17 @@ WILDCARDS_PATTERN = re.compile(
 )  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
 
 
+TOpenFile = TypeVar("TOpenFile")
+
+
 def load_open_file(
-    file,
+    file: TOpenFile,
     loader_type: TYamlLoaderTypes,
     path: str,
-    custom_loader: Optional[Callable[[str, Any, TYamlLoaderTypes], Any]] = None,
+    custom_loader: Optional[Callable[[str, TOpenFile, TYamlLoaderTypes], Any]] = None,
 ) -> Any:
     if custom_loader is None:
-        return yaml.load(file, loader_type)
+        return yaml.load(file, loader_type)  # type: ignore
     return custom_loader(path, file, loader_type)
 
 
@@ -182,7 +184,7 @@ class Constructor:
         finally:
             self.autoload = saved
 
-    def __call__(self, loader, node):
+    def __call__(self, loader, node):  # type: ignore[no-untyped-def]
         if isinstance(node, yaml.ScalarNode):
             params = loader.construct_scalar(node)
             data = Data(params)
@@ -378,9 +380,9 @@ class Constructor:
                 open_fn = lambda x: self.fs.open(x, open_params)  # noqa: E731
 
             result = []
-            for file in glob_fn():
+            for file in glob_fn():  # type: ignore[no-untyped-call]
                 assert isinstance(file, str)
-                with open_fn(file) as of_:
+                with open_fn(file) as of_:  # type: ignore[no-untyped-call]
                     data = load_open_file(of_, loader_type, file, self.custom_loader)
                     result.append(data)
             return result

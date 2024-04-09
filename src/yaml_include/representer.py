@@ -28,16 +28,16 @@ class Representer:
         because :func:`yaml.add_representer` will add the symbol itself.
     """
 
-    def __call__(self, dumper, data):
+    def __call__(self, dumper, data):  # type: ignore[no-untyped-def]
         if not isinstance(data, Data):  # pragma: no cover
             raise TypeError(f"Type of data for {type(self)} expects {Data}, but actually {type(data)}")
 
         if data.mapping_params:
-            params = {"urlpath": data.urlpath}
-            params.update(data.mapping_params)
-            return dumper.represent_mapping(f"!{self.tag}", params)
+            kv_args = {"urlpath": data.urlpath}
+            kv_args.update(data.mapping_params)
+            return dumper.represent_mapping(f"!{self.tag}", kv_args)
         if data.sequence_params:
-            params = [data.urlpath]
-            params.extend(data.sequence_params)
-            return dumper.represent_sequence(f"!{self.tag}", params)
+            pos_args = [data.urlpath]
+            pos_args.extend(data.sequence_params)
+            return dumper.represent_sequence(f"!{self.tag}", pos_args)
         return dumper.represent_scalar(f"!{self.tag}", data.urlpath)
