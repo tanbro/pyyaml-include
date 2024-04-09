@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.0.1
+
+> 📅 **Date** 2024-4-9
+
+- 🆕 New Features:
+  - #44: Add `py.typed` file, make the package PEP-561 friendly
+
 ## 2.0
 
 > 📅 **Date** 2024-3-31
