@@ -54,5 +54,8 @@ Changelog = "https://github.com/tanbro/pyyaml-include/blob/main/CHANGELOG.md"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+pyyaml_include = ["yaml_include/py.typed"]
+
 [tool.setuptools_scm]
 write_to = "src/yaml_include/_version.py"

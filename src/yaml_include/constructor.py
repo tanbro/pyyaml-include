@@ -22,7 +22,7 @@ if sys.version_info >= (3, 11):  # pragma: no cover
 else:  # pragma: no cover
     from typing_extensions import Self
 
-import fsspec
+import fsspec  # type: ignore[import-untyped]
 import yaml
 
 from .data import Data
