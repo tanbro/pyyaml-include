@@ -1,5 +1,3 @@
-exclude: ^(src/yaml_include/_yaml_types(_backward)?\.py)|(tests/.+)$
-
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

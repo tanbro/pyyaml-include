@@ -7,7 +7,7 @@ from pathlib import Path
 from textwrap import dedent
 from time import sleep
 
-import fsspec
+import fsspec  # type: ignore[import-untyped]
 import yaml
 
 from yaml_include import Constructor
@@ -164,7 +164,7 @@ class DefaultFsBasicTestCase(BaseTestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
     def test_abs(self):
         yml = dedent(
@@ -188,7 +188,7 @@ class FileFsBasicTestCase(BaseTestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
     def test_scheme_abs(self):
         yml = dedent(
@@ -298,7 +298,7 @@ class DefaultFsNoBaseDirBasicTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
     def test_yaml2(self):
         yml = dedent(

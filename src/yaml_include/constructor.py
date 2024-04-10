@@ -2,6 +2,8 @@
 Include other YAML files in YAML
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from contextlib import contextmanager
@@ -9,12 +11,12 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import Any, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
 
-if sys.version_info >= (3, 9):
+if sys.version_info >= (3, 9):  # pragma: no cover
     from collections.abc import Callable, Generator
-else:
+else:  # pragma: no cover
     from typing import Callable, Generator
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
@@ -26,10 +28,13 @@ import yaml
 
 from .data import Data
 
-if sys.version_info >= (3, 12):  # pragma: no cover
-    from ._yaml_types import TYamlLoaderTypes
-else:  # pragma: no cover
-    from ._yaml_types_backward import TYamlLoaderTypes
+if TYPE_CHECKING:  # pragma: no cover
+    from yaml.cyaml import _CLoader as YAML_CLoader
+    from yaml.loader import _Loader as YAML_Loader
+    from yaml.reader import _ReadStream as YAML_ReadStream
+
+    _TOF = TypeVar("_TOF", bound=YAML_ReadStream)
+
 
 __all__ = ["Constructor"]
 
@@ -38,17 +43,14 @@ WILDCARDS_PATTERN = re.compile(
 )  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
 
 
-TOpenFile = TypeVar("TOpenFile")
-
-
 def load_open_file(
-    file: TOpenFile,
-    loader_type: TYamlLoaderTypes,
+    file: "_TOF",
+    loader_type: "Type[YAML_Loader|YAML_CLoader]",
     path: str,
-    custom_loader: Optional[Callable[[str, TOpenFile, TYamlLoaderTypes], Any]] = None,
+    custom_loader: Optional[Callable[[str, "_TOF", "Type[YAML_Loader|YAML_CLoader]"], Any]] = None,
 ) -> Any:
     if custom_loader is None:
-        return yaml.load(file, loader_type)  # type: ignore
+        return yaml.load(file, loader_type)
     return custom_loader(path, file, loader_type)
 
 
@@ -103,7 +105,7 @@ class Constructor:
     )
     """:mod:`fsspec` File-system object to parse path/url and open including files. `LocalFileSystem` by default."""
 
-    base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None
+    base_dir: Union[str, PathLike[Any], Callable[[], Union[str, PathLike[Any]]], None] = None
     """Base directory to which open or search including YAML files in relative mode.
 
     * If it is ``None``, the actual base directory was decided by the :mod:`fsspec` file-system implementation in use.
@@ -121,7 +123,7 @@ class Constructor:
       will **NOT** open including file(s), the return value is a :class:`.Data` object stores include statement.
     """
 
-    custom_loader: Optional[Callable[[str, Any, TYamlLoaderTypes], Any]] = None
+    custom_loader: Optional[Callable[[str, "YAML_ReadStream", "type[YAML_Loader | YAML_CLoader]"], Any]] = None
     """Custom loader/parser function called when an including file is about to parse.
 
     If ``None``, parse the file as ordinary YAML with current `Loader` class.
@@ -153,19 +155,24 @@ class Constructor:
             * Each file name returned by :meth:`fsspec.spec.AbstractFileSystem.glob`,
               if there be wildcard and no scheme in the include statement (eg: ``!inc foobar/**/*.yml``).
 
-        arg2(typing.Any):
-            What returned by :func:`fsspec.open` or member of :func:`fsspec.open_files`'s returned list will be passed to the argument.
+        arg2(bytes | str | SupportsRead[bytes | str]):
+            What returned by :func:`fsspec.open`, or member of :func:`fsspec.open_files`'s returned list, will be set to the argument.
 
-            Type of the parameter is usually one of:
+            The parameter may later be used in :func:`yaml.load`, it could be:
 
-            * Subclass of :class:`io.IOBase`
-            * Subclass of :class:`fsspec.spec.AbstractBufferedFile`
+            * :class:`bytes` or :class:`str`
+
+            * An object implements ::
+
+                class SupportsRead(bytes | str):
+                    def read(self, length: int = ..., /) -> bytes | str: ...
 
             Tip:
-                **The type is NOT certain** however, because ``open`` methods of different :mod:`fsspec` file-system implementations are variable.
+                The ``open`` method of :mod:`fsspec` file-system implementations usually returns a :class:`fsspec.spec.AbstractBufferedFile` object.
+                However, **the type is NOT certain**, because ``open`` methods of different :mod:`fsspec` file-system implementations are variable.
 
         arg3(typing.Type):
-            Type of `PyYAML`'s Loader class in use.
+            Type (**not instance**) of `PyYAML`'s Loader currently in use.
 
     Returns:
         typing.Any: Parsed result
@@ -206,7 +213,7 @@ class Constructor:
         else:
             return data
 
-    def load(self, loader_type: TYamlLoaderTypes, data: Data) -> Any:
+    def load(self, loader_type: "Type[YAML_Loader|YAML_CLoader]", data: Data) -> Any:
         """The method will be invoked once the PyYAML's Loader class call the constructor.
         It happens when an include state tag(eg: ``"!inc"``) is met.
 

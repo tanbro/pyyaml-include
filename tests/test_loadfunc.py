@@ -22,7 +22,7 @@ class LoadFuncTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
     def test_normal(self):
         yaml_string = dedent(
@@ -102,7 +102,7 @@ class LazyLoadFuncTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
     def test_inplace(self):
         yaml_string = dedent(

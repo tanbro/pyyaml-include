@@ -1,15 +1,9 @@
 import sys
-from typing import Any
+from typing import TYPE_CHECKING, Any, Type
 
 if sys.version_info >= (3, 9):  # pragma: no cover
-    from collections.abc import (
-        Generator,
-        Mapping,
-        MutableMapping,
-        MutableSequence,
-        Sequence,
-    )
-else:
+    from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
+else:  # pragma: no cover
     from typing import (
         Generator,
         Mapping,
@@ -21,18 +15,16 @@ else:
 from .constructor import Constructor
 from .data import Data
 
-if sys.version_info >= (3, 12):  # pragma: no cover
-    from ._yaml_types import TYamlLoaderTypes
-else:  # pragma: no cover
-    from ._yaml_types_backward import TYamlLoaderTypes
-
+if TYPE_CHECKING:  # pragma: no cover
+    from yaml.cyaml import _CLoader as YAML_CLoader
+    from yaml.loader import _Loader as YAML_Loader
 
 __all__ = ["load", "lazy_load"]
 
 
 def load(
     obj: Any,
-    loader_type: TYamlLoaderTypes,
+    loader_type: "Type[YAML_Loader | YAML_CLoader]",
     constructor: Constructor,
     inplace: bool = False,
     nested: bool = False,
@@ -80,7 +72,7 @@ def load(
 
 def lazy_load(
     obj: Any,
-    loader_type: TYamlLoaderTypes,
+    loader_type: "Type[YAML_Loader | YAML_CLoader]",
     constructor: Constructor,
     nested: bool = False,
 ) -> Generator[Any, None, Any]:

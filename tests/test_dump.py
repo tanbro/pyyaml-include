@@ -26,9 +26,9 @@ class DumpTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
         for dumper_cls in YAML_DUMPERS:
-            del dumper_cls.yaml_representers[Data]
+            del dumper_cls.yaml_representers[Data]  # type: ignore[attr-defined]
 
     def test_extract(self):
         yaml_string = dedent(

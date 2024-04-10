@@ -19,7 +19,7 @@ class MultiLoaderTestCase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
     def test_load_all(self):
         yml_txt = dedent(

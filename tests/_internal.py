@@ -29,8 +29,8 @@ try:
 except ImportError as err:
     warn(f"PyYAML was not build with libyaml: {err}")
 else:
-    YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]
-    YAML_DUMPERS += [CDumper, CSafeDumper]
+    YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]  # type: ignore
+    YAML_DUMPERS += [CDumper, CSafeDumper]  # type: ignore
 
 with open("tests/data/include.d/1.yaml") as f:
     YAML1 = yaml.full_load(f)
