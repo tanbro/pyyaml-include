@@ -1,16 +1,10 @@
 import sys
-from typing import TYPE_CHECKING, Any, Type
+from typing import TYPE_CHECKING, Any, Type, Union
 
 if sys.version_info >= (3, 9):  # pragma: no cover
     from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
 else:  # pragma: no cover
-    from typing import (
-        Generator,
-        Mapping,
-        MutableMapping,
-        MutableSequence,
-        Sequence,
-    )
+    from typing import Generator, Mapping, MutableMapping, MutableSequence, Sequence
 
 from .constructor import Constructor
 from .data import Data
@@ -19,12 +13,13 @@ if TYPE_CHECKING:  # pragma: no cover
     from yaml.cyaml import _CLoader as YAML_CLoader
     from yaml.loader import _Loader as YAML_Loader
 
+
 __all__ = ["load", "lazy_load"]
 
 
 def load(
     obj: Any,
-    loader_type: "Type[YAML_Loader | YAML_CLoader]",
+    loader_type: Type[Union[YAML_Loader, YAML_CLoader]],
     constructor: Constructor,
     inplace: bool = False,
     nested: bool = False,

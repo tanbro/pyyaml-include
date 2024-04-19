@@ -2,8 +2,6 @@
 Include other YAML files in YAML
 """
 
-from __future__ import annotations
-
 import re
 import sys
 from contextlib import contextmanager
@@ -33,7 +31,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from yaml.loader import _Loader as YAML_Loader
     from yaml.reader import _ReadStream as YAML_ReadStream
 
-    _TOF = TypeVar("_TOF", bound=YAML_ReadStream)
+    _TOpenFile = TypeVar("_TOpenFile", bound=YAML_ReadStream)
+    _TLoaderType = TypeVar("_TLoaderType", bound=Type[Union[YAML_Loader, YAML_CLoader]])
 
 
 __all__ = ["Constructor"]
@@ -44,10 +43,10 @@ WILDCARDS_PATTERN = re.compile(
 
 
 def load_open_file(
-    file: "_TOF",
-    loader_type: "Type[YAML_Loader|YAML_CLoader]",
+    file: _TOpenFile,
+    loader_type: _TLoaderType,
     path: str,
-    custom_loader: Optional[Callable[[str, "_TOF", "Type[YAML_Loader|YAML_CLoader]"], Any]] = None,
+    custom_loader: Optional[Callable[[str, _TOpenFile, _TLoaderType], Any]] = None,
 ) -> Any:
     if custom_loader is None:
         return yaml.load(file, loader_type)
@@ -123,7 +122,7 @@ class Constructor:
       will **NOT** open including file(s), the return value is a :class:`.Data` object stores include statement.
     """
 
-    custom_loader: Optional[Callable[[str, "YAML_ReadStream", "type[YAML_Loader | YAML_CLoader]"], Any]] = None
+    custom_loader: Optional[Callable[[str, YAML_ReadStream, Type[Union[YAML_Loader, YAML_CLoader]]], Any]] = None
     """Custom loader/parser function called when an including file is about to parse.
 
     If ``None``, parse the file as ordinary YAML with current `Loader` class.
@@ -213,7 +212,7 @@ class Constructor:
         else:
             return data
 
-    def load(self, loader_type: "Type[YAML_Loader|YAML_CLoader]", data: Data) -> Any:
+    def load(self, loader_type: Type[Union[YAML_Loader, YAML_CLoader]], data: Data) -> Any:
         """The method will be invoked once the PyYAML's Loader class call the constructor.
         It happens when an include state tag(eg: ``"!inc"``) is met.
 
