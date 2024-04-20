@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import sys
 from typing import TYPE_CHECKING, Any, Type, Union
 
@@ -67,7 +69,7 @@ def load(
 
 def lazy_load(
     obj: Any,
-    loader_type: "Type[YAML_Loader | YAML_CLoader]",
+    loader_type: Type[Union[YAML_Loader, YAML_CLoader]],
     constructor: Constructor,
     nested: bool = False,
 ) -> Generator[Any, None, Any]:

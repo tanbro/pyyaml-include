@@ -2,6 +2,8 @@
 Include other YAML files in YAML
 """
 
+from __future__ import annotations
+
 import re
 import sys
 from contextlib import contextmanager
@@ -104,7 +106,7 @@ class Constructor:
     )
     """:mod:`fsspec` File-system object to parse path/url and open including files. `LocalFileSystem` by default."""
 
-    base_dir: Union[str, PathLike[Any], Callable[[], Union[str, PathLike[Any]]], None] = None
+    base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None
     """Base directory to which open or search including YAML files in relative mode.
 
     * If it is ``None``, the actual base directory was decided by the :mod:`fsspec` file-system implementation in use.
