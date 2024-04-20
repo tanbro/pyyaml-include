@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 2.0.2
+
+> 📅 **Date** 2024-4-20
+
+- Remove custom PyYAML types definition module, use that from `types-PyYAML` instead.
+- Add [mypy](https://www.mypy-lang.org/) hook in pre-commit
+- Better type hints/annotations
+
 ## 2.0.1
 
 > 📅 **Date** 2024-4-9
