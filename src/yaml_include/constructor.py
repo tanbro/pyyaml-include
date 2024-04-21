@@ -11,13 +11,9 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union, Callable, Generator
 from urllib.parse import urlsplit, urlunsplit
 
-if sys.version_info >= (3, 9):  # pragma: no cover
-    from collections.abc import Callable, Generator
-else:  # pragma: no cover
-    from typing import Callable, Generator
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
 else:  # pragma: no cover

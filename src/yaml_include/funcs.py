@@ -1,12 +1,6 @@
 from __future__ import annotations
 
-import sys
-from typing import TYPE_CHECKING, Any, Type, Union
-
-if sys.version_info >= (3, 9):  # pragma: no cover
-    from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
-else:  # pragma: no cover
-    from typing import Generator, Mapping, MutableMapping, MutableSequence, Sequence
+from typing import TYPE_CHECKING, Any, Generator, Mapping, MutableMapping, MutableSequence, Sequence, Type, Union
 
 from .constructor import Constructor
 from .data import Data
