@@ -19,7 +19,7 @@ How to build docs
 
    .. code:: sh
 
-      sphinx-apidoc -o docs/apidocs -eMTf src/yaml_include
+      sphinx-apidoc -o docs/apidocs -eMTf src
 
 #. Build HTML documentation:
 

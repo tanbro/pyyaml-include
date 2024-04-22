@@ -6,8 +6,8 @@ from .constructor import Constructor
 from .data import Data
 
 if TYPE_CHECKING:  # pragma: no cover
-    from yaml.cyaml import _CLoader as YAML_CLoader
-    from yaml.loader import _Loader as YAML_Loader
+    from yaml.cyaml import _CLoader
+    from yaml.loader import _Loader
 
 
 __all__ = ["load", "lazy_load"]
@@ -15,7 +15,7 @@ __all__ = ["load", "lazy_load"]
 
 def load(
     obj: Any,
-    loader_type: Type[Union[YAML_Loader, YAML_CLoader]],
+    loader_type: Type[Union[_Loader, _CLoader]],
     constructor: Constructor,
     inplace: bool = False,
     nested: bool = False,
@@ -62,10 +62,7 @@ def load(
 
 
 def lazy_load(
-    obj: Any,
-    loader_type: Type[Union[YAML_Loader, YAML_CLoader]],
-    constructor: Constructor,
-    nested: bool = False,
+    obj: Any, loader_type: Type[Union[_Loader, _CLoader]], constructor: Constructor, nested: bool = False
 ) -> Generator[Any, None, Any]:
     """Recursively load and parse all :class:`.Data` inside ``obj`` in generative mode.
 
