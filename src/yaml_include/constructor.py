@@ -98,9 +98,7 @@ class Constructor:
            The variable ``data`` containers the parsed Python object(s) from including file(s)
     """
 
-    fs: fsspec.AbstractFileSystem = field(
-        default_factory=lambda: fsspec.filesystem("file"),
-    )
+    fs: fsspec.AbstractFileSystem = field(default_factory=lambda: fsspec.filesystem("file"))
     """:mod:`fsspec` File-system object to parse path/url and open including files. `LocalFileSystem` by default."""
 
     base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None
@@ -248,7 +246,6 @@ class Constructor:
                     with fsspec.open("s3://my-bucket/my-file.yml.gz", compression="gzip") as f:
                         yaml.load(f, Loader)
 
-
         * If there is a protocol/scheme, and also wildcard defined in YAML including,
             :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as ``*args`` and ``**kwargs``
 
@@ -316,13 +313,7 @@ class Constructor:
             else:
                 base_dir = Path(base_dir)
             if url_sr.scheme:
-                urlpath = urlunsplit(
-                    chain(
-                        url_sr[:2],
-                        (base_dir.joinpath(url_sr[2]).as_posix(),),
-                        url_sr[3:],
-                    )
-                )
+                urlpath = urlunsplit(chain(url_sr[:2], (base_dir.joinpath(url_sr[2]).as_posix(),), url_sr[3:]))
             else:
                 urlpath = base_dir.joinpath(urlpath).as_posix()
 
