@@ -11,8 +11,13 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Generator, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, Mapping, Optional, Sequence, Type, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
+
+if sys.version_info >= (3, 10):
+    from typing import TypeGuard
+else:
+    from typing_extensions import TypeGuard
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
@@ -26,6 +31,7 @@ from .data import Data
 
 if TYPE_CHECKING:  # pragma: no cover
     from yaml import Node
+    from yaml.constructor import _Scalar
     from yaml.cyaml import _CLoader
     from yaml.loader import _Loader
     from yaml.reader import _ReadStream
@@ -188,21 +194,22 @@ class Constructor:
             self.autoload = saved
 
     def __call__(self, loader: Union[_Loader, _CLoader], node: Node) -> Union[Data, Any]:
-        if isinstance(node, yaml.ScalarNode):
-            p0 = loader.construct_scalar(node)
-            if not isinstance(p0, str):
-                raise TypeError(f"{type(p0)}")
-            data = Data(p0)
-        elif isinstance(node, yaml.SequenceNode):
-            p1 = loader.construct_sequence(node)
-            data = Data(p1[0], sequence_params=p1[1:])
-        elif isinstance(node, yaml.MappingNode):
-            p2 = loader.construct_mapping(node)
-            data = Data(p2["urlpath"], mapping_params={k: v for k, v in p2.items() if k != "urlpath"})  # type:ignore
+        val: Union[_Scalar, Sequence, Mapping]
+        if is_yaml_scalar_node(node):
+            val = loader.construct_scalar(node)
+            if not isinstance(val, str):
+                raise TypeError(f"{type(val)}")
+            data = Data(val)
+        elif is_yaml_sequence_node(node):
+            val = loader.construct_sequence(node)
+            data = Data(val[0], sequence_params=val[1:])
+        elif is_yaml_mapping_node(node):
+            val = loader.construct_mapping(node)
+            if any(not isinstance(k, str) for k in val):
+                raise TypeError()
+            data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})  # type:ignore
         else:  # pragma: no cover
-            raise TypeError(
-                f"Type of node for {type(self)} expects one of {yaml.ScalarNode}, {yaml.SequenceNode} and {yaml.MappingNode}, but actually {type(node)}"
-            )
+            raise TypeError(f"{type(node)}")
         if self.autoload:
             return self.load(type(loader), data)
         else:
@@ -329,7 +336,8 @@ class Constructor:
                 return result
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
-                assert not isinstance(of_, list)
+                if isinstance(of_, list):
+                    raise RuntimeError(f"`fsspec.open()` returns a `list` ({of_})")
                 result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
                 return result
 
@@ -376,7 +384,8 @@ class Constructor:
 
             result = []
             for file in glob_fn():  # type: ignore[no-untyped-call]
-                assert isinstance(file, str)
+                if not isinstance(file, str):
+                    raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
                 with open_fn(file) as of_:  # type: ignore[no-untyped-call]
                     data = load_open_file(of_, loader_type, file, self.custom_loader)
                     result.append(data)
@@ -386,3 +395,15 @@ class Constructor:
         with self.fs.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
             result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
             return result
+
+
+def is_yaml_scalar_node(node) -> TypeGuard[yaml.ScalarNode]:
+    return isinstance(node, yaml.ScalarNode)
+
+
+def is_yaml_sequence_node(node) -> TypeGuard[yaml.SequenceNode]:
+    return isinstance(node, yaml.SequenceNode)
+
+
+def is_yaml_mapping_node(node) -> TypeGuard[yaml.MappingNode]:
+    return isinstance(node, yaml.MappingNode)

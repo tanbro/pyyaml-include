@@ -36,9 +36,8 @@ class Representer:
     """
 
     def __call__(self, dumper: Dumper, data) -> Node:
-        if not isinstance(data, Data):  # pragma: no cover
-            raise TypeError(f"Type of data for {type(self)} expects {Data}, but actually {type(data)}")
-
+        if not isinstance(data, Data):
+            raise TypeError(f"{type(data)}")
         if data.mapping_params:
             kv_args = {"urlpath": data.urlpath}
             kv_args.update(data.mapping_params)
