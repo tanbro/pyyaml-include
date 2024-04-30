@@ -38,11 +38,9 @@ class Representer:
     def __call__(self, dumper: Dumper, data) -> Node:
         if not isinstance(data, Data):
             raise TypeError(f"{type(data)}")
+        tag = "!" + self.tag
         if data.mapping_params:
-            kv_args = {"urlpath": data.urlpath}
-            kv_args.update(data.mapping_params)
-            return dumper.represent_mapping(f"!{self.tag}", kv_args)
+            return dumper.represent_mapping(tag, {**{"urlpath": data.urlpath}, **data.mapping_params})
         if data.sequence_params:
-            pos_args = chain((data.urlpath,), data.sequence_params)
-            return dumper.represent_sequence(f"!{self.tag}", pos_args)
-        return dumper.represent_scalar(f"!{self.tag}", data.urlpath)
+            return dumper.represent_sequence(tag, chain((data.urlpath,), data.sequence_params))
+        return dumper.represent_scalar(tag, data.urlpath)

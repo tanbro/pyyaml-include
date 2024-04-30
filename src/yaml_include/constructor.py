@@ -197,9 +197,10 @@ class Constructor:
         val: Union[_Scalar, Sequence, Mapping]
         if is_yaml_scalar_node(node):
             val = loader.construct_scalar(node)
-            if not isinstance(val, str):
+            if isinstance(val, str):
+                data = Data(val)
+            else:
                 raise TypeError(f"{type(val)}")
-            data = Data(val)
         elif is_yaml_sequence_node(node):
             val = loader.construct_sequence(node)
             data = Data(val[0], sequence_params=val[1:])
@@ -240,7 +241,7 @@ class Constructor:
         The function works as blow description:
 
         * If there is a protocol/scheme, and no wildcard defined in YAML including,
-            ``*args`` and ``**kwargs`` will be passed to :func:`fsspec.open`.
+          ``*args`` and ``**kwargs`` will be passed to :func:`fsspec.open`.
 
             Example:
                 The YAML
@@ -255,7 +256,7 @@ class Constructor:
                         yaml.load(f, Loader)
 
         * If there is a protocol/scheme, and also wildcard defined in YAML including,
-            :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as ``*args`` and ``**kwargs``
+          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as ``*args`` and ``**kwargs``
 
             Example:
                 The YAML
@@ -271,7 +272,7 @@ class Constructor:
                             yaml.load(file, Loader)
 
         * If there is no protocol/scheme, and no wildcard defined in YAML including,
-            :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :mod:`fsspec` file-system implementation's ``open`` function (derive from :meth:`fsspec.spec.AbstractFileSystem.open`) as ``*args`` and ``**kwargs``
+          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :mod:`fsspec` file-system implementation's ``open`` function (derive from :meth:`fsspec.spec.AbstractFileSystem.open`) as ``*args`` and ``**kwargs``
 
         * If there is no protocol/scheme, and also wildcard defined in YAML including, the situation is complex:
             * If the include statement is in a positional-parameter form:
