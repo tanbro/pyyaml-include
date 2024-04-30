@@ -205,9 +205,10 @@ class Constructor:
             data = Data(val[0], sequence_params=val[1:])
         elif is_yaml_mapping_node(node):
             val = loader.construct_mapping(node)
-            if any(not isinstance(k, str) for k in val):
-                raise TypeError()
-            data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})  # type:ignore
+            if is_mapping_all_key_str(val):
+                data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})
+            else:
+                raise ValueError("not all key of the YAML mapping node is `str`")
         else:  # pragma: no cover
             raise TypeError(f"{type(node)}")
         if self.autoload:
@@ -383,10 +384,10 @@ class Constructor:
                 open_fn = lambda x: self.fs.open(x, open_params)  # noqa: E731
 
             result = []
-            for file in glob_fn():  # type: ignore[no-untyped-call]
+            for file in glob_fn():
                 if not isinstance(file, str):
                     raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
-                with open_fn(file) as of_:  # type: ignore[no-untyped-call]
+                with open_fn(file) as of_:
                     data = load_open_file(of_, loader_type, file, self.custom_loader)
                     result.append(data)
             return result
@@ -407,3 +408,7 @@ def is_yaml_sequence_node(node) -> TypeGuard[yaml.SequenceNode]:
 
 def is_yaml_mapping_node(node) -> TypeGuard[yaml.MappingNode]:
     return isinstance(node, yaml.MappingNode)
+
+
+def is_mapping_all_key_str(val) -> TypeGuard[Mapping[str, Any]]:
+    return all(isinstance(k, str) for k in val)
