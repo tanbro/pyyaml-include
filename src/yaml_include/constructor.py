@@ -11,12 +11,12 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Generator, Mapping, Optional, Sequence, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, Optional, Sequence, Type, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
 
-if sys.version_info >= (3, 10):
+if sys.version_info >= (3, 10):  # pragma: no cover
     from typing import TypeGuard
-else:
+else:  # pragma: no cover
     from typing_extensions import TypeGuard
 
 if sys.version_info >= (3, 11):  # pragma: no cover
@@ -199,7 +199,7 @@ class Constructor:
             val = loader.construct_scalar(node)
             if isinstance(val, str):
                 data = Data(val)
-            else:
+            else:  # pragma: no cover
                 raise TypeError(f"{type(val)}")
         elif is_yaml_sequence_node(node):
             val = loader.construct_sequence(node)
@@ -208,7 +208,7 @@ class Constructor:
             val = loader.construct_mapping(node)
             if is_mapping_all_key_str(val):
                 data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})
-            else:
+            else:  # pragma: no cover
                 raise ValueError("not all key of the YAML mapping node is `str`")
         else:  # pragma: no cover
             raise TypeError(f"{type(node)}")
@@ -338,7 +338,7 @@ class Constructor:
                 return result
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
-                if isinstance(of_, list):
+                if isinstance(of_, list):  # pragma: no cover
                     raise RuntimeError(f"`fsspec.open()` returns a `list` ({of_})")
                 result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
                 return result
@@ -347,7 +347,8 @@ class Constructor:
         if WILDCARDS_PATTERN.match(urlpath):
             urlpath = Path(urlpath).as_posix()
             # if wildcard in path, returns a List
-            glob_params = open_params = None
+            glob_params: Union[Mapping[str, Any], Iterable, None] = None
+            open_params: Union[Mapping[str, Any], Iterable, None] = None
             if data.sequence_params:
                 if len(data.sequence_params) > 1:
                     glob_params, open_params = data.sequence_params[:2]
@@ -359,34 +360,36 @@ class Constructor:
 
             if glob_params is None:
                 glob_fn = lambda: self.fs.glob(urlpath)  # noqa: E731
-            elif isinstance(glob_params, dict):
+            elif isinstance(glob_params, Mapping):
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
-                if "maxdepth" in glob_params:
-                    glob_params["maxdepth"] = int(glob_params["maxdepth"])
-                glob_fn = lambda: self.fs.glob(urlpath, **glob_params)  # noqa: E731
-            elif isinstance(glob_params, (list, set)):
+                kv_args = {**glob_params}
+                if "maxdepth" in kv_args:
+                    kv_args["maxdepth"] = int(kv_args["maxdepth"])
+                glob_fn = lambda: self.fs.glob(urlpath, **kv_args)  # noqa: E731
+            elif isinstance(glob_params, Iterable) and not isinstance(glob_params, (str, bytes)):
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
-                glob_params = list(glob_params)
-                if glob_params:
-                    glob_params[0] = int(glob_params[0])
-                glob_fn = lambda: self.fs.glob(urlpath, *glob_params)  # noqa: E731
+                pos_args = list(glob_params)
+                if pos_args:
+                    pos_args[0] = int(pos_args[0])
+                glob_fn = lambda: self.fs.glob(urlpath, *pos_args)  # noqa: E731
             else:
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
                 maxdepth = int(glob_params)
-                glob_fn = lambda: self.fs.glob(urlpath, maxdepth)  # noqa: E731
+                glob_fn = lambda: self.fs.glob(urlpath, maxdepth=maxdepth)  # noqa: E731
 
             if open_params is None:
                 open_fn = lambda x: self.fs.open(x)  # noqa: E731
-            elif isinstance(open_params, dict):
+            elif isinstance(open_params, Mapping):
                 open_fn = lambda x: self.fs.open(x, **open_params)  # noqa: E731
-            elif isinstance(open_params, (list, set)):
+            elif isinstance(open_params, Iterable) and not isinstance(open_params, (str, bytes)):
                 open_fn = lambda x: self.fs.open(x, *open_params)  # noqa: E731
-            else:
-                open_fn = lambda x: self.fs.open(x, open_params)  # noqa: E731
+            elif isinstance(open_params, str):
+                mode = str(open_params)
+                open_fn = lambda x: self.fs.open(x, mode=mode)  # noqa: E731
 
             result = []
             for file in glob_fn():
-                if not isinstance(file, str):
+                if not isinstance(file, str):  # pragma: no cover
                     raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
                 with open_fn(file) as of_:
                     data = load_open_file(of_, loader_type, file, self.custom_loader)

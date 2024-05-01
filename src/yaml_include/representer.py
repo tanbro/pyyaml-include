@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from itertools import chain
 from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from yaml import Dumper, Node
 
 from .data import Data
@@ -36,7 +36,7 @@ class Representer:
     """
 
     def __call__(self, dumper: Dumper, data) -> Node:
-        if not isinstance(data, Data):
+        if not isinstance(data, Data):  # pragma: no cover
             raise TypeError(f"{type(data)}")
         tag = "!" + self.tag
         if data.mapping_params:

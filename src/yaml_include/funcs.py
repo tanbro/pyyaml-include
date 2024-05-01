@@ -44,7 +44,7 @@ def load(
             return d
     elif isinstance(obj, Mapping):
         if inplace:
-            if not isinstance(obj, MutableMapping):
+            if not isinstance(obj, MutableMapping):  # pragma: no cover
                 raise ValueError(f"{obj} is not mutable")
             for k, v in obj.items():
                 obj[k] = load(v, loader_type, constructor, inplace, nested)
@@ -52,7 +52,7 @@ def load(
             return {k: load(v, loader_type, constructor, inplace, nested) for k, v in obj.items()}
     elif isinstance(obj, Sequence) and not isinstance(obj, (bytearray, bytes, memoryview, str)):
         if inplace:
-            if not isinstance(obj, MutableSequence):
+            if not isinstance(obj, MutableSequence):  # pragma: no cover
                 raise ValueError(f"{obj} is not mutable")
             for i, v in enumerate(obj):
                 obj[i] = load(v, loader_type, constructor, inplace, nested)
