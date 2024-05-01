@@ -5,7 +5,6 @@
 -r docs/requirements.txt
 -r tests/requirements.txt
 build
-setuptools_scm
+coverage
 pre-commit
 ruff
-coverage
