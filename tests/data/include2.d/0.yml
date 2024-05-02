@@ -1,0 +1,7 @@
+'1': !inc include2.d/1.d/1.yml
+
+a:
+  deep:
+    path:
+      test:
+        '1': !inc include2.d/1.d/1.yml
