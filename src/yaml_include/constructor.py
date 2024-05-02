@@ -256,7 +256,7 @@ class Constructor:
                         yaml.load(f, Loader)
 
         * If there is a protocol/scheme, and also wildcard defined in YAML including,
-          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as ``*args`` and ``**kwargs``
+          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as it's ``*args`` and ``**kwargs`` arguments.
 
             Example:
                 The YAML
