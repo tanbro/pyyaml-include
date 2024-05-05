@@ -5,6 +5,8 @@
 -r docs/requirements.txt
 -r tests/requirements.txt
 build
-coverage
+setuptools_scm
 pre-commit
 ruff
+coverage
+mypy
