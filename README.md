@@ -418,7 +418,7 @@ the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
 When load [YAML][] string with include statement, the including files are default parsed into python objects. Thant is, if we call `yaml.dump()` on the object, what dumped is the parsed python object, and can not serialize the include statement itself.
 
-To serialize the statement, we shall first create an `yaml_include.Constructor` object whose `autoload` is `False`:
+To serialize the statement, we shall first create an `yaml_include.Constructor` object whose **`autoload` is `False`**:
 
 ```python
 import yaml

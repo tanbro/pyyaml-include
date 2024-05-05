@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2.1
+
+> 📅 **Date** 2024-5-5
+
+- Better type hints
+- Some optimizations and bugfix
+
 ## 2.0.2
 
 > 📅 **Date** 2024-4-20

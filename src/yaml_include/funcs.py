@@ -1,19 +1,13 @@
 from __future__ import annotations
 
-import sys
-from typing import TYPE_CHECKING, Any, Type, Union
-
-if sys.version_info >= (3, 9):  # pragma: no cover
-    from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
-else:  # pragma: no cover
-    from typing import Generator, Mapping, MutableMapping, MutableSequence, Sequence
+from typing import TYPE_CHECKING, Any, Generator, Mapping, MutableMapping, MutableSequence, Sequence, Type, Union
 
 from .constructor import Constructor
 from .data import Data
 
 if TYPE_CHECKING:  # pragma: no cover
-    from yaml.cyaml import _CLoader as YAML_CLoader
-    from yaml.loader import _Loader as YAML_Loader
+    from yaml.cyaml import _CLoader
+    from yaml.loader import _Loader
 
 
 __all__ = ["load", "lazy_load"]
@@ -21,7 +15,7 @@ __all__ = ["load", "lazy_load"]
 
 def load(
     obj: Any,
-    loader_type: Type[Union[YAML_Loader, YAML_CLoader]],
+    loader_type: Type[Union[_Loader, _CLoader]],
     constructor: Constructor,
     inplace: bool = False,
     nested: bool = False,
@@ -50,7 +44,7 @@ def load(
             return d
     elif isinstance(obj, Mapping):
         if inplace:
-            if not isinstance(obj, MutableMapping):
+            if not isinstance(obj, MutableMapping):  # pragma: no cover
                 raise ValueError(f"{obj} is not mutable")
             for k, v in obj.items():
                 obj[k] = load(v, loader_type, constructor, inplace, nested)
@@ -58,7 +52,7 @@ def load(
             return {k: load(v, loader_type, constructor, inplace, nested) for k, v in obj.items()}
     elif isinstance(obj, Sequence) and not isinstance(obj, (bytearray, bytes, memoryview, str)):
         if inplace:
-            if not isinstance(obj, MutableSequence):
+            if not isinstance(obj, MutableSequence):  # pragma: no cover
                 raise ValueError(f"{obj} is not mutable")
             for i, v in enumerate(obj):
                 obj[i] = load(v, loader_type, constructor, inplace, nested)
@@ -68,10 +62,7 @@ def load(
 
 
 def lazy_load(
-    obj: Any,
-    loader_type: Type[Union[YAML_Loader, YAML_CLoader]],
-    constructor: Constructor,
-    nested: bool = False,
+    obj: Any, loader_type: Type[Union[_Loader, _CLoader]], constructor: Constructor, nested: bool = False
 ) -> Generator[Any, None, Any]:
     """Recursively load and parse all :class:`.Data` inside ``obj`` in generative mode.
 

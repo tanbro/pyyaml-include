@@ -132,6 +132,16 @@ files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: {}}
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
+    def test_include_wildcards_3_1(self):
+        yml = """
+files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: rb}
+"""
+        for loader_cls in YAML_LOADERS:
+            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
+            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
+            data = yaml.load(StringIO(yml), loader_cls)
+            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+
     def test_include_wildcards_4(self):
         yml = """
 files: !inc [include.d/**/*.yaml, {maxdepth: 1}, []]
