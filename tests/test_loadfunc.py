@@ -2,13 +2,14 @@ import unittest
 from textwrap import dedent
 
 import yaml
+
 from yaml_include import (
     Constructor,
-    load,
     lazy_load,
+    load,
 )
 
-from ._internal import YAML_LOADERS, YAML1, YAML2
+from ._internal import YAML1, YAML2, YAML_LOADERS
 
 
 class LoadFuncTestCase(unittest.TestCase):

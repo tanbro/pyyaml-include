@@ -2,6 +2,7 @@ import unittest
 from textwrap import dedent
 
 import yaml
+
 from yaml_include import Constructor
 
 from ._internal import YAML_LOADERS

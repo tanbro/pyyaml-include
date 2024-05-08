@@ -3,13 +3,13 @@ from warnings import warn
 import yaml
 from yaml import (
     BaseLoader,
-    FullLoader,
-    Loader,
-    SafeLoader,
-    UnsafeLoader,
     # BaseDumper,
     Dumper,
+    FullLoader,
+    Loader,
     SafeDumper,
+    SafeLoader,
+    UnsafeLoader,
 )
 
 YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
@@ -18,13 +18,13 @@ YAML_DUMPERS = [Dumper, SafeDumper]
 try:
     from yaml import (
         CBaseLoader,
-        CFullLoader,
-        CLoader,
-        CSafeLoader,
-        CUnsafeLoader,
         # CBaseDumper,
         CDumper,
+        CFullLoader,
+        CLoader,
         CSafeDumper,
+        CSafeLoader,
+        CUnsafeLoader,
     )
 except ImportError as err:
     warn(f"PyYAML was not build with libyaml: {err}")

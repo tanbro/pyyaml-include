@@ -3,6 +3,7 @@ extend-exclude = ["docs"]
 line-length = 128
 
 [lint]
+extend-select = ["I"]
 ignore-init-module-imports = true
 
 [lint.mccabe]

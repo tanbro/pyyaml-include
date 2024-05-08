@@ -1,12 +1,19 @@
-# The file defines requirements for the project's local DEVELOPMENT.
-# It's NOT package-install dependencies.
+# The file defines requirements for the project's local development.
+# It's NOT package install dependencies.
 
 -e .
+
 -r docs/requirements.txt
 -r tests/requirements.txt
-build
+
 setuptools_scm
-pre-commit
-ruff
+
 coverage
+
 mypy
+ruff
+
+build
+twine
+
+pre-commit

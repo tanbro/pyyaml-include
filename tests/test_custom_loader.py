@@ -1,11 +1,11 @@
-from pathlib import Path
-import unittest
 import json
+import unittest
+from pathlib import Path
 from textwrap import dedent
+
 import yaml
 
 from yaml_include import Constructor
-
 
 from ._internal import YAML_LOADERS
 
