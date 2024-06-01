@@ -206,7 +206,7 @@ class Constructor:
             data = Data(val[0], sequence_params=val[1:])
         elif is_yaml_mapping_node(node):
             val = loader.construct_mapping(node)
-            if is_mapping_all_key_str(val):
+            if is_kwds(val):
                 data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})
             else:  # pragma: no cover
                 raise ValueError("not all key of the YAML mapping node is `str`")
@@ -414,5 +414,5 @@ def is_yaml_mapping_node(node) -> TypeGuard[yaml.MappingNode]:
     return isinstance(node, yaml.MappingNode)
 
 
-def is_mapping_all_key_str(val) -> TypeGuard[Mapping[str, Any]]:
-    return all(isinstance(k, str) for k in val)
+def is_kwds(val) -> TypeGuard[Mapping[str, Any]]:
+    return isinstance(val, Mapping) and all(isinstance(k, str) for k in val)

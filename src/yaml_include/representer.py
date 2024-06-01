@@ -35,7 +35,7 @@ class Representer:
         because :func:`yaml.add_representer` will add the symbol itself.
     """
 
-    def __call__(self, dumper: Dumper, data) -> Node:
+    def __call__(self, dumper: Dumper, data: Data) -> Node:
         if not isinstance(data, Data):  # pragma: no cover
             raise TypeError(f"{type(data)}")
         tag = "!" + self.tag
