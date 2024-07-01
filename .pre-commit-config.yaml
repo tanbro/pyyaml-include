@@ -20,7 +20,7 @@ repos:
       - id: check-docstring-first
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.4.7
+    rev: v0.5.0
     hooks:
       - id: ruff # Run the linter.
         types_or: [python, pyi, jupyter]
@@ -29,14 +29,14 @@ repos:
         types_or: [python, pyi, jupyter]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.10.0"
+    rev: "v1.10.1"
     hooks:
       - id: mypy
         args: [--ignore-missing-imports, --config-file, .mypy.ini]
         additional_dependencies: [types-PyYAML]
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: "0.28.4"
+    rev: "0.28.6"
     hooks:
       - id: check-github-workflows
       - id: check-readthedocs
