@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, Optional, Sequence, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Sequence, Type, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
 
 if sys.version_info >= (3, 10):  # pragma: no cover
@@ -36,8 +36,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from yaml.loader import _Loader
     from yaml.reader import _ReadStream
 
-    _TOpenFile = TypeVar("_TOpenFile", bound=_ReadStream)
-    _TLoaderType = TypeVar("_TLoaderType", bound=Type[Union[_Loader, _CLoader]])
+    OpenFileT = TypeVar("OpenFileT", bound=_ReadStream)
+    LoaderTypeT = TypeVar("LoaderTypeT", bound=Type[Union[_Loader, _CLoader]])
 
 
 __all__ = ["Constructor"]
@@ -48,10 +48,10 @@ WILDCARDS_PATTERN = re.compile(
 
 
 def load_open_file(
-    file: _TOpenFile,
-    loader_type: _TLoaderType,
+    file: OpenFileT,
+    loader_type: LoaderTypeT,
     path: str,
-    custom_loader: Optional[Callable[[str, _TOpenFile, _TLoaderType], Any]] = None,
+    custom_loader: Optional[Callable[[str, OpenFileT, LoaderTypeT], Any]] = None,
 ) -> Any:
     if custom_loader is None:
         return yaml.load(file, loader_type)
@@ -181,7 +181,7 @@ class Constructor:
     """
 
     @contextmanager
-    def managed_autoload(self, autoload: bool) -> Generator[Self, None, None]:
+    def managed_autoload(self, autoload: bool) -> Iterator[Self]:
         """``with`` statement context manager for :attr:`autoload`
 
         Args:
@@ -209,7 +209,7 @@ class Constructor:
             if is_kwds(val):
                 data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})
             else:  # pragma: no cover
-                raise ValueError("not all key of the YAML mapping node is `str`")
+                raise ValueError("not all keys type of the YAML mapping node are identifier string")
         else:  # pragma: no cover
             raise TypeError(f"{type(node)}")
         if self.autoload:
@@ -415,4 +415,4 @@ def is_yaml_mapping_node(node) -> TypeGuard[yaml.MappingNode]:
 
 
 def is_kwds(val) -> TypeGuard[Mapping[str, Any]]:
-    return isinstance(val, Mapping) and all(isinstance(k, str) for k in val)
+    return isinstance(val, Mapping) and all(isinstance(k, str) and k.isidentifier() for k in val)
