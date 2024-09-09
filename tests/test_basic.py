@@ -162,20 +162,6 @@ files: !inc [include.d/**/*.yaml, 1]
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
-
-class FlattenTestCase(BaseTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        ctor = Constructor(base_dir="tests/data")
-        for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", ctor, loader_cls)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
-
     def test_flatten_true(self):
         yml = dedent(
             """

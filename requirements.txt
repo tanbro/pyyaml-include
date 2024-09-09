@@ -6,8 +6,6 @@
 -r docs/requirements.txt
 -r tests/requirements.txt
 
-setuptools_scm
-
 coverage
 
 mypy

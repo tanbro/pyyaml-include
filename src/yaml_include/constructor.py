@@ -47,9 +47,9 @@ WILDCARDS_PATTERN = re.compile(
 )  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
 
 
-if yaml.__with_libyaml__:
+if yaml.__with_libyaml__:  # pragma: no cover
     DEFAULT_YAML_LOAD_FUNCTION = lambda x: yaml.load(x, yaml.CSafeLoader)  # noqa: E731
-else:
+else:  # pragma: no cover
     DEFAULT_YAML_LOAD_FUNCTION = yaml.safe_load
 
 
@@ -220,7 +220,7 @@ class Constructor:
                 if (flatten := val.get("flatten")) is not None:
                     if isinstance(flatten, str):
                         flatten = DEFAULT_YAML_LOAD_FUNCTION(flatten)
-                    if not isinstance(flatten, bool):
+                    if not isinstance(flatten, bool):  # pragma: no cover
                         raise ValueError("`flatten` must be a boolean")
                     kdargs["flatten"] = flatten
                 data = Data(**kdargs)

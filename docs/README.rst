@@ -23,11 +23,19 @@ How to build docs
 
 #. Build HTML documentation:
 
-   .. code:: sh
+   * Make tool:
 
-      docs/make html
+      .. code:: sh
 
-The built static web site is output to ``docs/_build/html``, we can serve it:
+         make -C docs/make html
+
+   * Windows:
+
+      .. code:: bat
+
+         docs\make html
+
+The built-out static web site is at ``docs/_build/html``, we can serve it:
 
 .. code:: sh
 
