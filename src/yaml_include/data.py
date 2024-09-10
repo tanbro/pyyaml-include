@@ -11,7 +11,7 @@ class Data:
     urlpath: str
     """url/path of the YAML include statement
 
-    urlpath can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards.
+    ``urlpath`` can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards.
 
     We support ``"**"``, ``"?"`` and ``"[..]"``. We do not support ``"^"`` for pattern negation.
     The ``maxdepth`` option is applied on the first ``"**"`` found in the path.

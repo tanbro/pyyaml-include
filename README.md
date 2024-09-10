@@ -414,6 +414,51 @@ xyz: !http-include xyz.yml
 
 the actual URL to access is `http://$HOST:$PORT/sub_1/sub_1_1/xyz.yml`
 
+### Flatten sequence object in multiple matched files
+
+Consider we have such a YAML:
+
+```yaml
+items: !include "*.yaml"
+```
+
+If every file matches `*.yaml` contains a sequence object at the top level in it, what parsed and loaded will be:
+
+```yaml
+items: [
+    [item 0 of 1st file, item 1 of 1st file, ... , item n of 1st file, ...],
+    [item 0 of 2nd file, item 1 of 2nd file, ... , item n of 2nd file, ...],
+    # ....
+    [item 0 of nth file, item 1 of nth file, ... , item n of nth file, ...],
+    # ...
+]
+```
+
+It's a 2-dim array, because YAML content of each matched file is treated as a member of the list(sequence).
+
+But if `flatten` parameter was set to `true`, like:
+
+```yaml
+items: !include {urlpath: "*.yaml", flatten: true}
+```
+
+we'll get:
+
+```yaml
+items: [
+    item 0 of 1st file, item 1 of 1st file, ... , item n of 1st file,  # ...
+    item 0 of 2nd file, item 1 of 2nd file, ... , item n of 2nd file,  # ...
+    # ....
+    item 0 of n-th file, item 1 of n-th file, ... , item n of n-th file,  # ...
+    # ...
+]
+```
+
+> ℹ️ **Note**
+>
+> - Only available when multiple files were matched.
+> - **Every matched file should have a Sequence object in its top level**, or a `TypeError` exception may be thrown.
+
 ### Serialization
 
 When load [YAML][] string with include statement, the including files are parsed into python objects by default. That is, if we call `yaml.dump()` on the object, what dumped is the parsed python object, and can not serialize the include statement itself.

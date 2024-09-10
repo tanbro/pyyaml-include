@@ -52,3 +52,8 @@ then open http://localhost:8000/ in a web browser.
       python -m http.server -d docs/_build/html 8080
 
    .. seealso:: Python ``stdlib``'s :mod:`http.server`
+
+.. tip::
+   If want to build PDF, use ``make rinoh`` instead.
+
+   .. seealso:: <https://www.sphinx-doc.org/en/master/usage/builders/index.html#sphinx.builders.latex.LaTeXBuilder>
