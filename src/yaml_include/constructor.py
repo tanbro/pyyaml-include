@@ -31,7 +31,7 @@ from .data import Data
 
 if TYPE_CHECKING:  # pragma: no cover
     from yaml import Node
-    from yaml.constructor import _Scalar
+    from yaml.constructor import _Scalar  # type: ignore[attr-defined]
     from yaml.cyaml import _CLoader
     from yaml.loader import _Loader
     from yaml.reader import _ReadStream
