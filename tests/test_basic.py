@@ -162,6 +162,48 @@ files: !inc [include.d/**/*.yaml, 1]
             data = yaml.load(StringIO(yml), loader_cls)
             self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
 
+    def test_flatten_true(self):
+        yml = dedent(
+            """
+            items: !inc {urlpath: "include3.d/*.yml", flatten: true}
+            """
+        )
+
+        for loader_cls in YAML_LOADERS:
+            two_dim_sequence = []
+            for pth in Path().glob("tests/data/include3.d/*.yml"):
+                two_dim_sequence.append(yaml.load(pth.read_bytes(), loader_cls))
+            flattened_sequence = sorted([member for data in two_dim_sequence for member in data])
+
+            data = yaml.load(StringIO(yml), loader_cls)
+            result = sorted(data["items"])
+            self.assertListEqual(result, flattened_sequence)
+
+    def test_flatten_false_or_default(self):
+        yml1 = dedent(
+            """
+            items: !inc {urlpath: "include3.d/*.yml", flatten: false}
+            """
+        )
+        yml2 = dedent(
+            """
+            items: !inc "include3.d/*.yml"
+            """
+        )
+        for loader_cls in YAML_LOADERS:
+            two_dim_sequence = []
+            for pth in Path().glob("tests/data/include3.d/*.yml"):
+                two_dim_sequence.append(yaml.load(pth.read_bytes(), loader_cls))
+            two_dim_sequence = sorted(two_dim_sequence)
+
+            data1 = yaml.load(StringIO(yml1), loader_cls)
+            result1 = data1["items"]
+            self.assertListEqual(result1, two_dim_sequence)
+
+            data2 = yaml.load(StringIO(yml2), loader_cls)
+            result2 = data2["items"]
+            self.assertListEqual(result2, two_dim_sequence)
+
 
 class DefaultFsBasicTestCase(BaseTestCase):
     @classmethod

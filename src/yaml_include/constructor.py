@@ -47,6 +47,12 @@ WILDCARDS_PATTERN = re.compile(
 )  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
 
 
+if yaml.__with_libyaml__:  # pragma: no cover
+    DEFAULT_YAML_LOAD_FUNCTION = lambda x: yaml.load(x, yaml.CSafeLoader)  # noqa: E731
+else:  # pragma: no cover
+    DEFAULT_YAML_LOAD_FUNCTION = yaml.safe_load
+
+
 def load_open_file(
     file: OpenFileT,
     loader_type: LoaderTypeT,
@@ -207,7 +213,17 @@ class Constructor:
         elif is_yaml_mapping_node(node):
             val = loader.construct_mapping(node)
             if is_kwds(val):
-                data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})
+                kdargs = {
+                    "urlpath": val["urlpath"],
+                    "mapping_params": {k: v for k, v in val.items() if k not in ("urlpath", "flatten")},
+                }
+                if (flatten := val.get("flatten")) is not None:
+                    if isinstance(flatten, str):
+                        flatten = DEFAULT_YAML_LOAD_FUNCTION(flatten)
+                    if not isinstance(flatten, bool):  # pragma: no cover
+                        raise ValueError("`flatten` must be a boolean")
+                    kdargs["flatten"] = flatten
+                data = Data(**kdargs)
             else:  # pragma: no cover
                 raise ValueError("not all keys type of the YAML mapping node are identifier string")
         else:  # pragma: no cover
@@ -333,8 +349,8 @@ class Constructor:
                 result = []
                 with fsspec.open_files(urlpath, *data.sequence_params, **data.mapping_params) as ofs:
                     for of_ in ofs:
-                        data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
-                        result.append(data)
+                        loaded_data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                        result.append(loaded_data)
                 return result
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
@@ -392,9 +408,12 @@ class Constructor:
                 if not isinstance(file, str):  # pragma: no cover
                     raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
                 with open_fn(file) as of_:
-                    data = load_open_file(of_, loader_type, file, self.custom_loader)
-                    result.append(data)
-            return result
+                    loaded_data = load_open_file(of_, loader_type, file, self.custom_loader)
+                    result.append(loaded_data)
+            if data.flatten:
+                return [child for item in result for child in item]
+            else:
+                return result
 
         # else if no wildcards, return a single object
         with self.fs.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
