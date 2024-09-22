@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Generator, Iterable, Mapping, Optional, Sequence, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Sequence, Type, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
 
 if sys.version_info >= (3, 10):  # pragma: no cover
@@ -31,13 +31,13 @@ from .data import Data
 
 if TYPE_CHECKING:  # pragma: no cover
     from yaml import Node
-    from yaml.constructor import _Scalar
+    from yaml.constructor import _Scalar  # type: ignore[attr-defined]
     from yaml.cyaml import _CLoader
     from yaml.loader import _Loader
     from yaml.reader import _ReadStream
 
-    _TOpenFile = TypeVar("_TOpenFile", bound=_ReadStream)
-    _TLoaderType = TypeVar("_TLoaderType", bound=Type[Union[_Loader, _CLoader]])
+    OpenFileT = TypeVar("OpenFileT", bound=_ReadStream)
+    LoaderTypeT = TypeVar("LoaderTypeT", bound=Type[Union[_Loader, _CLoader]])
 
 
 __all__ = ["Constructor"]
@@ -47,11 +47,17 @@ WILDCARDS_PATTERN = re.compile(
 )  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
 
 
+if yaml.__with_libyaml__:  # pragma: no cover
+    DEFAULT_YAML_LOAD_FUNCTION = lambda x: yaml.load(x, yaml.CSafeLoader)  # noqa: E731
+else:  # pragma: no cover
+    DEFAULT_YAML_LOAD_FUNCTION = yaml.safe_load
+
+
 def load_open_file(
-    file: _TOpenFile,
-    loader_type: _TLoaderType,
+    file: OpenFileT,
+    loader_type: LoaderTypeT,
     path: str,
-    custom_loader: Optional[Callable[[str, _TOpenFile, _TLoaderType], Any]] = None,
+    custom_loader: Optional[Callable[[str, OpenFileT, LoaderTypeT], Any]] = None,
 ) -> Any:
     if custom_loader is None:
         return yaml.load(file, loader_type)
@@ -181,7 +187,7 @@ class Constructor:
     """
 
     @contextmanager
-    def managed_autoload(self, autoload: bool) -> Generator[Self, None, None]:
+    def managed_autoload(self, autoload: bool) -> Iterator[Self]:
         """``with`` statement context manager for :attr:`autoload`
 
         Args:
@@ -207,9 +213,19 @@ class Constructor:
         elif is_yaml_mapping_node(node):
             val = loader.construct_mapping(node)
             if is_kwds(val):
-                data = Data(val["urlpath"], mapping_params={k: v for k, v in val.items() if k != "urlpath"})
+                kdargs = {
+                    "urlpath": val["urlpath"],
+                    "mapping_params": {k: v for k, v in val.items() if k not in ("urlpath", "flatten")},
+                }
+                if (flatten := val.get("flatten")) is not None:
+                    if isinstance(flatten, str):
+                        flatten = DEFAULT_YAML_LOAD_FUNCTION(flatten)
+                    if not isinstance(flatten, bool):  # pragma: no cover
+                        raise ValueError("`flatten` must be a boolean")
+                    kdargs["flatten"] = flatten
+                data = Data(**kdargs)
             else:  # pragma: no cover
-                raise ValueError("not all key of the YAML mapping node is `str`")
+                raise ValueError("not all keys type of the YAML mapping node are identifier string")
         else:  # pragma: no cover
             raise TypeError(f"{type(node)}")
         if self.autoload:
@@ -333,8 +349,8 @@ class Constructor:
                 result = []
                 with fsspec.open_files(urlpath, *data.sequence_params, **data.mapping_params) as ofs:
                     for of_ in ofs:
-                        data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
-                        result.append(data)
+                        loaded_data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                        result.append(loaded_data)
                 return result
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
@@ -374,7 +390,10 @@ class Constructor:
                 glob_fn = lambda: self.fs.glob(urlpath, *pos_args)  # noqa: E731
             else:
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
-                maxdepth = int(glob_params)
+                try:
+                    maxdepth = int(glob_params)
+                except ValueError:
+                    maxdepth = None
                 glob_fn = lambda: self.fs.glob(urlpath, maxdepth=maxdepth)  # noqa: E731
 
             if open_params is None:
@@ -392,9 +411,12 @@ class Constructor:
                 if not isinstance(file, str):  # pragma: no cover
                     raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
                 with open_fn(file) as of_:
-                    data = load_open_file(of_, loader_type, file, self.custom_loader)
-                    result.append(data)
-            return result
+                    loaded_data = load_open_file(of_, loader_type, file, self.custom_loader)
+                    result.append(loaded_data)
+            if data.flatten:
+                return [child for item in result for child in item]
+            else:
+                return result
 
         # else if no wildcards, return a single object
         with self.fs.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
@@ -415,4 +437,4 @@ def is_yaml_mapping_node(node) -> TypeGuard[yaml.MappingNode]:
 
 
 def is_kwds(val) -> TypeGuard[Mapping[str, Any]]:
-    return isinstance(val, Mapping) and all(isinstance(k, str) for k in val)
+    return isinstance(val, Mapping) and all(isinstance(k, str) and k.isidentifier() for k in val)
