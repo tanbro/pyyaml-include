@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 2.2a1
+
+> 📅 **Date** 2024-9-22
+
+- New:
+
+  - Add `flatten` argument. See [#46](https://github.com/tanbro/pyyaml-include/issues/46) for detail
+
+- Bug fix:
+
+  - fix issue if glob_params is not int. See [#48](https://github.com/tanbro/pyyaml-include/pull/48) for detail
+
+- Other update and improvement
+
 ## 2.1
 
 > 📅 **Date** 2024-5-5
