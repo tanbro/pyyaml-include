@@ -77,7 +77,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
    ```yaml
    file1: !inc include.d/1.yml
-   file2: !inc include.d/1.yml
+   file2: !inc include.d/2.yml
    ```
 
 1. Load it
