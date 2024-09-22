@@ -390,7 +390,10 @@ class Constructor:
                 glob_fn = lambda: self.fs.glob(urlpath, *pos_args)  # noqa: E731
             else:
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
-                maxdepth = int(glob_params)
+                try:
+                    maxdepth = int(glob_params)
+                except ValueError:
+                    maxdepth = None
                 glob_fn = lambda: self.fs.glob(urlpath, maxdepth=maxdepth)  # noqa: E731
 
             if open_params is None:
