@@ -27,7 +27,7 @@ How to build docs
 
       .. code:: sh
 
-         make -C docs/make html
+         make -C docs html
 
    * Windows:
 
