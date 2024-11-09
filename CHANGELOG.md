@@ -1,16 +1,20 @@
 # CHANGELOG
 
-## 2.2a1
+## 2.2
 
-> 📅 **Date** 2024-9-22
+> 📅 **Date** 2024-11-9
 
 - New:
 
-  - Add `flatten` argument. See [#46](https://github.com/tanbro/pyyaml-include/issues/46) for detail
+  - Add a `flatten` argument. See [#46](https://github.com/tanbro/pyyaml-include/issues/46) for detail
 
 - Bug fix:
 
   - fix issue if glob_params is not int. See [#48](https://github.com/tanbro/pyyaml-include/pull/48) for detail
+
+- Test:
+
+  - PyPy 3.9 and 3.10 in docker compose based unit-test
 
 - Other update and improvement
 
