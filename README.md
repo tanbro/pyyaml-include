@@ -19,7 +19,7 @@ In version `2.0`, [fsspec][] was introduced. With it, we can even include files 
 pip install "pyyaml-include"
 ```
 
-Since we are using [fsspec][] to open including files from v2.0, an installation can be performed like below, if want to open remote files:
+Because [fsspec][] was introduced to open the including files since v2.0, an installation can be performed like below, if want to open remote files:
 
 - for files on website:
 
@@ -63,7 +63,7 @@ Consider we have such [YAML][] files:
 
 To include `1.yml`, `2.yml` in `0.yml`, we shall:
 
-1. Register a `yaml_include.Constructor` to [PyYAML][]'s loader class, with `!inc` as it's tag:
+1. Register a `yaml_include.Constructor` to [PyYAML][]'s loader class, with `!inc`(or any other tags start with `!` character) as it's tag:
 
    ```python
    import yaml
@@ -73,14 +73,14 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
    yaml.add_constructor("!inc", yaml_include.Constructor(base_dir='/your/conf/dir'))
    ```
 
-1. Write `!inc` tags in `0.yaml`:
+1. Use `!inc` tag(s) in `0.yaml`:
 
    ```yaml
    file1: !inc include.d/1.yml
    file2: !inc include.d/2.yml
    ```
 
-1. Load it
+1. Load `0.yaml` in your Python program
 
    ```python
    with open('0.yml') as f:
@@ -91,7 +91,7 @@ To include `1.yml`, `2.yml` in `0.yml`, we shall:
    we'll get:
 
    ```python
-   {'file1':{'name':'1'},'file2':{'name':'2'}}
+   {'file1': {'name': '1'}, 'file2': {'name': '2'}}
    ```
 
 1. (optional) the constructor can be unregistered:
