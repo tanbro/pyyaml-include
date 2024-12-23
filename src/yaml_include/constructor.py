@@ -68,20 +68,20 @@ def load_open_file(
 class Constructor:
     """The include constructor for PyYAML Loaders
 
-    Use :func:`yaml.add_constructor` to register it on PyYAML's Loaders.
+    Use :func:`yaml.add_constructor` to register it with PyYAML's Loaders.
 
     Example:
 
-        #. In Python source code, register it to a Loader class::
+        #. In Python source code, register it with a Loader class::
 
             import yaml
             import yaml_include
 
             yaml.add_constructor("!inc", yaml_include.Constructor(), yaml.Loader)
 
-        #. In a YAML file, write ``!inc`` tags to include other YAML files. We can:
+        #. In a YAML file, use ``!inc`` tags to include other YAML files. You can:
 
-            * include file in local file system, absolute or relative
+            * Include a file from the local file system, either absolute or relative:
 
                 .. code-block:: yaml
 
@@ -91,107 +91,116 @@ class Constructor:
 
                     file: !inc ../../foo/baz.yml
 
-            * include file from a website
+            * Include a file from a website:
 
                 .. code-block:: yaml
 
                     file: !inc http://localhost:8080/foo/baz.yml
 
-            * include file by wildcards
+            * Include files by wildcard:
 
                 .. code-block:: yaml
 
                     files: !inc foo/**/*.yml
 
-        #. load the YAML in python::
+        #. Load the YAML in Python::
 
             data = yaml.load(yaml_string, yaml.Loader)
 
-           The variable ``data`` containers the parsed Python object(s) from including file(s)
+           The variable ``data`` contains the parsed Python object(s) from the included file(s).
     """
 
     fs: fsspec.AbstractFileSystem = field(default_factory=lambda: fsspec.filesystem("file"))
-    """:mod:`fsspec` File-system object to parse path/url and open including files. `LocalFileSystem` by default."""
+    """:mod:`fsspec` File-system object used to parse paths/URLs and open included files. Defaults to `LocalFileSystem`."""
 
     base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None
-    """Base directory to which open or search including YAML files in relative mode.
+    """Base directory used to open or search for included YAML files in relative mode.
 
-    * If it is ``None``, the actual base directory was decided by the :mod:`fsspec` file-system implementation in use.
-      For example, the ``base_dir`` is default to be ``cwd`` for ``LocalFileSystem``, and be the value of ``client_kwargs.base_url`` for ``HTTPFileSystem``.
-    * Else if it is callable, the actual base directory will be it's return value.
-    * Else it will be used directly as the actual base directory.
+    * If it is ``None``:
+      The actual base directory is determined by the :mod:`fsspec` file-system implementation in use.
+
+      - For example, for ``LocalFileSystem``, the default base directory is the current working directory (``cwd``).
+      - For ``HTTPFileSystem``, the base directory is set to the value of ``client_kwargs.base_url``.
+
+    * If it is callable:
+      The actual base directory will be the return value of the callable.
+
+    * Otherwise:
+      It will be used directly as the actual base directory.
     """
 
     autoload: bool = True
-    """Whether if open and parse including file(s) when called.
+    """Determines whether to open and parse included file(s) when called.
 
     * If ``True``:
-      open including file(s) then parse its/their content with current PyYAML Loader, and returns the parsed result.
+      Open the included file(s), parse their content using the current PyYAML Loader, and return the parsed result.
+
     * If ``False``:
-      will **NOT** open including file(s), the return value is a :class:`.Data` object stores include statement.
+      Do not open the included file(s). Instead, return a :class:`.Data` object that stores the include statement.
     """
 
     custom_loader: Optional[Callable[[str, _ReadStream, Type[Union[_Loader, _CLoader]]], Any]] = None
-    """Custom loader/parser function called when an including file is about to parse.
+    """Custom loader/parser function called when an included file is about to be parsed.
 
-    If ``None``, parse the file as ordinary YAML with current `Loader` class.
+    If ``None``, the file is parsed as ordinary YAML using the current `Loader` class.
 
-    Else it shall be a callable object, as the replacement of ordinary YAML `Loader`.
+    Otherwise, it should be a callable object that replaces the ordinary YAML `Loader`.
 
     Example:
-        The parameter may be like::
+        The parameter may be defined as follows::
 
             def my_loader(urlpath, file, Loader):
-                if urlpath.endswith(".json):
+                if urlpath.endswith(".json"):
                     return json.load(file)
-                if urlpath.endswith(".toml):
+                if urlpath.endswith(".toml"):
                     return toml.load(file)
                 return yaml.load(file, Loader)
 
     The definition of the callable parameter is:
 
     Args:
+        urlpath (str):
+            URL or path of the file.
 
-        arg1(str):
-            url or path of the file.
+            The value passed to this argument may be:
 
-            Pass-in value of the argument may be:
+            - The original URL/path string defined in YAML, in cases where:
+                - Neither a wildcard nor a scheme is present in the include statement (e.g., ``!inc foo/baz.yml``).
+                - Either a wildcard or a scheme is present in the include statement (e.g., ``!inc http://host/foo/*.yml``).
+            - Each file name returned by :meth:`fsspec.spec.AbstractFileSystem.glob`,
+            if a wildcard is present but no scheme in the include statement (e.g., ``!inc foobar/**/*.yml``).
 
-            * Original url/path string defined in YAML, in the case of:
-                * neither wildcard nor scheme exists in the include statement (eg: ``!inc foo/baz.yml``),
-                * either wildcard and scheme exists in the include statement (eg: ``!inc http://host/foo/*.yml``)
-            * Each file name returned by :meth:`fsspec.spec.AbstractFileSystem.glob`,
-              if there be wildcard and no scheme in the include statement (eg: ``!inc foobar/**/*.yml``).
+        file (bytes | str | SupportsRead[bytes | str]):
+            The object returned by :func:`fsspec.open` or a member of the list returned by :func:`fsspec.open_files`.
 
-        arg2(bytes | str | SupportsRead[bytes | str]):
-            What returned by :func:`fsspec.open`, or member of :func:`fsspec.open_files`'s returned list, will be set to the argument.
+            This parameter will be used in :func:`yaml.load` and can be:
 
-            The parameter may later be used in :func:`yaml.load`, it could be:
-
-            * :class:`bytes` or :class:`str`
-
-            * An object implements ::
+            - An instance of :class:`bytes` or :class:`str`.
+            - An object that implements the following interface::
 
                 class SupportsRead(bytes | str):
-                    def read(self, length: int = ..., /) -> bytes | str: ...
+                    def read(self, length: int = ...) -> bytes | str: ...
 
             Tip:
-                The ``open`` method of :mod:`fsspec` file-system implementations usually returns a :class:`fsspec.spec.AbstractBufferedFile` object.
-                However, **the type is NOT certain**, because ``open`` methods of different :mod:`fsspec` file-system implementations are variable.
+                The ``open`` method of :mod:`fsspec` file-system implementations typically returns a :class:`fsspec.spec.AbstractBufferedFile` object.
+                However, the exact type is not guaranteed, as ``open`` methods can vary across different :mod:`fsspec` file-system implementations.
 
-        arg3(typing.Type):
-            Type (**not instance**) of `PyYAML`'s Loader currently in use.
+        Loader (typing.Type):
+            The type (not an instance) of the `PyYAML` `Loader` currently in use.
 
     Returns:
-        typing.Any: Parsed result
+        typing.Any: The parsed result.
     """
 
     @contextmanager
     def managed_autoload(self, autoload: bool) -> Iterator[Self]:
-        """``with`` statement context manager for :attr:`autoload`
+        """Context manager for temporarily setting the :attr:`autoload` attribute.
+
+        This context manager allows you to set a temporary value for :attr:`autoload` within a ``with`` statement.
+        The original value is restored once the block is exited.
 
         Args:
-            autoload: Temporary value of :attr:`autoload` to be set inside the ``with`` statement
+            autoload: The temporary value to assign to :attr:`autoload` within the ``with`` statement.
         """
         saved, self.autoload = self.autoload, bool(autoload)
         try:
@@ -234,99 +243,111 @@ class Constructor:
             return data
 
     def load(self, loader_type: Type[Union[_Loader, _CLoader]], data: Data) -> Any:
-        """The method will be invoked once the PyYAML's Loader class call the constructor.
-        It happens when an include state tag(eg: ``"!inc"``) is met.
+        """This method is invoked when the PyYAML Loader class encounters an include tag (e.g., ``!inc``).
 
         Args:
-            loader_type: Type of current in-use PyYAML Loader class
-            data: The data class of the include statement
+            loader_type: The type of the current PyYAML Loader class in use.
+            data: The data object representing the include statement.
 
         Returns:
-            Data from the actual included YAML file, which is parsed by a PyYAML's Loader class.
+            Data from the included YAML file, parsed by a PyYAML Loader class.
 
         Caution:
-            It's mainly invoked in :func:`yaml.load`, and **NOT advised to call it yourself**.
+            This method is primarily invoked internally by :func:`yaml.load`. **It is not recommended to call this method directly.**
 
-        Note:
-            Additional positional or named parameters in YAML include statement are passed to ``*args`` and ``**kwargs`` in :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params`.
-            The class will pass them to :mod:`fsspec`'s :mod:`fsspec` File-system as implementation specific options.
+        Notes:
+            - Additional positional or named parameters in YAML include statements are passed to ``*args`` and ``**kwargs`` in :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params`. These parameters are then forwarded to the :mod:`fsspec` File-system as implementation-specific options.
+            - The use of positional parameters in YAML include statements is discouraged.
 
-        Note:
-            To use positional in YAML include statement is discouraged.
+        The function operates as follows:
 
-        The function works as blow description:
+        - If there is a protocol/scheme and no wildcard in the YAML include:
 
-        * If there is a protocol/scheme, and no wildcard defined in YAML including,
-          ``*args`` and ``**kwargs`` will be passed to :func:`fsspec.open`.
+          ``*args`` and ``**kwargs`` are passed to :func:`fsspec.open`.
 
-            Example:
-                The YAML
+        Example:
+            The YAML
 
-                .. code-block:: yaml
+            .. code-block:: yaml
 
-                    key: !inc {urlpath: s3://my-bucket/my-file.yml.gz, compression: gzip}
+                key: !inc {urlpath: s3://my-bucket/my-file.yml.gz, compression: gzip}
 
-                means::
+            translates to:
 
-                    with fsspec.open("s3://my-bucket/my-file.yml.gz", compression="gzip") as f:
-                        yaml.load(f, Loader)
+            .. code-block:: python
 
-        * If there is a protocol/scheme, and also wildcard defined in YAML including,
-          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :func:`fsspec.open_files` as it's ``*args`` and ``**kwargs`` arguments.
+                with fsspec.open("s3://my-bucket/my-file.yml.gz", compression="gzip") as f:
+                    yaml.load(f, Loader)
 
-            Example:
-                The YAML
+        - If there is a protocol/scheme and a wildcard in the YAML include:
 
-                .. code-block:: yaml
+          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` are passed to :func:`fsspec.open_files` as its ``*args`` and ``**kwargs`` arguments.
 
-                    key: !inc {urlpath: s3://my-bucket/*.yml.gz, compression: gzip}
+        Example:
+            The YAML
 
-                means::
+            .. code-block:: yaml
 
-                    with fsspec.open_files("s3://my-bucket/*.yml.gz", compression="gzip") as files:
-                        for file in files:
-                            yaml.load(file, Loader)
+                key: !inc {urlpath: s3://my-bucket/*.yml.gz, compression: gzip}
 
-        * If there is no protocol/scheme, and no wildcard defined in YAML including,
-          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` will be passed to :mod:`fsspec` file-system implementation's ``open`` function (derive from :meth:`fsspec.spec.AbstractFileSystem.open`) as ``*args`` and ``**kwargs``
+            translates to:
 
-        * If there is no protocol/scheme, and also wildcard defined in YAML including, the situation is complex:
-            * If the include statement is in a positional-parameter form:
-                * If count of argument is one,
-                    it will be passed to of :meth:`fsspec.spec.AbstractFileSystem.glob`'s  ``maxdepth`` argument;
-                * If count of argument is more than one:
-                    * First of them will be passed to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
-                    * Second of them will be passed to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
-                    * Others will be ignored
-            * If the include statement is in a named-parameter form, the class will:
-                * Find a key named `glob`, then pass the corresponding data to :mod:`fsspec` file system implementation's ``glob`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.glob`)
-                * Find a key named `open`, then pass the corresponding data to :mod:`fsspec` file system implementation's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`)
+            .. code-block:: python
 
-            Example:
-                The YAML
+                with fsspec.open_files("s3://my-bucket/*.yml.gz", compression="gzip") as files:
+                    for file in files:
+                        yaml.load(file, Loader)
 
-                .. code-block:: yaml
+        - If there is no protocol/scheme and no wildcard in the YAML include:
 
-                    key: !inc [foo/**/*.yml, 2]
+          :attr:`.Data.sequence_params` and :attr:`.Data.mapping_params` of ``data`` are passed to the :mod:`fsspec` file-system's ``open`` method (derived from :meth:`fsspec.spec.AbstractFileSystem.open`) as ``*args`` and ``**kwargs``.
 
-                means::
+        - If there is no protocol/scheme and a wildcard in the YAML include, the behavior depends on the form of the include statement:
 
-                    for file in fs.glob("foo/**/*.yml", maxdepth=2):
-                        with fs.open(file) as fp:
-                            yaml.load(fp, Loader)
+          - For positional-parameter form:
 
-            Example:
-                The YAML
+            - If there is one argument, it is passed to :meth:`fsspec.spec.AbstractFileSystem.glob`'s ``maxdepth`` parameter.
 
-                .. code-block:: yaml
+            - If there are multiple arguments:
 
-                    key: !inc {urlpath: foo/**/*.yml.gz, glob: {maxdepth: 2}, open: {compression: gzip}}
+              - The first argument is passed to the ``glob`` method.
+              - The second argument is passed to the ``open`` method.
+              - Additional arguments are ignored.
 
-                means::
+          - For named-parameter form:
 
-                    for file in fs.glob("foo/**/*.yml.gz", maxdepth=2):
-                        with fs.open(file, compression=gzip) as fp:
-                            yaml.load(fp, Loader)
+            - A key named `glob` passes its value to the ``glob`` method.
+            - A key named `open` passes its value to the ``open`` method.
+
+        Examples:
+
+            - The YAML
+
+              .. code-block:: yaml
+
+                  key: !inc [foo/**/*.yml, 2]
+
+              translates to:
+
+              .. code-block:: python
+
+                  for file in fs.glob("foo/**/*.yml", maxdepth=2):
+                      with fs.open(file) as fp:
+                          yaml.load(fp, Loader)
+
+            - The YAML
+
+              .. code-block:: yaml
+
+                  key: !inc {urlpath: foo/**/*.yml.gz, glob: {maxdepth: 2}, open: {compression: gzip}}
+
+              translates to:
+
+              .. code-block:: python
+
+                  for file in fs.glob("foo/**/*.yml.gz", maxdepth=2):
+                      with fs.open(file, compression=gzip) as fp:
+                          yaml.load(fp, Loader)
         """
         base_dir = self.base_dir
         urlpath = data.urlpath

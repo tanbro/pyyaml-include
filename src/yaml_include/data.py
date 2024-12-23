@@ -6,64 +6,62 @@ __all__ = ["Data"]
 
 @dataclass(frozen=True)
 class Data:
-    """A :func:`dataclasses.dataclass` store YAML include statement"""
+    """A :func:`dataclasses.dataclass` to store a YAML include statement."""
 
     urlpath: str
-    """url/path of the YAML include statement
+    """URL/path of the YAML include statement
 
-    ``urlpath`` can be either absolute (like `/usr/src/Python-1.5/*.yml`) or relative (like `../../Tools/*/*.yml`), and can contain shell-style wildcards.
+    ``urlpath`` can be either absolute (e.g., `/usr/src/Python-1.5/*.yml`) or relative (e.g., `../../Tools/*/*.yml`) and can contain shell-style wildcards.
 
-    We support ``"**"``, ``"?"`` and ``"[..]"``. We do not support ``"^"`` for pattern negation.
-    The ``maxdepth`` option is applied on the first ``"**"`` found in the path.
+    We support ``"**"``, ``"?"``, and ``"[..]"``. We do not support ``"^"`` for pattern negation.
+    The ``maxdepth`` option is applied to the first ``"**"`` found in the path.
 
     Warning:
-        Using the ``"**"`` pattern in large directory trees or remote files may consume an inordinate amount of time.
+        Using the ``"**"`` pattern in large directory trees or with remote files may consume a significant amount of time.
     """
 
     flatten: bool = False
-    """Whether to flatten sequence object pared from multiple matched YAML files.
+    """Whether to flatten sequence objects parsed from multiple matched YAML files.
 
-    * Only available when multiple files were matched
-    * **Every matched file should have a Sequence object in its top level**, or a :class:`TypeError` exception may be thrown.
+    * Only available when multiple files are matched.
+    * **Each matched file must have a Sequence object at the top level**, otherwise a :class:`TypeError` exception will be raised.
 
     Example:
-        Consider we have such a YAML:
+        Consider the following YAML:
 
         .. code-block:: yaml
 
             items: !include "*.yaml"
 
-        If every file matches `*.yaml` contains a sequence object at the top level in it, what parsed and loaded will be:
+        If each file matching `*.yaml` contains a sequence object at the top level, the parsed and loaded result will be:
 
         .. code-block:: yaml
 
-                items: [
-                    [item 0 of 1st file, item 1 of 1st file, ... , item n of 1st file, ...],
-                    [item 0 of 2nd file, item 1 of 2nd file, ... , item n of 2nd file, ...],
-                    # ....
-                    [item 0 of nth file, item 1 of nth file, ... , item n of nth file, ...],
-                    # ...
-                ]
+            items: [
+                [item 0 of 1st file, item 1 of 1st file, ..., item n of 1st file],
+                [item 0 of 2nd file, item 1 of 2nd file, ..., item n of 2nd file],
+                # ...
+                [item 0 of nth file, item 1 of nth file, ..., item n of nth file],
+            ]
 
-        It's a 2-dim array, because YAML content of each matched file is treated as a member of the list(sequence).
+        This results in a 2-dimensional array because the YAML content of each matched file is treated as a member of the list (sequence).
 
-        But if ``flatten`` parameter was set to ``true``, like:
+        However, if the ``flatten`` parameter is set to ``true``, like:
 
         .. code-block:: yaml
 
             items: !include {urlpath: "*.yaml", flatten: true}
 
-        we'll get:
+        the result will be:
 
-            .. code-block:: yaml
+        .. code-block:: yaml
 
-                items: [
-                    item 0 of 1st file, item 1 of 1st file, ... , item n of 1st file,  # ...
-                    item 0 of 2nd file, item 1 of 2nd file, ... , item n of 2nd file,  # ...
-                    # ....
-                    item 0 of n-th file, item 1 of n-th file, ... , item n of n-th file,  # ...
-                    # ...
-                ]
+            items: [
+                item 0 of 1st file, item 1 of 1st file, ..., item n of 1st file,
+                item 0 of 2nd file, item 1 of 2nd file, ..., item n of 2nd file,
+                # ...
+                item 0 of nth file, item 1 of nth file, ..., item n of nth file,
+            ]
     """
 
     sequence_params: Sequence[Any] = field(default_factory=list)

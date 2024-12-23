@@ -16,13 +16,13 @@ __all__ = ["Representer"]
 class Representer:
     """Representer for :class:`.Data`
 
-    When dumping an object into YAML string, it deserializes :class:`.Data` instance(s) in it.
+    When dumping an object into a YAML string, this representer serializes :class:`.Data` instances within the object.
 
-    Add the representer to ``PyYAML`` ``Dumper`` class as below::
+    To add the representer to the ``PyYAML`` ``Dumper`` class, use the following code::
 
         import yaml_include
 
-        rpr = yaml_include.Representer("inc")  # ATTENTION: No "!" here !!!
+        rpr = yaml_include.Representer("inc")  # ATTENTION: No "!" here!!!
         yaml.add_representer(Data, rpr)
     """
 
@@ -30,9 +30,10 @@ class Representer:
     """YAML tag name for include statement
 
     Attention:
-        Custom YAML tag's name starts with ``"!"``.
-        But we **MUST NOT** put a ``"!"`` at the beginning here,
-        because :func:`yaml.add_representer` will add the symbol itself.
+      - Custom YAML tag names start with ``"!"``.
+      - Do **NOT** include the ``"!"`` at the beginning here,
+
+      as :func:`yaml.add_representer` will automatically add the symbol.
     """
 
     def __call__(self, dumper: Dumper, data: Data) -> Node:

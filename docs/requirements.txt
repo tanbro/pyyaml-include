@@ -12,6 +12,6 @@ sphinx-inline-tabs
 sphinx_tippy
 sphinx-version-warning
 
-# for direct pdf generate
-rinohtype
-pillow
+# # for direct pdf generate
+# rinohtype
+# pillow

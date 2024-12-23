@@ -22,19 +22,19 @@ def load(
 ) -> Any:
     """Recursively load and parse all :class:`.Data` instances inside ``obj``.
 
-    If :attr:`.Constructor.autoload` is ``False``, :func:`yaml.load` will not cause including files to be opened or read,
-    in the situation, what returned by :func:`yaml.load` is an object with :class:`.Data` in it, and the files won't be processed.
-    Thus we use the function to open and parse those including files represented by :class:`.Data` instances inside `obj`.
+    If :attr:`.Constructor.autoload` is set to ``False``, :func:`yaml.load` will not open or read included files.
+    In this case, :func:`yaml.load` returns an object containing :class:`.Data` instances, but the included files remain unprocessed.
+    This function is used to open and parse those included files represented by :class:`.Data` instances within ``obj``.
 
     Args:
-        obj: object containers :class:`.Data`
-        loader_type: use this type of `PyYAML` Loader to parse string in including file(s)
-        constructor: use this :class:`.Constructor` to find/open/read including file(s)
-        inplace: whether to make a in-place replacement for every :class:`.Constructor` instance in ``obj``
-        nested: whether to parse and load lower level include statement(s) inside :class:`.Constructor` instance
+        obj: An object containing :class:`.Data` instances.
+        loader_type: The type of PyYAML Loader to use for parsing strings in included files.
+        constructor: The :class:`.Constructor` instance used to find, open, and read included files.
+        inplace: Whether to perform in-place replacement for each :class:`.Data` instance in ``obj``.
+        nested: Whether to recursively parse and load lower-level include statements within :class:`.Data` instances.
 
     Returns:
-        Parsed object
+        The fully parsed object with all included files loaded and processed.
     """
     if isinstance(obj, Data):
         d = constructor.load(loader_type, obj)
@@ -64,12 +64,12 @@ def load(
 def lazy_load(
     obj: Any, loader_type: Type[Union[_Loader, _CLoader]], constructor: Constructor, nested: bool = False
 ) -> Generator[Any, None, Any]:
-    """Recursively load and parse all :class:`.Data` inside ``obj`` in generative mode.
+    """Recursively load and parse all :class:`.Data` instances inside ``obj`` in generative mode.
 
-    Almost the same as :func:`.load`, except that:
+    This function is similar to :func:`.load`, with the following differences:
 
-    * The function returns a :term:`generator`, it yields at every :class:`.Data` instance found in side ``obj``.
-    * It only applies an in-place parsing and replacement, and will not return parsed object.
+    * It returns a :term:`generator` that yields each :class:`.Data` instance found within ``obj``.
+    * It performs in-place parsing and replacement, but does not return the fully parsed object.
     """
     if isinstance(obj, Data):
         d = constructor.load(loader_type, obj)
