@@ -1,2 +1,3 @@
-toml;python_version<="3.11"
 coverage
+toml;python_version<="3.11"
+fsspec[http]

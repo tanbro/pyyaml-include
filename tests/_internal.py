@@ -1,35 +1,40 @@
-# -*- coding: utf-8 -*-
-
 from warnings import warn
 
 import yaml
+from yaml import (
+    BaseLoader,
+    # BaseDumper,
+    Dumper,
+    FullLoader,
+    Loader,
+    SafeDumper,
+    SafeLoader,
+    UnsafeLoader,
+)
 
+YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
+YAML_DUMPERS = [Dumper, SafeDumper]
 
-YAML1 = {"name": "1"}
-YAML2 = {"name": "2"}
-YAML_ZH_CN = {"name": "中文"}
-
-YAML_LOADERS = []
-
-if "3.12" <= yaml.__version__ < "4.0":
-    from yaml import BaseLoader, SafeLoader, Loader
-
-    YAML_LOADERS = [BaseLoader, SafeLoader, Loader]
-    try:
-        from yaml import CBaseLoader, CSafeLoader, CLoader
-    except ImportError as err:
-        warn(Warning(err))
-    else:
-        YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader]
-elif "5.0" <= yaml.__version__ < "7.0":
-    from yaml import BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader
-
-    YAML_LOADERS = [BaseLoader, SafeLoader, Loader, FullLoader, UnsafeLoader]
-    try:
-        from yaml import CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader
-    except ImportError as err:
-        warn("{}".format(err))
-    else:
-        YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]
+try:
+    from yaml import (
+        CBaseLoader,
+        # CBaseDumper,
+        CDumper,
+        CFullLoader,
+        CLoader,
+        CSafeDumper,
+        CSafeLoader,
+        CUnsafeLoader,
+    )
+except ImportError as err:
+    warn(f"PyYAML was not build with libyaml: {err}")
 else:
-    raise RuntimeError("Un-supported pyyaml version: {}".format(yaml.__version__))
+    YAML_LOADERS += [CBaseLoader, CSafeLoader, CLoader, CFullLoader, CUnsafeLoader]  # type: ignore
+    YAML_DUMPERS += [CDumper, CSafeDumper]  # type: ignore
+
+with open("tests/data/include.d/1.yaml") as f:
+    YAML1 = yaml.full_load(f)
+with open("tests/data/include.d/2.yaml") as f:
+    YAML2 = yaml.full_load(f)
+with open("tests/data/zh_cn.yaml", encoding="utf8") as f:
+    YAML_ZH_CN = yaml.full_load(f)

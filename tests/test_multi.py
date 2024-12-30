@@ -3,33 +3,39 @@ from textwrap import dedent
 
 import yaml
 
-from yamlinclude import YamlIncludeConstructor
+from yaml_include import Constructor
 
-YAML1 = {"name": "1"}
-YAML2 = {"name": "2"}
+from ._internal import YAML1, YAML2, YAML_LOADERS
 
 
 class MultiLoaderTestCase(unittest.TestCase):
-    constructor = YamlIncludeConstructor()
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        ctor = Constructor(base_dir="tests/data")
+        for loader_cls in YAML_LOADERS:
+            yaml.add_constructor("!inc", ctor, loader_cls)
 
-    def setUp(self):
-        yaml.add_constructor("!include", self.constructor)
+    @classmethod
+    def tearDownClass(cls) -> None:
+        for loader_class in YAML_LOADERS:
+            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
-    def test_full_load_all_yaml(self):
-        txt = dedent(
+    def test_load_all(self):
+        yml_txt = dedent(
             """
             ---
-            file1: !include tests/data/include.d/1.yaml
+            data: !inc include.d/1.yaml
 
             ---
-            file2: !include tests/data/include.d/2.yaml
+            data: !inc include.d/2.yaml
             """
-        ).strip()
-        iterable = yaml.full_load_all(txt)
-        for i, data in enumerate(iterable):
-            if i == 0:
-                self.assertEqual(data, {"file1": YAML1})
-            elif i == 1:
-                self.assertEqual(data, {"file2": YAML2})
-            else:
-                raise RuntimeError()
+        )
+        for Loader in YAML_LOADERS:
+            for i, data in enumerate(yaml.load_all(yml_txt, Loader)):
+                if i == 0:
+                    self.assertDictEqual(data, {"data": YAML1})
+                elif i == 1:
+                    self.assertDictEqual(data, {"data": YAML2})
+                else:
+                    raise RuntimeError()
