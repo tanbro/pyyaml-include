@@ -6,4 +6,3 @@
 -r tests/requirements.txt
 build
 pre-commit
-ruff
