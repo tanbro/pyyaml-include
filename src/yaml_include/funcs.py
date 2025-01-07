@@ -31,10 +31,17 @@ def load(
         loader_type: The type of PyYAML Loader to use for parsing strings in included files.
         constructor: The :class:`.Constructor` instance used to find, open, and read included files.
         inplace: Whether to perform in-place replacement for each :class:`.Data` instance in ``obj``.
-        nested: Whether to recursively parse and load lower-level include statements within :class:`.Data` instances.
+
+        nested: Whether to recursively parse and load "include statements" inside :class:`.Data` instances.
+
+            Note:
+                The parameter is used for "include within include" scenarios, allowing nested includes.
 
     Returns:
         The fully parsed object with all included files loaded and processed.
+
+    Warning:
+        The function is **recursive** and can lead to a **stack overflow** if the ``obj`` is too deeply nested.
     """
     if isinstance(obj, Data):
         d = constructor.load(loader_type, obj)
@@ -70,6 +77,9 @@ def lazy_load(
 
     * It returns a :term:`generator` that yields each :class:`.Data` instance found within ``obj``.
     * It performs in-place parsing and replacement, but does not return the fully parsed object.
+
+    Yields:
+        Object parsed from the :class:`.Data` instances as one is encountered.
     """
     if isinstance(obj, Data):
         d = constructor.load(loader_type, obj)

@@ -1,11 +1,8 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 from itertools import chain
-from typing import TYPE_CHECKING
 
-if TYPE_CHECKING:  # pragma: no cover
-    from yaml import Dumper, Node
+from yaml import Node
+from yaml.representer import BaseRepresenter
 
 from .data import Data
 
@@ -36,7 +33,7 @@ class Representer:
       as :func:`yaml.add_representer` will automatically add the symbol.
     """
 
-    def __call__(self, dumper: Dumper, data: Data) -> Node:
+    def __call__(self, dumper: BaseRepresenter, data: Data) -> Node:
         if not isinstance(data, Data):  # pragma: no cover
             raise TypeError(f"{type(data)}")
         tag = "!" + self.tag

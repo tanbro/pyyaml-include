@@ -30,8 +30,6 @@ import yaml
 from .data import Data
 
 if TYPE_CHECKING:  # pragma: no cover
-    from yaml import Node
-    from yaml.constructor import _Scalar  # type: ignore[attr-defined]
     from yaml.cyaml import _CLoader
     from yaml.loader import _Loader
     from yaml.reader import _ReadStream
@@ -168,7 +166,7 @@ class Constructor:
                 - Neither a wildcard nor a scheme is present in the include statement (e.g., ``!inc foo/baz.yml``).
                 - Either a wildcard or a scheme is present in the include statement (e.g., ``!inc http://host/foo/*.yml``).
             - Each file name returned by :meth:`fsspec.spec.AbstractFileSystem.glob`,
-            if a wildcard is present but no scheme in the include statement (e.g., ``!inc foobar/**/*.yml``).
+              if a wildcard is present but no scheme in the include statement (e.g., ``!inc foobar/**/*.yml``).
 
         file (bytes | str | SupportsRead[bytes | str]):
             The object returned by :func:`fsspec.open` or a member of the list returned by :func:`fsspec.open_files`.
@@ -201,6 +199,9 @@ class Constructor:
 
         Args:
             autoload: The temporary value to assign to :attr:`autoload` within the ``with`` statement.
+
+        Yields:
+            The current instance of :class:`.Constructor`.
         """
         saved, self.autoload = self.autoload, bool(autoload)
         try:
@@ -208,8 +209,8 @@ class Constructor:
         finally:
             self.autoload = saved
 
-    def __call__(self, loader: Union[_Loader, _CLoader], node: Node) -> Union[Data, Any]:
-        val: Union[_Scalar, Sequence, Mapping]
+    def __call__(self, loader: Union[_Loader, _CLoader], node: yaml.Node) -> Union[Data, Any]:
+        val: Union[Sequence, Mapping, str]
         if is_yaml_scalar_node(node):
             val = loader.construct_scalar(node)
             if isinstance(val, str):
