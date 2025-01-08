@@ -75,7 +75,7 @@ def lazy_load(
 ) -> Generator[Any, None, Any]:
     """Recursively load and parse all :class:`.Data` instances inside ``obj`` in generative mode.
 
-    This function is similar to :func:`.load`, with the following differences:
+    This function is similar to :func:`load`, with the following differences:
 
     * It returns a :term:`generator` that yields each :class:`.Data` instance found within ``obj``.
     * It performs in-place parsing and replacement, but does not return the fully parsed object.
