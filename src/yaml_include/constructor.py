@@ -202,6 +202,18 @@ class Constructor:
 
         Yields:
             The current instance of :class:`.Constructor`.
+
+        Example:
+
+            ::
+
+                ctor = yaml_include.Constructor()
+                # autoload is True here
+
+                with ctor.managed_autoload(False):
+                    # temporary set autoload to False
+                    yaml.full_load(YAML_TEXT)
+                # autoload restore True automatic
         """
         saved, self.autoload = self.autoload, bool(autoload)
         try:

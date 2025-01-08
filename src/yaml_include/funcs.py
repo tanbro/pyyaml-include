@@ -20,28 +20,30 @@ def load(
     inplace: bool = False,
     nested: bool = False,
 ) -> Any:
-    """Recursively load and parse all :class:`.Data` instances inside ``obj``.
+    """Recursively load and parse all :class:`.Data` instances within ``obj``.
 
-    If :attr:`.Constructor.autoload` is set to ``False``, :func:`yaml.load` will not open or read included files.
+    If :attr:`.Constructor.autoload` is set to :data:`False`, :func:`yaml.load` will not open or read included files.
     In this case, :func:`yaml.load` returns an object containing :class:`.Data` instances, but the included files remain unprocessed.
-    This function is used to open and parse those included files represented by :class:`.Data` instances within ``obj``.
+    This function opens and parses those included files represented by :class:`.Data` instances within ``obj``.
 
     Args:
         obj: An object containing :class:`.Data` instances.
-        loader_type: The type of PyYAML Loader to use for parsing strings in included files.
-        constructor: The :class:`.Constructor` instance used to find, open, and read included files.
+        loader_type: The type of PyYAML Loader used for parsing strings in included files.
+        constructor: A :class:`.Constructor` instance used to locate, open, and read included files.
         inplace: Whether to perform in-place replacement for each :class:`.Data` instance in ``obj``.
 
         nested: Whether to recursively parse and load "include statements" inside :class:`.Data` instances.
 
             Note:
-                The parameter is used for "include within include" scenarios, allowing nested includes.
+                - The ``nested`` argument is used to handle scenarios of nested includes, also known as "include within include".
+                - The function is always recursive, regardless of the ``nested`` argument value.
 
     Returns:
         The fully parsed object with all included files loaded and processed.
 
     Warning:
-        The function is **recursive** and can lead to a **stack overflow** if the ``obj`` is too deeply nested.
+        This function is **recursive** and can lead to a **stack overflow** if ``obj`` is too deeply nested.
+
     """
     if isinstance(obj, Data):
         d = constructor.load(loader_type, obj)
