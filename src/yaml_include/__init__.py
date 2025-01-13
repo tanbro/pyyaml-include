@@ -2,9 +2,8 @@
 Include other YAML files in YAML
 """
 
-__all__ = ["__version__", "version", "version_tuple", "Constructor", "Data", "lazy_load", "load", "Representer"]
-
-from ._version import __version__, version, version_tuple
+from . import _version as version
+from ._version import __version__, __version_tuple__
 from .constructor import Constructor
 from .data import Data
 from .funcs import lazy_load, load

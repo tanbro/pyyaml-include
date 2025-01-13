@@ -9,5 +9,10 @@ extend-select = ["I"]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
 
+# Ignore `F401`(imported but unused), `F403`(import *` used), `E402`(import violations) in all `__init__.py` files
+[lint.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403"]
+
+
 [format]
 docstring-code-format = true

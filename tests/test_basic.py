@@ -287,7 +287,7 @@ def serve_http(
     httpd = ServerClass(addr, HandlerClass)  # type: ignore
     host, port = httpd.socket.getsockname()[:2]
     url_host = f"[{host}]" if ":" in host else host
-    print(f"Serving HTTP on {host} port {port} " f"(http://{url_host}:{port}/) ...")
+    print(f"Serving HTTP on {host} port {port} (http://{url_host}:{port}/) ...")
     httpd.serve_forever()
 
 
