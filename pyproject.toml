@@ -1,11 +1,12 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=64", "setuptools-scm>=8"]
+requires = ["setuptools>=64"]
 
 [project]
 authors = [{ name = "liu xue yan", email = "liu_xue_yan@foxmail.com" }]
 description = "An extending constructor of PyYAML: include other YAML files into current YAML document"
 name = "pyyaml-include"
+version = "2.2"
 readme = "README.md"
 
 requires-python = ">=3.8"
@@ -45,8 +46,6 @@ classifiers = [
   "Topic :: Text Processing :: Markup",
 ]
 
-dynamic = ["version"]
-
 [project.urls]
 Homepage = "https://github.com/tanbro/pyyaml-include"
 Repository = "https://github.com/tanbro/pyyaml-include.git"
@@ -59,6 +58,3 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 pyyaml_include = ["yaml_include/py.typed"]
-
-[tool.setuptools_scm]
-write_to = "src/yaml_include/_version.py"
