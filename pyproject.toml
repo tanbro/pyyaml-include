@@ -57,6 +57,9 @@ Changelog = "https://github.com/tanbro/pyyaml-include/blob/main/CHANGELOG.md"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[dependency-groups]
+dev = ["pip", "mypy", "types-PyYAML"]
+
 [tool.setuptools.package-data]
 pyyaml_include = ["yaml_include/py.typed"]
 

@@ -439,6 +439,8 @@ class Constructor:
             elif isinstance(open_params, str):
                 mode = str(open_params)
                 open_fn = lambda x: self.fs.open(x, mode=mode)  # noqa: E731
+            else:  # pragma: no cover
+                raise ValueError("invalid open parameter")
 
             result = []
             for file in glob_fn():
