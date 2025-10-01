@@ -1,6 +1,6 @@
 [build-system]
 build-backend = "setuptools.build_meta"
-requires = ["setuptools>=64", "setuptools-scm>=8"]
+requires = ["setuptools>=80", "setuptools-scm>=8"]
 
 [project]
 authors = [{ name = "liu xue yan", email = "liu_xue_yan@foxmail.com" }]
@@ -8,7 +8,7 @@ description = "An extending constructor of PyYAML: include other YAML files into
 name = "pyyaml-include"
 readme = "README.md"
 
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 dependencies = [
   "PyYAML~=6.0",
@@ -18,7 +18,8 @@ dependencies = [
 
 keywords = ["yaml", "PyYAML", "include", "yml"]
 
-license = { text = "GPLv3+" }
+license = "GPLv3+"
+license-files = ["LICENSE"]
 
 classifiers = [
   "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
