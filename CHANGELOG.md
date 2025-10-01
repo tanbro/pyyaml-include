@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## Developing
+
+- ❎ Breaking Changes:
+  - Drop support for Python 3.8 and below
+
 ## 2.2
 
 > 📅 **Date** 2024-11-9

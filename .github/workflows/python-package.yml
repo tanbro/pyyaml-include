@@ -40,23 +40,22 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
-          cache: pip # caching pip dependencies
-      - name: Install project and dependent tools
+      - name: Install project
         run: |
-          pip install -e . -r tests/requirements.txt coverage ruff
+          uv sync --group test --all-extras
       - name: Check with ruff
+        uses: astral-sh/ruff-action@v3
+      - name: Test
         run: |
-          ruff check .
-      - name: Test with coverage
-        run: |
-          coverage run -m unittest -fcv
-          coverage report -m
-          coverage xml
+          uv run coverage run -m unittest -fcv
+          uv run coverage report -m
+          uv run coverage xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -69,15 +68,11 @@ jobs:
     if: needs.get-version-pep440.outputs.version != ''
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          cache: "pip" # caching pip dependencies
-      - name: Install builder
-        run: pip install build
+        uses: actions/checkout@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
       - name: Build Python distribution
-        run: pyproject-build
+        run: uv build
       - name: Upload dist to artifact
         uses: actions/upload-artifact@v4
         with:

@@ -58,7 +58,29 @@ Changelog = "https://github.com/tanbro/pyyaml-include/blob/main/CHANGELOG.md"
 where = ["src"]
 
 [dependency-groups]
-dev = ["pip", "mypy", "types-PyYAML"]
+dev = [
+  { include-group = "docs" },
+  { include-group = "mypy" },
+  { include-group = "test" },
+  { include-group = "ipykernel" },
+]
+
+mypy = ["mypy", "types-PyYAML"]
+
+docs = [
+  "importlib_metadata;python_version<'3.8'",
+  "Sphinx>=7",
+  "myst-parser",
+  "furo",
+  "linkify-it-py",
+  "sphinx-copybutton",
+  "sphinx-inline-tabs",
+  "sphinx_tippy",
+  "sphinx-version-warning",
+]
+test = ["coverage", "toml;python_version<='3.11'", "fsspec[http]"]
+
+ipykernel = ["ipykernel", "pip"]
 
 [tool.setuptools.package-data]
 pyyaml_include = ["yaml_include/py.typed"]
