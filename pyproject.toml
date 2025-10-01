@@ -22,26 +22,11 @@ license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 
 classifiers = [
-  "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
-  # "Development Status :: 1 - Planning",
-  # "Development Status :: 2 - Pre-Alpha",
-  # "Development Status :: 3 - Alpha",
-  # "Development Status :: 4 - Beta",
   "Development Status :: 5 - Production/Stable",
-  # "Development Status :: 6 - Mature",
-  # "Development Status :: 7 - Inactive",
   "Intended Audience :: Developers",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
-  "Programming Language :: Python :: 3.12",
-  "Programming Language :: Python :: 3.13",
-  "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Processing :: Markup",
 ]
