@@ -23,9 +23,8 @@ pyyaml-include
    :alt: PyPI
    :target: https://pypi.org/project/pyyaml-include/
 
-.. image:: https://sonarcloud.io/api/project_badges/measure?project=tanbro_pyyaml-include&metric=alert_status
-   :alt: SonarCloud alert status
-   :target: https://sonarcloud.io/dashboard?id=tanbro_pyyaml-include
+.. image:: https://codecov.io/gh/tanbro/pyyaml-include/graph/badge.svg?token=N4QBGv08EE
+   :target: https://codecov.io/gh/tanbro/pyyaml-include
 
 .. rubric::
    `pyyaml-include` is an extending of PyYAML_: include other YAML_ files into YAML_ document.
