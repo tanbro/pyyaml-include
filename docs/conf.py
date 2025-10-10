@@ -15,7 +15,7 @@ else:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "pyyaml-include"
-copyright = "2023-2024, liu xue yan"
+copyright = "2023-2025, liu xue yan"
 author = "liu xue yan"
 # full version
 version = importlib_metadata.version(project)
@@ -37,6 +37,7 @@ extensions = [
     "sphinx_inline_tabs",
     "sphinx_copybutton",
     "versionwarning.extension",
+    "sphinx_autodoc_typehints",
 ]
 source_suffix = {
     ".rst": "restructuredtext",
@@ -60,20 +61,25 @@ autodoc_typehints = "both"
 # autodoc_class_signature = "separated"
 
 autoclass_content = "both"
-autodoc_member_order = "bysource"
+# autodoc_member_order = "bysource"
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
-
-html_theme = "furo"
+html_theme = "sphinx_book_theme"
 html_static_path = ["_static"]
 html_theme_options = {
-    "source_repository": "https://github.com/tanbro/pyyaml-include",
-    "source_branch": "main",
-    "source_directory": "docs/",
-    "top_of_page_button": "edit",
+    "path_to_docs": "docs/",
+    "repository_url": "https://github.com/tanbro/pyyaml-include",
+    "repository_branch": "main",
+    "use_download_button": True,
+    "use_fullscreen_button": True,
+    "use_repository_button": True,
+    "use_issues_button": True,
+    "use_download_button": True,
+    "show_toc_level": 2,
 }
+
 
 # -- Options for myst_parser extension ---------------------------------------
 
@@ -106,6 +112,3 @@ intersphinx_mapping = {
 napoleon_use_admonition_for_examples = True
 napoleon_use_admonition_for_notes = True
 napoleon_use_admonition_for_references = True
-
-
-latex_engine = "xelatex"

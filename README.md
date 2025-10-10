@@ -561,34 +561,6 @@ We can include files in different format other than [YAML][], like [JSON][] or [
 > yaml.load(s, yaml.Loader)
 > ```
 
-## Develop
-
-1. clone the repo:
-
-   ```bash
-   git clone https://github.com/tanbro/pyyaml-include.git
-   cd pyyaml-include
-   ```
-
-1. create then activate a python virtual-env:
-
-   ```bash
-   python -m venv .venv
-   .venv/bin/activate
-   ```
-
-1. install development requirements and the project itself in editable mode:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-Now you can work on it.
-
-## Test
-
-read: `tests/README.md`
-
 [YAML]: http://yaml.org/ "YAML: YAML Ain't Markup Language™"
 [PyYaml]: https://pypi.org/project/PyYAML/ "PyYAML is a full-featured YAML framework for the Python programming language."
 [fsspec]: https://github.com/fsspec/filesystem_spec/ "Filesystem Spec (fsspec) is a project to provide a unified pythonic interface to local, remote and embedded file systems and bytes storage."

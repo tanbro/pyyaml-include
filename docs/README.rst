@@ -7,39 +7,49 @@ README
 How to Build the Documentation
 ==============================
 
-#. The documentation is built using `Sphinx <https://www.sphinx-doc.org/>`_.
-   We need to install the package and its testing requirements:
+#. The documentation is built using `Sphinx`_.
 
-   .. code:: sh
+   We need to install the package itself in editable mode, `Sphinx`_, and some of its extensions used in the documentation:
 
-      pip install -e . -r docs/requirements.txt
+   * Using `pip`_:
+
+     .. code:: sh
+
+        pip install -e . --group docs
+
+   * Using `uv`_:
+
+     .. code:: sh
+
+        uv sync --group docs
 
 #. Generate API documentation.
-   If the source tree has changed, you may clear the `docs/apidocs` directory and regenerate the API documentation:
+
+   If it's the first time building the documentation, or if the source tree has changed, you may need a clean ``docs/apidoc`` directory and regenerate the API documentation:
 
    .. code:: sh
 
-      sphinx-apidoc -o docs/apidocs -f -e -H APIs src
+      sphinx-apidoc -H "" -feo docs/apidoc src
 
 #. Build HTML documentation:
 
-   * Using the Make tool (for Unix/Linux/macOS):
+   * Using the Make tool (on Unix-like systems):
 
-      .. code:: sh
+     .. code:: sh
 
-         make -C docs html
+        make -C docs html
 
    * On Windows:
 
-      .. code:: bat
+     .. code:: bat
 
-         docs\make html
+        docs\make html
 
 The built static website is located at ``docs/_build/html``. You can serve it with a simple HTTP server:
 
 .. code:: sh
 
-   python -m http.server --directory docs/_build/html
+   python -m http.server -d docs/_build/html
 
 Then open http://localhost:8000/ in a web browser.
 
@@ -49,6 +59,11 @@ Then open http://localhost:8000/ in a web browser.
 
    .. code:: sh
 
-      python -m http.server --directory docs/_build/html 8080
+      python -m http.server -d docs/_build/html 8080
 
    .. seealso:: Python ``stdlib``'s :mod:`http.server`
+
+
+.. _sphinx: https://www.sphinx-doc.org/
+.. _pip: https://pip.pypa.io/en/stable/
+.. _uv: https://docs.astral.sh/uv/
