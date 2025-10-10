@@ -223,16 +223,16 @@ class Constructor:
 
     def __call__(self, loader: Union[_Loader, _CLoader], node: yaml.Node) -> Union[Data, Any]:
         val: Union[Sequence, Mapping, str]
-        if is_yaml_scalar_node(node):
+        if isinstance(node, yaml.ScalarNode):
             val = loader.construct_scalar(node)
             if isinstance(val, str):
                 data = Data(val)
             else:  # pragma: no cover
                 raise TypeError(f"{type(val)}")
-        elif is_yaml_sequence_node(node):
+        elif isinstance(node, yaml.SequenceNode):
             val = loader.construct_sequence(node)
             data = Data(val[0], sequence_params=val[1:])
-        elif is_yaml_mapping_node(node):
+        elif isinstance(node, yaml.MappingNode):
             val = loader.construct_mapping(node)
             if is_kwds(val):
                 kdargs = {
@@ -458,18 +458,6 @@ class Constructor:
         with self.fs.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
             result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
             return result
-
-
-def is_yaml_scalar_node(node) -> TypeGuard[yaml.ScalarNode]:
-    return isinstance(node, yaml.ScalarNode)
-
-
-def is_yaml_sequence_node(node) -> TypeGuard[yaml.SequenceNode]:
-    return isinstance(node, yaml.SequenceNode)
-
-
-def is_yaml_mapping_node(node) -> TypeGuard[yaml.MappingNode]:
-    return isinstance(node, yaml.MappingNode)
 
 
 def is_kwds(val) -> TypeGuard[Mapping[str, Any]]:
