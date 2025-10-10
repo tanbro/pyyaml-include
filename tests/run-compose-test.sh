@@ -5,7 +5,7 @@ export PIP_DISABLE_PIP_VERSION_CHECK=1
 export PIP_ROOT_USER_ACTION=ignore
 export PIP_NO_WARN_SCRIPT_LOCATION=1
 
-PYTHON_LIST=(python3.8 python3.9 python3.10 python3.11 python3.12 python3.13 pypy3.9 pypy3.10)
+PYTHON_LIST=(python3.9 python3.10 python3.11 python3.12 python3.13 python3.14)
 for PYTHON in ${PYTHON_LIST[@]}
 do
     echo
@@ -16,7 +16,7 @@ do
     TMPDIR=$(mktemp -d)
     trap 'rm -rf $TMPDIR' EXIT
     $PYTHON -m venv $TMPDIR
-    $TMPDIR/bin/python -m pip install -e ./ -r tests/requirements.txt coverage
+    $TMPDIR/bin/python -m pip install -e . --group test
     $TMPDIR/bin/python -m coverage run -m unittest -cfv
     $TMPDIR/bin/python -m coverage report
     echo
