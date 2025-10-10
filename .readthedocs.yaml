@@ -22,6 +22,6 @@ build:
     pre_install: # Avoid having a dirty Git index
       - git update-index --assume-unchanged docs/conf.py
     install: # install by uv
-      - UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}" uv sync --all-extras --group docs
+      - UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}" uv sync --no-dev --group docs
     pre_build:
-      - sphinx-apidoc -o docs/apidocs -efH APIs src
+      - sphinx-apidoc -H "" -feo docs/apidoc src
