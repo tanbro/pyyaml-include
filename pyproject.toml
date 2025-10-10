@@ -48,7 +48,7 @@ dev = [
   { include-group = "docs" },
   { include-group = "mypy" },
   { include-group = "test" },
-  { include-group = "ipykernel" },
+  { include-group = "ipy" },
 ]
 
 mypy = ["mypy", "types-PyYAML"]
@@ -66,7 +66,7 @@ docs = [
 ]
 test = ["coverage", "toml;python_version<='3.11'", "fsspec[http]"]
 
-ipykernel = ["ipykernel", "pip"]
+ipy = ["ipykernel", "pip"]
 
 [tool.setuptools.package-data]
 pyyaml_include = ["yaml_include/py.typed"]

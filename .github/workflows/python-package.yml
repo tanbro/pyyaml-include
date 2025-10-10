@@ -33,11 +33,11 @@ jobs:
           fi
           echo "version=${PEP440_VERSION}" | tee -a $GITHUB_OUTPUT
 
-  check:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -47,21 +47,19 @@ jobs:
           enable-cache: true
           python-version: ${{ matrix.python-version }}
       - name: Install project
-        run: uv sync --group test --group mypy
+        run: uv sync --no-dev --group test --group mypy
       - name: Cache of Ruff and MyPY
         uses: actions/cache@v4
         with:
           path: |
             .ruff_cache
             .mypy_cache
-          key: ${{ runner.os }}-py${{ matrix.python-version }}-ruff-mypy-${{ hashFiles('pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-py${{ matrix.python-version }}-ruff-mypy-
-      - name: Check with ruff
+          key: cache-${{ runner.os }}-${{ runner.arch }}-mypy-ruff
+      - name: Lint check with ruff
         uses: astral-sh/ruff-action@v3
       - name: Static check with mypy
         run: uv run mypy
-      - name: Test
+      - name: Unit test
         run: |
           uv run coverage run -m unittest -fcv
           uv run coverage report -m
@@ -70,39 +68,19 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: tanbro/pyyaml-include
 
-  build:
+  publish:
     runs-on: ubuntu-latest
-    needs: [get-version-pep440, check]
+    needs: [get-version-pep440, test]
     if: needs.get-version-pep440.outputs.version != ''
     steps:
       - name: Checkout
         uses: actions/checkout@v5
       - name: Install uv
         uses: astral-sh/setup-uv@v6
-      - name: Build Python distribution
+        with:
+          enable-cache: true
+      - name: Build
         run: uv build
-      - name: Upload dist to artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pyyaml_include-dist-${{ needs.get-version-pep440.outputs.version }}
-          path: dist
-          if-no-files-found: error
-          retention-days: 1
-
-  publish:
-    runs-on: ubuntu-latest
-    needs: [get-version-pep440, build]
-    if: needs.get-version-pep440.outputs.version != ''
-    steps:
-      - name: Download dist from artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: pyyaml_include-dist-${{needs.get-version-pep440.outputs.version}}
-          path: dist
-      - name: Publish package
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Publish
+        run: uv publish --token ${{ secrets.PYPI_API_TOKEN }}
