@@ -58,12 +58,12 @@ jobs:
       - name: Lint check with ruff
         uses: astral-sh/ruff-action@v3
       - name: Static type check with mypy
-        run: uv run mypy
+        run: uv run --no-dev mypy
       - name: Unit test
         run: |
-          uv run coverage run -m unittest -fcv
-          uv run coverage report -m
-          uv run coverage xml
+          uv run --no-dev coverage run -m unittest -fcv
+          uv run --no-dev coverage report -m
+          uv run --no-dev coverage xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
