@@ -46,13 +46,10 @@ where = ["src"]
 [dependency-groups]
 dev = [
   { include-group = "docs" },
-  { include-group = "mypy" },
+  { include-group = "typed" },
   { include-group = "test" },
-  { include-group = "ipy" },
 ]
-
-mypy = ["mypy", "types-PyYAML"]
-
+typed = ["mypy", "types-PyYAML"]
 docs = [
   "importlib_metadata;python_version<'3.8'",
   "Sphinx>=7",
@@ -67,7 +64,7 @@ docs = [
 ]
 test = ["coverage", "toml;python_version<='3.11'", "fsspec[http]"]
 
-ipy = ["ipykernel", "pip"]
+ipy = ["ipykernel"]
 
 [tool.setuptools.package-data]
 pyyaml_include = ["yaml_include/py.typed"]
