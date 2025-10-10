@@ -6,12 +6,13 @@ from __future__ import annotations
 
 import re
 import sys
+from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Iterator, Mapping, Optional, Sequence, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
 from urllib.parse import urlsplit, urlunsplit
 
 if sys.version_info >= (3, 10):  # pragma: no cover
@@ -249,7 +250,7 @@ class Constructor:
             else:  # pragma: no cover
                 raise ValueError("not all keys type of the YAML mapping node are identifier string")
         else:  # pragma: no cover
-            raise TypeError(f"{type(node)}")
+            raise TypeError(f"{type(node).__name__}")
         if self.autoload:
             return self.load(type(loader), data)
         else:
