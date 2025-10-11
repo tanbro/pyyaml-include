@@ -14,6 +14,11 @@ on:
       - "pyproject.toml"
   pull_request:
     branches: [main]
+    paths:
+      - ".github/**"
+      - "src/**"
+      - "tests/**"
+      - "pyproject.toml"
 
 jobs:
   get-version-pep440:
