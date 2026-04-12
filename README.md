@@ -311,6 +311,47 @@ specific: !inc logs/app-*.yml
 
 ---
 
+## Limitations
+
+### Merge Keys and Anchors
+
+**⚠️ Merge keys (`<<`) and anchors (`&`/`*) don't work with include tags.**
+
+This is a fundamental limitation of PyYAML's architecture - merge key and anchor validation happens before custom tags are processed.
+
+**Instead of this (won't work):**
+```yaml
+<<: !inc config/base.yml
+```
+
+**Use one of these alternatives:**
+
+1. **Include separately, then merge in Python:**
+   ```yaml
+   base: !inc config/base.yml
+   override: !inc config/override.yml
+   ```
+   ```python
+   config = yaml.load(yaml_string)
+   merged = {**config['base'], **config['override']}
+   ```
+
+2. **Use wildcard includes for multiple files:**
+   ```yaml
+   configs: !inc config.d/*.yml  # Returns a list
+   ```
+   ```python
+   config = yaml.load(yaml_string)
+   # Merge all configs
+   merged = {}
+   for cfg in config['configs']:
+       merged.update(cfg)
+   ```
+
+See [issues #45](https://github.com/tanbro/pyyaml-include/issues/45) and [#53](https://github.com/tanbro/pyyaml-include/issues/53) for more details.
+
+---
+
 ## Reference
 
 ### Constructor Options
