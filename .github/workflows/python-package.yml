@@ -66,9 +66,8 @@ jobs:
         run: uv run --no-dev mypy
       - name: Unit test
         run: |
-          uv run --no-dev coverage run -m unittest -fcv
+          uv run --no-dev pytest
           uv run --no-dev coverage report -m
-          uv run --no-dev coverage xml
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:

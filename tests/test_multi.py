@@ -1,41 +1,54 @@
-import unittest
+"""Multi-document YAML tests - pytest version"""
+
 from textwrap import dedent
 
+import pytest
 import yaml
 
+from tests._internal import YAML1, YAML2, YAML_LOADERS
 from yaml_include import Constructor
 
-from ._internal import YAML1, YAML2, YAML_LOADERS
+from .conftest import YAML_INCLUDE_TAG, cleanup_constructor
 
 
-class MultiLoaderTestCase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        ctor = Constructor(base_dir="tests/data")
-        for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", ctor, loader_cls)
+@pytest.fixture(scope="class")
+def multi_constructor():
+    """Configure constructor for multi-document tests"""
+    ctor = Constructor(base_dir="tests/data")
+    yield ctor
+    # Cleanup: remove all registered constructors
+    cleanup_constructor(YAML_INCLUDE_TAG, YAML_LOADERS)
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
 
-    def test_load_all(self):
-        yml_txt = dedent(
-            """
-            ---
-            data: !inc include.d/1.yaml
+@pytest.fixture(scope="class")
+def multi_loaders(multi_constructor):
+    """Configure all loaders for multi-document tests"""
+    for loader_cls in YAML_LOADERS:
+        yaml.add_constructor(YAML_INCLUDE_TAG, multi_constructor, loader_cls)
+    return YAML_LOADERS
 
-            ---
-            data: !inc include.d/2.yaml
-            """
-        )
-        for Loader in YAML_LOADERS:
-            for i, data in enumerate(yaml.load_all(yml_txt, Loader)):
-                if i == 0:
-                    self.assertDictEqual(data, {"data": YAML1})
-                elif i == 1:
-                    self.assertDictEqual(data, {"data": YAML2})
-                else:
-                    raise RuntimeError()
+
+@pytest.mark.parametrize("loader_cls", YAML_LOADERS, ids=lambda cls: cls.__name__)
+def test_load_all(multi_loaders, loader_cls):
+    """Test multi-document YAML loading"""
+
+    yml_txt = dedent(
+        """
+        ---
+        data: !inc include.d/1.yaml
+
+        ---
+        data: !inc include.d/2.yaml
+        """
+    )
+
+    docs = list(yaml.load_all(yml_txt, loader_cls))
+
+    # Assert: should have two documents
+    assert len(docs) == 2
+
+    # Assert: first document should contain YAML1 data
+    assert docs[0] == {"data": YAML1}
+
+    # Assert: second document should contain YAML2 data
+    assert docs[1] == {"data": YAML2}

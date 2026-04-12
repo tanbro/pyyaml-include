@@ -2,3 +2,4 @@
 omit =
     tests/*
     src/**/_version.py
+source = src/yaml_include

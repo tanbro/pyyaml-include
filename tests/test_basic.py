@@ -1,37 +1,55 @@
-import http.server
-import socket
-import threading
-import unittest
+"""
+Basic functionality tests for pyyaml-include (pytest version)
+
+Tests core behaviors of YAML include functionality:
+- Basic include operations (mapping and sequence)
+- Wildcard matching
+- Filesystem variants (default, file://, HTTP)
+- Flatten options
+"""
+
 from io import StringIO
-from pathlib import Path
 from textwrap import dedent
-from time import sleep
 
 import fsspec  # type: ignore[import-untyped]
+import pytest
 import yaml
 
 from yaml_include import Constructor
 
 from ._internal import YAML1, YAML2, YAML_LOADERS
+from .conftest import YAML_INCLUDE_TAG, cleanup_constructor, sort_by_name
+
+# ===== Basic Include Tests =====
 
 
-class BaseTestCase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        if cls is BaseTestCase:
-            raise unittest.SkipTest(f"{cls.__name__} is an abstract base class")
-        else:
-            super().setUpClass()
+class TestBasicInclude:
+    """Basic YAML include functionality tests (using default filesystem)"""
 
-    def test_include_one_in_mapping(self):
+    @pytest.fixture(autouse=True)
+    def setup_constructor(self, test_data_dir):
+        """Setup constructor and register to all YAML loaders"""
+        self.ctor = Constructor(base_dir=str(test_data_dir))
+        for loader_cls in YAML_LOADERS:
+            yaml.add_constructor("!inc", self.ctor, loader_cls)
+
+        yield
+
+        # Cleanup: remove constructor registration
+        cleanup_constructor(YAML_INCLUDE_TAG, YAML_LOADERS)
+
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_one_in_mapping(self, loader):
+        """Test including a single file in mapping"""
         yml = """
 file1: !inc include.d/1.yaml
         """
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {"file1": YAML1})
+        data = yaml.load(StringIO(yml), loader)
+        assert data == {"file1": YAML1}
 
-    def test_continuous_including(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_continuous_including(self, loader):
+        """Test continuous including of multiple files"""
         yml = dedent(
             """
             foo:
@@ -39,11 +57,12 @@ file1: !inc include.d/1.yaml
                 - !inc include.d/2.yaml
             """
         )
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {"foo": [YAML1, YAML2]})
+        data = yaml.load(StringIO(yml), loader)
+        assert data == {"foo": [YAML1, YAML2]}
 
-    def test_include_two_in_mapping(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_two_in_mapping(self, loader):
+        """Test including two files in mapping"""
         yml = """
 a: A
 file1: !inc include.d/1.yaml
@@ -51,28 +70,27 @@ b: B
 file2: !inc include.d/2.yaml
 c: C
         """
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(
-                data,
-                {
-                    "a": "A",
-                    "file1": YAML1,
-                    "b": "B",
-                    "file2": YAML2,
-                    "c": "C",
-                },
-            )
+        data = yaml.load(StringIO(yml), loader)
+        assert data == {
+            "a": "A",
+            "file1": YAML1,
+            "b": "B",
+            "file2": YAML2,
+            "c": "C",
+        }
 
-    def test_include_one_in_sequence(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_one_in_sequence(self, loader):
+        """Test including a single file in sequence"""
         yml = """
 - !inc include.d/1.yaml
         """
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(data, [YAML1])
+        data = yaml.load(StringIO(yml), loader)
+        assert data == [YAML1]
 
-    def test_include_two_in_sequence(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_two_in_sequence(self, loader):
+        """Test including two files in sequence"""
         yml = """
 - a
 - !inc include.d/1.yaml
@@ -80,106 +98,103 @@ c: C
 - !inc include.d/2.yaml
 - c
         """
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(data, ["a", YAML1, "b", YAML2, "c"])
+        data = yaml.load(StringIO(yml), loader)
+        assert data == ["a", YAML1, "b", YAML2, "c"]
 
-    def test_include_file_not_exists(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_file_not_exists(self, loader):
+        """Test including non-existent file"""
         yml = """
 file: !inc include.d/x.yaml
             """
-        for loader_cls in YAML_LOADERS:
-            with self.assertRaises(FileNotFoundError):
-                yaml.load(StringIO(yml), loader_cls)
+        with pytest.raises(FileNotFoundError):
+            yaml.load(StringIO(yml), loader)
 
-    def test_include_wildcards(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards(self, loader):
+        """Test wildcard include"""
         yml = """
 files: !inc include.d/*.yaml
 """
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_include_wildcards_1(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards_1(self, loader):
+        """Test wildcard include (with maxdepth parameter)"""
         yml = """
 files: !inc [include.d/**/*.yaml, [1]]
 """
-        for loader_cls in YAML_LOADERS:
-            # if any(
-            #     name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")
-            # ):
-            #     continue  # BaseLoader 和 SafeLoader不支持 !! 操作符!
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_include_wildcards_2(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards_2(self, loader):
+        """Test wildcard include (with maxdepth dict parameter)"""
         yml = """
 files: !inc [include.d/**/*.yaml, {maxdepth: 1}]
 """
-        for loader_cls in YAML_LOADERS:
-            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
-            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_include_wildcards_3(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards_3(self, loader):
+        """Test wildcard include (complete dict format)"""
         yml = """
 files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: {}}
 """
-        for loader_cls in YAML_LOADERS:
-            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
-            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_include_wildcards_3_1(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards_3_1(self, loader):
+        """Test wildcard include (rb mode)"""
         yml = """
 files: !inc {urlpath: include.d/**/*.yaml, glob: {maxdepth: 1}, open: rb}
 """
-        for loader_cls in YAML_LOADERS:
-            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
-            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_include_wildcards_4(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards_4(self, loader):
+        """Test wildcard include (three-parameter format)"""
         yml = """
 files: !inc [include.d/**/*.yaml, {maxdepth: 1}, []]
 """
-        for loader_cls in YAML_LOADERS:
-            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
-            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_include_wildcards_5(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_include_wildcards_5(self, loader):
+        """Test wildcard include (shorthand maxdepth)"""
         yml = """
 files: !inc [include.d/**/*.yaml, 1]
 """
-        for loader_cls in YAML_LOADERS:
-            # if any(name in loader_cls.__name__ for name in ("BaseLoader", "SafeLoader")):
-            #     continue # BaseLoader 和 SafeLoader不支持 !! 操作符!
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        data = yaml.load(StringIO(yml), loader)
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
-    def test_flatten_true(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_flatten_true(self, loader, test_data_dir):
+        """Test flatten option set to true"""
         yml = dedent(
             """
             items: !inc {urlpath: "include3.d/*.yml", flatten: true}
             """
         )
 
-        for loader_cls in YAML_LOADERS:
-            two_dim_sequence = []
-            for pth in Path().glob("tests/data/include3.d/*.yml"):
-                two_dim_sequence.append(yaml.load(pth.read_bytes(), loader_cls))
-            flattened_sequence = sorted([member for data in two_dim_sequence for member in data])
+        # Build expected results
+        two_dim_sequence = []
+        for pth in test_data_dir.glob("include3.d/*.yml"):
+            two_dim_sequence.append(yaml.load(pth.read_bytes(), loader))
+        flattened_sequence = sorted([member for data in two_dim_sequence for member in data])
 
-            data = yaml.load(StringIO(yml), loader_cls)
-            result = sorted(data["items"])
-            self.assertListEqual(result, flattened_sequence)
+        data = yaml.load(StringIO(yml), loader)
+        result = sorted(data["items"])
+        assert result == flattened_sequence
 
-    def test_flatten_false_or_default(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_flatten_false_or_default(self, loader, test_data_dir):
+        """Test flatten option set to false or default"""
         yml1 = dedent(
             """
             items: !inc {urlpath: "include3.d/*.yml", flatten: false}
@@ -190,177 +205,139 @@ files: !inc [include.d/**/*.yaml, 1]
             items: !inc "include3.d/*.yml"
             """
         )
+
+        # Build expected results
+        two_dim_sequence = []
+        for pth in test_data_dir.glob("include3.d/*.yml"):
+            two_dim_sequence.append(yaml.load(pth.read_bytes(), loader))
+        two_dim_sequence = sorted(two_dim_sequence)
+
+        data1 = yaml.load(StringIO(yml1), loader)
+        result1 = data1["items"]
+        assert result1 == two_dim_sequence
+
+        data2 = yaml.load(StringIO(yml2), loader)
+        result2 = data2["items"]
+        assert result2 == two_dim_sequence
+
+
+# ===== FileFs Tests =====
+
+
+class TestFileFs:
+    """Tests using fsspec file:// filesystem"""
+
+    @pytest.fixture(autouse=True)
+    def setup_constructor(self):
+        """Setup file:// constructor"""
+        self.ctor = Constructor(fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data")
         for loader_cls in YAML_LOADERS:
-            two_dim_sequence = []
-            for pth in Path().glob("tests/data/include3.d/*.yml"):
-                two_dim_sequence.append(yaml.load(pth.read_bytes(), loader_cls))
-            two_dim_sequence = sorted(two_dim_sequence)
+            yaml.add_constructor("!inc", self.ctor, loader_cls)
 
-            data1 = yaml.load(StringIO(yml1), loader_cls)
-            result1 = data1["items"]
-            self.assertListEqual(result1, two_dim_sequence)
+        yield
 
-            data2 = yaml.load(StringIO(yml2), loader_cls)
-            result2 = data2["items"]
-            self.assertListEqual(result2, two_dim_sequence)
-
-
-class DefaultFsBasicTestCase(BaseTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        ctor = Constructor(base_dir="tests/data")
+        # Cleanup
         for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", ctor, loader_cls)
+            if "!inc" in loader_cls.yaml_constructors:
+                del loader_cls.yaml_constructors["!inc"]
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
-
-    def test_abs(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_abs(self, loader, absolute_path):
+        """Test absolute path"""
         yml = dedent(
             f"""
-            file1: !inc {Path().absolute().as_posix()}/tests/data/include.d/1.yaml
+            file1: !inc {absolute_path.as_posix()}/tests/data/include.d/1.yaml
             """
         )
-        for loader_cls in YAML_LOADERS:
-            data = yaml.load(StringIO(yml), loader_cls)
-            self.assertDictEqual(data, {"file1": YAML1})
+        data = yaml.load(StringIO(yml), loader)
+        assert data == {"file1": YAML1}
 
-
-class FileFsBasicTestCase(BaseTestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        ctor = Constructor(fs=fsspec.filesystem("file"), base_dir=lambda: "tests/data")
-        for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", ctor, loader_cls)
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
-
-    def test_scheme_abs(self):
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_scheme_abs(self, loader, absolute_path):
+        """Test absolute path with file:// scheme"""
         yml = dedent(
             f"""
-            file1: !inc file://{Path().absolute().as_posix()}/tests/data/include.d/1.yaml
+            file1: !inc file://{absolute_path.as_posix()}/tests/data/include.d/1.yaml
             """
         )
         data = yaml.load(yml, yaml.Loader)
-        self.assertDictEqual(data, {"file1": YAML1})
+        assert data == {"file1": YAML1}
 
 
-def _get_best_family(*address):
-    infos = socket.getaddrinfo(
-        *address,
-        type=socket.SOCK_STREAM,
-        flags=socket.AI_PASSIVE,
-    )
-    family, type_, proto, canon_name, sock_addr = next(iter(infos))
-    return family, sock_addr
+# ===== HTTP Filesystem Tests =====
 
 
-httpd: http.server.HTTPServer
+class TestHTTPFs:
+    """Tests using HTTP filesystem"""
 
-
-class CustomHttpServer(http.server.ThreadingHTTPServer):
-    def finish_request(self, request, client_address):
-        self.RequestHandlerClass(request, client_address, self)
-
-
-def serve_http(
-    HandlerClass=http.server.SimpleHTTPRequestHandler,
-    ServerClass=CustomHttpServer,
-    protocol="HTTP/1.1",
-    port=0,
-    bind="127.0.0.1",
-):
-    """Test the HTTP request handler class.
-
-    This runs an HTTP server on port 8000 (or the port argument).
-    """
-    global httpd
-    ServerClass.address_family, addr = _get_best_family(bind, port)
-    HandlerClass.protocol_version = protocol
-    httpd = ServerClass(addr, HandlerClass)  # type: ignore
-    host, port = httpd.socket.getsockname()[:2]
-    url_host = f"[{host}]" if ":" in host else host
-    print(f"Serving HTTP on {host} port {port} (http://{url_host}:{port}/) ...")
-    httpd.serve_forever()
-
-
-class SimpleHttpBasicTestCase(BaseTestCase):
-    server_thread: threading.Thread
-
-    @classmethod
-    def setUpClass(cls):
-        cls.server_thread = threading.Thread(target=serve_http)
-        cls.server_thread.start()
-        sleep(1)
-        host, port = httpd.socket.getsockname()[:2]
-        ctor = Constructor(
+    @pytest.fixture(autouse=True)
+    def setup_constructor(self, http_server):
+        """Setup HTTP constructor"""
+        host, port = http_server["host"], http_server["port"]
+        self.ctor = Constructor(
             fs=fsspec.filesystem("http", client_kwargs=dict(base_url=f"http://{host}:{port}")),
-            base_dir="/tests/data",
+            base_dir="tests/data",
         )
-        yaml.add_constructor("!inc", ctor, yaml.Loader)
+        yaml.add_constructor("!inc", self.ctor, yaml.Loader)
         for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", ctor, loader_cls)
+            yaml.add_constructor("!inc", self.ctor, loader_cls)
 
-    @classmethod
-    def tearDownClass(cls):
-        httpd.shutdown()
-        cls.server_thread.join()
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]
+        yield
 
-    def setUp(self) -> None:
-        self.assertTrue(self.server_thread.is_alive())
+        # Cleanup
+        for loader_cls in YAML_LOADERS:
+            if "!inc" in loader_cls.yaml_constructors:
+                del loader_cls.yaml_constructors["!inc"]
 
-    def test_full_url(self):
-        host, port = httpd.socket.getsockname()[:2]
+    def test_full_url(self, http_server):
+        """Test full HTTP URL"""
+        host, port = http_server["host"], http_server["port"]
         yml = dedent(
             f"""
             file1: !inc http://{host}:{port}/tests/data/include.d/1.yaml
             """
         )
         data = yaml.load(yml, yaml.Loader)
-        self.assertDictEqual(data, {"file1": YAML1})
+        assert data == {"file1": YAML1}
 
-    def test_wildcards_full_url(self):
-        host, port = httpd.socket.getsockname()[:2]
+    def test_wildcards_full_url(self, http_server):
+        """Test wildcard HTTP URL"""
+        host, port = http_server["host"], http_server["port"]
         yml = dedent(
             f"""
             files: !inc http://{host}:{port}/tests/data/include.d/*.yaml
             """
         )
         data = yaml.load(yml, yaml.Loader)
-        self.assertListEqual(sorted(data["files"], key=lambda m: m["name"]), [YAML1, YAML2])
+        assert sort_by_name(data["files"]) == [YAML1, YAML2]
 
 
-class DefaultFsNoBaseDirBasicTestCase(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        ctor = Constructor()
+# ===== No Base Directory Tests =====
+
+
+class TestNoBaseDir:
+    """Tests without setting base directory"""
+
+    @pytest.fixture(autouse=True)
+    def setup_constructor(self):
+        """Setup constructor without base directory"""
+        self.ctor = Constructor()
         for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", ctor, loader_cls)
+            yaml.add_constructor("!inc", self.ctor, loader_cls)
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
+        yield
+
+        # Cleanup
+        for loader_cls in YAML_LOADERS:
+            if "!inc" in loader_cls.yaml_constructors:
+                del loader_cls.yaml_constructors["!inc"]
 
     def test_yaml2(self):
+        """Test including file from current directory"""
         yml = dedent(
             """
             file1: !inc tests/data/include.d/2.yaml
             """
         )
         data = yaml.load(yml, yaml.Loader)
-        self.assertDictEqual(data, {"file1": YAML2})
-
-
-if __name__ == "__main__":
-    unittest.main()
+        assert data == {"file1": YAML2}

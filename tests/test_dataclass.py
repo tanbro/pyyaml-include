@@ -1,36 +1,42 @@
-import unittest
 from textwrap import dedent
 
+import pytest
 import yaml
 
 from yaml_include import Constructor, Data
 
 from ._internal import YAML_LOADERS
+from .conftest import YAML_INCLUDE_TAG, cleanup_constructor
 
 
-class DataClassTestCase(unittest.TestCase):
-    ctor = Constructor(base_dir="tests/data")
+@pytest.fixture(scope="module")
+def dataclass_constructor(test_data_dir):
+    """Create constructor with base_dir and register !inc tag for dataclass tests"""
+    ctor = Constructor(base_dir=str(test_data_dir))
 
-    @classmethod
-    def setUpClass(cls):
-        for loader_cls in YAML_LOADERS:
-            yaml.add_constructor("!inc", cls.ctor, loader_cls)
+    # Register constructor for all loaders
+    for loader_cls in YAML_LOADERS:
+        yaml.add_constructor(YAML_INCLUDE_TAG, ctor, loader_cls)
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        for loader_class in YAML_LOADERS:
-            del loader_class.yaml_constructors["!inc"]  # type: ignore[attr-defined]
+    yield ctor
 
-    def test_simple_managed_autoload(self):
-        yaml_string = dedent(
-            """
-            yaml1: !inc include.d/1.yaml
-            """
-        ).strip()
-        for loader_cls in YAML_LOADERS:
-            with self.ctor.managed_autoload(False):
-                self.assertFalse(self.ctor.autoload)
-                d = yaml.load(yaml_string, loader_cls)
-                self.assertIsInstance(d["yaml1"], Data)
-                self.assertEqual(d["yaml1"].urlpath, "include.d/1.yaml")
-            self.assertTrue(self.ctor.autoload)
+    # Cleanup: unregister constructor
+    cleanup_constructor(YAML_INCLUDE_TAG, YAML_LOADERS)
+
+
+@pytest.mark.usefixtures("dataclass_constructor")
+def test_simple_managed_autoload(dataclass_constructor):
+    """Test managed_autoload context manager"""
+    yaml_string = dedent(
+        """
+        yaml1: !inc include.d/1.yaml
+        """
+    ).strip()
+
+    for loader_cls in YAML_LOADERS:
+        with dataclass_constructor.managed_autoload(False):
+            assert not dataclass_constructor.autoload
+            d = yaml.load(yaml_string, loader_cls)
+            assert isinstance(d["yaml1"], Data)
+            assert d["yaml1"].urlpath == "include.d/1.yaml"
+        assert dataclass_constructor.autoload
