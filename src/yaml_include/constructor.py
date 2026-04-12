@@ -47,7 +47,9 @@ WILDCARDS_PATTERN = re.compile(
 
 
 if yaml.__with_libyaml__:  # pragma: no cover
-    DEFAULT_YAML_LOAD_FUNCTION = lambda x: yaml.load(x, yaml.CSafeLoader)  # noqa: E731
+
+    def DEFAULT_YAML_LOAD_FUNCTION(stream: _ReadStream) -> Any:
+        return yaml.load(stream, yaml.CSafeLoader)
 else:  # pragma: no cover
     DEFAULT_YAML_LOAD_FUNCTION = yaml.safe_load
 
