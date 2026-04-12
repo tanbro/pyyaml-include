@@ -19,18 +19,17 @@ class Representer:
 
         import yaml_include
 
-        rpr = yaml_include.Representer("inc")  # ATTENTION: No "!" here!!!
+        rpr = yaml_include.Representer("inc")  # Note: No "!" prefix needed
         yaml.add_representer(Data, rpr)
     """
 
     tag: str
-    """YAML tag name for include statement
+    """YAML tag name for include statement (without the "!" prefix)
 
-    Attention:
-      - Custom YAML tag names start with ``"!"``.
-      - Do **NOT** include the ``"!"`` at the beginning here,
+    The "!" prefix is automatically added by :func:`yaml.add_representer`.
 
-      as :func:`yaml.add_representer` will automatically add the symbol.
+    Example:
+        >>> rpr = yaml_include.Representer("inc")  # Creates "!inc" tag
     """
 
     def __call__(self, dumper: BaseRepresenter, data: Data) -> Node:

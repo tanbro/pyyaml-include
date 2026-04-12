@@ -41,9 +41,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 __all__ = ["Constructor"]
 
-WILDCARDS_PATTERN = re.compile(
-    r"^(.*)([\*\?\[\]]+)(.*)$"
-)  # We support "**", "?" and "[..]". We do not support "^" for pattern negation.
+WILDCARDS_PATTERN = re.compile(r"^(.*)([\*\?\[\]]+)(.*)$")
 
 
 if yaml.__with_libyaml__:  # pragma: no cover
