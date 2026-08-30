@@ -4,6 +4,7 @@ Include other YAML files in YAML
 
 from __future__ import annotations
 
+import os
 import re
 import sys
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -42,6 +43,10 @@ if TYPE_CHECKING:  # pragma: no cover
 __all__ = ["Constructor"]
 
 WILDCARDS_PATTERN = re.compile(r"^(.*)([\*\?\[\]]+)(.*)$")
+
+#: A leading ``@`` means "resolve relative to the directory of the file doing the including",
+#: instead of relative to `base_dir` / the current working directory.
+LOCAL_PATTERN = re.compile(r"^@")
 
 
 if yaml.__with_libyaml__:  # pragma: no cover
@@ -189,6 +194,15 @@ class Constructor:
 
     Returns:
         typing.Any: The parsed result.
+    """
+
+    _including_file_dir: Optional[str] = field(default=None, init=False, repr=False, compare=False)
+    """Directory of the file currently being parsed, used to resolve ``@``-relative include paths.
+
+    Tracks the innermost include's directory while its content is being loaded, so that a nested
+    ``!inc @relative/path.yaml`` resolves relative to the file that contains it, not to `base_dir`
+    or the current working directory. Restored to the previous value once the nested include
+    finishes loading, so sibling/parent includes are unaffected.
     """
 
     @contextmanager
@@ -364,7 +378,13 @@ class Constructor:
                           yaml.load(fp, Loader)
         """
         base_dir = self.base_dir
-        urlpath = data.urlpath
+        urlpath = os.path.expandvars(data.urlpath)
+
+        if LOCAL_PATTERN.match(urlpath):
+            # `@`-relative: resolve against the directory of the file doing the including,
+            # instead of `base_dir` / the current working directory.
+            including_dir = Path(self._including_file_dir) if self._including_file_dir else Path.cwd()
+            urlpath = including_dir.joinpath(urlpath[1:]).as_posix()
 
         url_sr = urlsplit(urlpath)
         if base_dir is not None:
@@ -374,7 +394,8 @@ class Constructor:
                 base_dir = Path(base_dir)
             if url_sr.scheme:
                 urlpath = urlunsplit(chain(url_sr[:2], (base_dir.joinpath(url_sr[2]).as_posix(),), url_sr[3:]))
-            else:
+            elif not LOCAL_PATTERN.match(data.urlpath):
+                # `@`-relative paths are already absolute at this point; don't re-anchor them to `base_dir`.
                 urlpath = base_dir.joinpath(urlpath).as_posix()
 
         # If protocol/scheme in path, we shall open it directly with fs's default open method
@@ -457,7 +478,12 @@ class Constructor:
 
         # else if no wildcards, return a single object
         with self.fs.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
-            result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+            previous_including_file_dir = self._including_file_dir
+            self._including_file_dir = str(Path(urlpath).parent)
+            try:
+                result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+            finally:
+                self._including_file_dir = previous_including_file_dir
             return result
 
 
