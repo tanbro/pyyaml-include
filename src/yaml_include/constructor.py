@@ -4,6 +4,7 @@ Include other YAML files in YAML
 
 from __future__ import annotations
 
+import importlib
 import os
 import re
 import sys
@@ -47,6 +48,10 @@ WILDCARDS_PATTERN = re.compile(r"^(.*)([\*\?\[\]]+)(.*)$")
 #: A leading ``@`` means "resolve relative to the directory of the file doing the including",
 #: instead of relative to `base_dir` / the current working directory.
 LOCAL_PATTERN = re.compile(r"^@")
+
+#: ``@modulename/relative/path.yaml`` resolves relative to the imported Python module's
+#: (first) package directory, i.e. ``importlib.import_module("modulename").__path__``.
+PYTHON_MODULE_PATTERN = re.compile(r"^@([A-Za-z0-9_][A-Za-z0-9_.]*)/(.*)$")
 
 
 if yaml.__with_libyaml__:  # pragma: no cover
@@ -379,12 +384,29 @@ class Constructor:
         """
         base_dir = self.base_dir
         urlpath = os.path.expandvars(data.urlpath)
+        at_resolved = False
 
-        if LOCAL_PATTERN.match(urlpath):
+        module_match = PYTHON_MODULE_PATTERN.match(urlpath)
+        module = None
+        if module_match:
+            # `@modulename/relative/path.yaml`: resolve against the imported module's package directory.
+            # If `modulename` isn't importable, this isn't module syntax after all -- fall back to
+            # treating the whole thing as a plain `@`-relative path (e.g. `@include.d/1.yaml`).
+            try:
+                module = importlib.import_module(module_match.group(1))
+            except ModuleNotFoundError:
+                module = None
+        if module is not None:
+            if not module.__path__:  # pragma: no cover
+                raise ImportError(f"module {module_match.group(1)!r} has no package directory (__path__ is empty)")
+            urlpath = Path(module.__path__[0]).joinpath(module_match.group(2)).as_posix()
+            at_resolved = True
+        elif LOCAL_PATTERN.match(urlpath):
             # `@`-relative: resolve against the directory of the file doing the including,
             # instead of `base_dir` / the current working directory.
             including_dir = Path(self._including_file_dir) if self._including_file_dir else Path.cwd()
             urlpath = including_dir.joinpath(urlpath[1:]).as_posix()
+            at_resolved = True
 
         url_sr = urlsplit(urlpath)
         if base_dir is not None:
@@ -394,8 +416,8 @@ class Constructor:
                 base_dir = Path(base_dir)
             if url_sr.scheme:
                 urlpath = urlunsplit(chain(url_sr[:2], (base_dir.joinpath(url_sr[2]).as_posix(),), url_sr[3:]))
-            elif not LOCAL_PATTERN.match(data.urlpath):
-                # `@`-relative paths are already absolute at this point; don't re-anchor them to `base_dir`.
+            elif not at_resolved:
+                # `@`-resolved paths are already absolute at this point; don't re-anchor them to `base_dir`.
                 urlpath = base_dir.joinpath(urlpath).as_posix()
 
         # If protocol/scheme in path, we shall open it directly with fs's default open method
