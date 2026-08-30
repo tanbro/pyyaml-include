@@ -5,6 +5,19 @@
 - ❎ Breaking Changes:
   - Drop support for Python 3.8 and below
 
+- New:
+
+  - `@relative/path.yaml` includes resolve relative to the directory of the *including* file, instead of `base_dir` / cwd
+  - `@modulename/relative/path.yaml` includes resolve relative to an importable Python module's package directory. Gated behind a new `Constructor(allow_module_include=False)` flag (default `False`, opt-in) since resolving it imports the named module, executing its top-level code
+  - `$ENV_VAR`-style environment variable expansion in include urlpaths
+  - `path/to/file.yaml:key.subkey` fragment syntax to load a file and extract only a nested key
+
+- Bug fix:
+
+  - Non-package modules (e.g. `os.path`, no `__path__`) and namespace packages (multiple `__path__` entries) are now handled correctly by `@modulename/path` resolution instead of raising `AttributeError` or only trying the first entry
+  - `path:key` fragment splitting no longer misparses a Windows drive letter (`C:\...`, `C:/...`) as a fragment separator
+  - `@`-relative resolution state is now tracked correctly for files reached via a wildcard/glob include, instead of only the single-file no-scheme path; it's explicitly reset (not left stale) for URL-scheme includes
+
 ## 2.2
 
 > 📅 **Date** 2024-11-9

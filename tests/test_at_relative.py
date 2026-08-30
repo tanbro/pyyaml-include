@@ -45,6 +45,16 @@ class TestAtRelativeInclude:
         data = yaml.load(StringIO(yml), loader)
         assert data == {"file1": {"name": "1"}}
 
+    @pytest.mark.parametrize("loader", YAML_LOADERS, ids=lambda cls: cls.__name__)
+    def test_at_relative_inside_wildcard_glob_include(self, loader):
+        """A file reached via a wildcard/glob include (`atinclude/outer.yaml`, matched by
+        `atinclude/*.yaml`) that itself contains a nested `@`-relative include must resolve
+        that nested include against its OWN directory (`atinclude/`), not stale state left
+        over from some earlier include."""
+        yml = "outer: !inc atinclude/*.yaml"
+        data = yaml.load(StringIO(yml), loader)
+        assert data == {"outer": [{"key": {"value": "hello-from-nested"}}]}
+
 
 class TestEnvVarExpansion:
     """`$ENV`-style environment variable expansion in include urlpaths."""
