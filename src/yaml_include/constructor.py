@@ -4,6 +4,8 @@ Include other YAML files in YAML
 
 from __future__ import annotations
 
+import importlib
+import os
 import re
 import sys
 from collections.abc import Callable, Iterable, Iterator, Mapping, Sequence
@@ -42,6 +44,20 @@ if TYPE_CHECKING:  # pragma: no cover
 __all__ = ["Constructor"]
 
 WILDCARDS_PATTERN = re.compile(r"^(.*)([\*\?\[\]]+)(.*)$")
+
+#: A leading ``@`` means "resolve relative to the directory of the file doing the including",
+#: instead of relative to `base_dir` / the current working directory.
+LOCAL_PATTERN = re.compile(r"^@")
+
+#: ``@modulename/relative/path.yaml`` resolves relative to the imported Python module's
+#: (first) package directory, i.e. ``importlib.import_module("modulename").__path__``.
+PYTHON_MODULE_PATTERN = re.compile(r"^@([A-Za-z0-9_][A-Za-z0-9_.]*)/(.*)$")
+
+#: Matches a ``:key.subkey``-style fragment suffix, used to split ``path/to/file.yaml:key``
+#: without misinterpreting a Windows drive letter (``C:\...`` / ``C:/...``) as a fragment
+#: separator. A drive letter is a single alpha character at the very start of the string,
+#: immediately followed by ``:`` and then a path separator -- that shape is excluded here.
+FRAGMENT_PATTERN = re.compile(r":(?!$)(?!\\)(?!/)[A-Za-z_][\w.]*$")
 
 
 if yaml.__with_libyaml__:  # pragma: no cover
@@ -101,6 +117,37 @@ class Constructor:
                 .. code-block:: yaml
 
                     files: !inc foo/**/*.yml
+
+            * Include a file relative to the directory of the file doing the including
+              (rather than relative to `base_dir` or the current working directory), with
+              a leading ``@``:
+
+                .. code-block:: yaml
+
+                    file: !inc @sibling/baz.yml
+
+            * Include a file relative to an importable Python package's directory, with
+              ``@modulename/relative/path``. This requires opting in via
+              ``Constructor(allow_module_include=True)`` (default ``False``) -- see the
+              :attr:`.allow_module_include` attribute docs for why it's gated:
+
+                .. code-block:: yaml
+
+                    file: !inc @my_package/data/baz.yml
+
+            * Expand ``$ENV_VAR`` / ``${ENV_VAR}``-style environment variables anywhere in
+              the urlpath (applied via :func:`os.path.expandvars` before any other resolution):
+
+                .. code-block:: yaml
+
+                    file: !inc $CONFIG_DIR/baz.yml
+
+            * Load a file and descend into it, extracting only a nested key (or dotted
+              ``key.subkey`` path) via a trailing ``:key.subkey`` fragment:
+
+                .. code-block:: yaml
+
+                    value: !inc foo/baz.yml:some.nested.key
 
         #. Load the YAML in Python::
 
@@ -189,6 +236,33 @@ class Constructor:
 
     Returns:
         typing.Any: The parsed result.
+    """
+
+    allow_module_include: bool = False
+    """Whether ``@modulename/relative/path.yaml`` includes are permitted.
+
+    Resolving this syntax calls :func:`importlib.import_module` on the ``modulename``
+    component, which executes that module's top-level code as a side effect of
+    :func:`yaml.load`. This can let untrusted YAML trigger arbitrary code execution
+    via any importable package, so it is an explicit, opt-in-only feature.
+
+    * If ``False`` (the default):
+      ``@modulename/path`` is never treated as module syntax; it falls through to
+      plain ``@``-relative resolution (as if ``modulename`` were not importable).
+
+    * If ``True``:
+      ``@modulename/path`` first attempts to import ``modulename`` and resolve
+      against its package directory, falling back to plain ``@``-relative
+      resolution only if the module can't be imported or has no usable ``__path__``.
+    """
+
+    _including_file_dir: Optional[str] = field(default=None, init=False, repr=False, compare=False)
+    """Directory of the file currently being parsed, used to resolve ``@``-relative include paths.
+
+    Tracks the innermost include's directory while its content is being loaded, so that a nested
+    ``!inc @relative/path.yaml`` resolves relative to the file that contains it, not to `base_dir`
+    or the current working directory. Restored to the previous value once the nested include
+    finishes loading, so sibling/parent includes are unaffected.
     """
 
     @contextmanager
@@ -364,7 +438,51 @@ class Constructor:
                           yaml.load(fp, Loader)
         """
         base_dir = self.base_dir
-        urlpath = data.urlpath
+        urlpath = os.path.expandvars(data.urlpath)
+        at_resolved = False
+
+        module_match = PYTHON_MODULE_PATTERN.match(urlpath) if self.allow_module_include else None
+        module_resolved_path: Optional[str] = None
+        if module_match:
+            # `@modulename/relative/path.yaml`: resolve against the imported module's package directory.
+            # If `modulename` isn't importable, or has no usable `__path__` (e.g. it's a plain module,
+            # not a package), this isn't module syntax after all -- fall back to treating the whole
+            # thing as a plain `@`-relative path (e.g. `@include.d/1.yaml`).
+            try:
+                module = importlib.import_module(module_match.group(1))
+                module_paths = list(module.__path__)
+            except (ModuleNotFoundError, AttributeError):
+                module_paths = []
+            rel = module_match.group(2)
+            for candidate_dir in module_paths:
+                candidate = Path(candidate_dir).joinpath(rel)
+                if candidate.exists():
+                    module_resolved_path = candidate.as_posix()
+                    break
+            else:
+                if module_paths:
+                    # Module found but none of its `__path__` entries contain the target file;
+                    # use the first entry so downstream open/glob still produces a sensible error.
+                    module_resolved_path = Path(module_paths[0]).joinpath(rel).as_posix()
+        if module_resolved_path is not None:
+            urlpath = module_resolved_path
+            at_resolved = True
+        elif LOCAL_PATTERN.match(urlpath):
+            # `@`-relative: resolve against the directory of the file doing the including,
+            # instead of `base_dir` / the current working directory.
+            including_dir = Path(self._including_file_dir) if self._including_file_dir else Path.cwd()
+            urlpath = including_dir.joinpath(urlpath[1:]).as_posix()
+            at_resolved = True
+
+        # `path/to/file.yaml:key.subkey` loads `path/to/file.yaml`, then descends into the
+        # loaded mapping/sequence via `key.subkey`, returning only that nested value.
+        # Only applies to plain local paths: real URLs always contain "://", and wildcarded
+        # paths have no single file to descend into.
+        objpath: Optional[str] = None
+        if "://" not in urlpath and not WILDCARDS_PATTERN.match(urlpath):
+            fragment_match = FRAGMENT_PATTERN.search(urlpath)
+            if fragment_match:
+                urlpath, objpath = urlpath[: fragment_match.start()], urlpath[fragment_match.start() + 1 :]
 
         url_sr = urlsplit(urlpath)
         if base_dir is not None:
@@ -374,24 +492,41 @@ class Constructor:
                 base_dir = Path(base_dir)
             if url_sr.scheme:
                 urlpath = urlunsplit(chain(url_sr[:2], (base_dir.joinpath(url_sr[2]).as_posix(),), url_sr[3:]))
-            else:
+            elif not at_resolved:
+                # `@`-resolved paths are already absolute at this point; don't re-anchor them to `base_dir`.
                 urlpath = base_dir.joinpath(urlpath).as_posix()
 
         # If protocol/scheme in path, we shall open it directly with fs's default open method
         if url_sr.scheme:
+            # `@`-relative resolution is scoped to the local file system: it can't map a remote
+            # URL's location onto a local directory. Rather than let a nested `!inc @...` silently
+            # resolve against a stale (unrelated) `_including_file_dir` left over from some earlier
+            # local include, explicitly clear it for the duration of URL-scheme loads, so any nested
+            # `@`-relative include falls back to `cwd` (its documented top-level behavior) instead of
+            # a wrong directory.
             if WILDCARDS_PATTERN.match(urlpath):
                 # if wildcards in path, return a Sequence/List
                 result = []
                 with fsspec.open_files(urlpath, *data.sequence_params, **data.mapping_params) as ofs:
                     for of_ in ofs:
-                        loaded_data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                        previous_including_file_dir = self._including_file_dir
+                        self._including_file_dir = None
+                        try:
+                            loaded_data = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                        finally:
+                            self._including_file_dir = previous_including_file_dir
                         result.append(loaded_data)
                 return result
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
                 if isinstance(of_, list):  # pragma: no cover
                     raise RuntimeError(f"`fsspec.open()` returns a `list` ({of_})")
-                result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                previous_including_file_dir = self._including_file_dir
+                self._including_file_dir = None
+                try:
+                    result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+                finally:
+                    self._including_file_dir = previous_including_file_dir
                 return result
 
         # if no protocol / scheme in path, we shall use the `fs` object
@@ -448,7 +583,12 @@ class Constructor:
                 if not isinstance(file, str):  # pragma: no cover
                     raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
                 with open_fn(file) as of_:
-                    loaded_data = load_open_file(of_, loader_type, file, self.custom_loader)
+                    previous_including_file_dir = self._including_file_dir
+                    self._including_file_dir = str(Path(file).parent)
+                    try:
+                        loaded_data = load_open_file(of_, loader_type, file, self.custom_loader)
+                    finally:
+                        self._including_file_dir = previous_including_file_dir
                     result.append(loaded_data)
             if data.flatten:
                 return [child for item in result for child in item]
@@ -457,7 +597,15 @@ class Constructor:
 
         # else if no wildcards, return a single object
         with self.fs.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
-            result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+            previous_including_file_dir = self._including_file_dir
+            self._including_file_dir = str(Path(urlpath).parent)
+            try:
+                result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
+            finally:
+                self._including_file_dir = previous_including_file_dir
+            if objpath:
+                for piece in objpath.split("."):
+                    result = result[piece]
             return result
 
 
