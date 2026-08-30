@@ -408,6 +408,14 @@ class Constructor:
             urlpath = including_dir.joinpath(urlpath[1:]).as_posix()
             at_resolved = True
 
+        # `path/to/file.yaml:key.subkey` loads `path/to/file.yaml`, then descends into the
+        # loaded mapping/sequence via `key.subkey`, returning only that nested value.
+        # Only applies to plain local paths: real URLs always contain "://", and wildcarded
+        # paths have no single file to descend into.
+        objpath: Optional[str] = None
+        if "://" not in urlpath and ":" in urlpath and not WILDCARDS_PATTERN.match(urlpath):
+            urlpath, _, objpath = urlpath.partition(":")
+
         url_sr = urlsplit(urlpath)
         if base_dir is not None:
             if callable(base_dir):
@@ -506,6 +514,9 @@ class Constructor:
                 result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
             finally:
                 self._including_file_dir = previous_including_file_dir
+            if objpath:
+                for piece in objpath.split("."):
+                    result = result[piece]
             return result
 
 

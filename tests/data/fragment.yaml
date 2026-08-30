@@ -1,0 +1,7 @@
+top:
+    mid:
+        leaf: fragment-value
+    other: ignored
+list_value:
+    - a
+    - b
