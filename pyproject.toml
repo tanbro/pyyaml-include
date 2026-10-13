@@ -8,7 +8,7 @@ description = "An extending constructor of PyYAML: include other YAML files into
 name = "pyyaml-include"
 readme = "README.md"
 
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 
 dependencies = [
   "PyYAML~=6.0",

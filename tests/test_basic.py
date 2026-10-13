@@ -275,7 +275,7 @@ class TestHTTPFs:
         """Setup HTTP constructor"""
         host, port = http_server["host"], http_server["port"]
         self.ctor = Constructor(
-            fs=fsspec.filesystem("http", client_kwargs=dict(base_url=f"http://{host}:{port}")),
+            fs=fsspec.filesystem("http", client_kwargs={"base_url": f"http://{host}:{port}"}),
             base_dir="tests/data",
         )
         yaml.add_constructor("!inc", self.ctor, yaml.Loader)

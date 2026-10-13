@@ -41,4 +41,4 @@ with open("tests/data/include.d/2.yaml") as f:
 with open("tests/data/zh_cn.yaml", encoding="utf8") as f:
     YAML_ZH_CN = yaml.full_load(f)
 
-__all__ = ["YAML_LOADERS", "YAML_DUMPERS", "YAML1", "YAML2", "YAML_ZH_CN"]
+__all__ = ["YAML1", "YAML2", "YAML_DUMPERS", "YAML_LOADERS", "YAML_ZH_CN"]

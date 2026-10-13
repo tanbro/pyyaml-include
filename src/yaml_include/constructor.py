@@ -12,13 +12,8 @@ from dataclasses import dataclass, field
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, TypeGuard, TypeVar
 from urllib.parse import urlsplit, urlunsplit
-
-if sys.version_info >= (3, 10):  # pragma: no cover
-    from typing import TypeGuard
-else:  # pragma: no cover
-    from typing_extensions import TypeGuard
 
 if sys.version_info >= (3, 11):  # pragma: no cover
     from typing import Self
@@ -36,7 +31,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from yaml.reader import _ReadStream
 
     OpenFileT = TypeVar("OpenFileT", bound=_ReadStream)
-    LoaderTypeT = TypeVar("LoaderTypeT", bound=Type[Union[_Loader, _CLoader]])
+    LoaderTypeT = TypeVar("LoaderTypeT", bound=type[_Loader | _CLoader])
 
 
 __all__ = ["Constructor"]
@@ -56,7 +51,7 @@ def load_open_file(
     file: OpenFileT,
     loader_type: LoaderTypeT,
     path: str,
-    custom_loader: Optional[Callable[[str, OpenFileT, LoaderTypeT], Any]] = None,
+    custom_loader: Callable[[str, OpenFileT, LoaderTypeT], Any] | None = None,
 ) -> Any:
     if custom_loader is None:
         return yaml.load(file, loader_type)
@@ -112,7 +107,7 @@ class Constructor:
     fs: fsspec.AbstractFileSystem = field(default_factory=lambda: fsspec.filesystem("file"))
     """:mod:`fsspec` File-system object used to parse paths/URLs and open included files. Defaults to `LocalFileSystem`."""
 
-    base_dir: Union[str, PathLike, Callable[[], Union[str, PathLike]], None] = None
+    base_dir: str | PathLike | Callable[[], str | PathLike] | None = None
     """Base directory used to open or search for included YAML files in relative mode.
 
     * If it is ``None``:
@@ -138,7 +133,7 @@ class Constructor:
       Do not open the included file(s). Instead, return a :class:`.Data` object that stores the include statement.
     """
 
-    custom_loader: Optional[Callable[[str, _ReadStream, Type[Union[_Loader, _CLoader]]], Any]] = None
+    custom_loader: Callable[[str, _ReadStream, type[_Loader | _CLoader]], Any] | None = None
     """Custom loader/parser function called when an included file is about to be parsed.
 
     If ``None``, the file is parsed as ordinary YAML using the current `Loader` class.
@@ -222,8 +217,8 @@ class Constructor:
         finally:
             self.autoload = saved
 
-    def __call__(self, loader: Union[_Loader, _CLoader], node: yaml.Node) -> Union[Data, Any]:
-        val: Union[Sequence, Mapping, str]
+    def __call__(self, loader: _Loader | _CLoader, node: yaml.Node) -> Data | Any:
+        val: Sequence | Mapping | str
         if isinstance(node, yaml.ScalarNode):
             val = loader.construct_scalar(node)
             if isinstance(val, str):
@@ -236,7 +231,7 @@ class Constructor:
         elif isinstance(node, yaml.MappingNode):
             val = loader.construct_mapping(node)
             if is_kwds(val):
-                kdargs = {
+                kdargs: dict[str, Any] = {
                     "urlpath": val["urlpath"],
                     "mapping_params": {k: v for k, v in val.items() if k not in ("urlpath", "flatten")},
                 }
@@ -256,7 +251,7 @@ class Constructor:
         else:
             return data
 
-    def load(self, loader_type: Type[Union[_Loader, _CLoader]], data: Data) -> Any:
+    def load(self, loader_type: type[_Loader | _CLoader], data: Data) -> Any:
         """This method is invoked when the PyYAML Loader class encounters an include tag (e.g., ``!inc``).
 
         Args:
@@ -390,7 +385,7 @@ class Constructor:
             # else if no wildcard, returns a single object
             with fsspec.open(urlpath, *data.sequence_params, **data.mapping_params) as of_:
                 if isinstance(of_, list):  # pragma: no cover
-                    raise RuntimeError(f"`fsspec.open()` returns a `list` ({of_})")
+                    raise TypeError(f"`fsspec.open()` returns a `list` ({of_})")
                 result = load_open_file(of_, loader_type, urlpath, self.custom_loader)
                 return result
 
@@ -398,8 +393,8 @@ class Constructor:
         if WILDCARDS_PATTERN.match(urlpath):
             urlpath = Path(urlpath).as_posix()
             # if wildcard in path, returns a List
-            glob_params: Union[Mapping[str, Any], Iterable, None] = None
-            open_params: Union[Mapping[str, Any], Iterable, None] = None
+            glob_params: Mapping[str, Any] | Iterable | None = None
+            open_params: Mapping[str, Any] | Iterable | None = None
             if data.sequence_params:
                 if len(data.sequence_params) > 1:
                     glob_params, open_params = data.sequence_params[:2]
@@ -410,43 +405,43 @@ class Constructor:
                 open_params = data.mapping_params.get("open")
 
             if glob_params is None:
-                glob_fn = lambda: self.fs.glob(urlpath)  # noqa: E731
+                glob_fn = lambda: self.fs.glob(urlpath)
             elif isinstance(glob_params, Mapping):
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
                 kv_args = {**glob_params}
                 if "maxdepth" in kv_args:
                     kv_args["maxdepth"] = int(kv_args["maxdepth"])
-                glob_fn = lambda: self.fs.glob(urlpath, **kv_args)  # noqa: E731
+                glob_fn = lambda: self.fs.glob(urlpath, **kv_args)
             elif isinstance(glob_params, Iterable) and not isinstance(glob_params, (str, bytes)):
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
                 pos_args = list(glob_params)
                 if pos_args:
                     pos_args[0] = int(pos_args[0])
-                glob_fn = lambda: self.fs.glob(urlpath, *pos_args)  # noqa: E731
+                glob_fn = lambda: self.fs.glob(urlpath, *pos_args)
             else:
                 # special for maxdepth, because PyYAML sometimes treat number as string for constructor's parameter
                 try:
                     maxdepth = int(glob_params)
                 except ValueError:
                     maxdepth = None
-                glob_fn = lambda: self.fs.glob(urlpath, maxdepth=maxdepth)  # noqa: E731
+                glob_fn = lambda: self.fs.glob(urlpath, maxdepth=maxdepth)
 
             if open_params is None:
-                open_fn = lambda x: self.fs.open(x)  # noqa: E731
+                open_fn = lambda x: self.fs.open(x)
             elif isinstance(open_params, Mapping):
-                open_fn = lambda x: self.fs.open(x, **open_params)  # noqa: E731
+                open_fn = lambda x: self.fs.open(x, **open_params)
             elif isinstance(open_params, Iterable) and not isinstance(open_params, (str, bytes)):
-                open_fn = lambda x: self.fs.open(x, *open_params)  # noqa: E731
+                open_fn = lambda x: self.fs.open(x, *open_params)
             elif isinstance(open_params, str):
                 mode = str(open_params)
-                open_fn = lambda x: self.fs.open(x, mode=mode)  # noqa: E731
+                open_fn = lambda x: self.fs.open(x, mode=mode)
             else:  # pragma: no cover
                 raise ValueError("invalid open parameter")
 
             result = []
             for file in glob_fn():
                 if not isinstance(file, str):  # pragma: no cover
-                    raise RuntimeError(f"`fs.glob()` function does not return a `str` ({file})")
+                    raise TypeError(f"`fs.glob()` function does not return a `str` ({file})")
                 with open_fn(file) as of_:
                     loaded_data = load_open_file(of_, loader_type, file, self.custom_loader)
                     result.append(loaded_data)

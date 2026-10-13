@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator, Mapping, MutableMapping, MutableSequence, Sequence, Type, Union
+from collections.abc import Generator, Mapping, MutableMapping, MutableSequence, Sequence
+from typing import TYPE_CHECKING, Any
 
 from .constructor import Constructor
 from .data import Data
@@ -10,12 +11,12 @@ if TYPE_CHECKING:  # pragma: no cover
     from yaml.loader import _Loader
 
 
-__all__ = ["load", "lazy_load"]
+__all__ = ["lazy_load", "load"]
 
 
 def load(
     obj: Any,
-    loader_type: Type[Union[_Loader, _CLoader]],
+    loader_type: type[_Loader | _CLoader],
     constructor: Constructor,
     inplace: bool = False,
     nested: bool = False,
@@ -71,7 +72,7 @@ def load(
 
 
 def lazy_load(
-    obj: Any, loader_type: Type[Union[_Loader, _CLoader]], constructor: Constructor, nested: bool = False
+    obj: Any, loader_type: type[_Loader | _CLoader], constructor: Constructor, nested: bool = False
 ) -> Generator[Any, None, Any]:
     """Recursively load and parse all :class:`.Data` instances inside ``obj`` in generative mode.
 

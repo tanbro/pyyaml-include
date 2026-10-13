@@ -37,7 +37,7 @@ class Representer:
             raise TypeError(f"{type(data)}")
         tag = "!" + self.tag
         if data.mapping_params:
-            return dumper.represent_mapping(tag, {**{"urlpath": data.urlpath}, **data.mapping_params})
+            return dumper.represent_mapping(tag, {"urlpath": data.urlpath, **data.mapping_params})
         if data.sequence_params:
             return dumper.represent_sequence(tag, chain((data.urlpath,), data.sequence_params))
         return dumper.represent_scalar(tag, data.urlpath)
